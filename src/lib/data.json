@@ -1,0 +1,197 @@
+{
+	"SPECIES": {
+		"Cattle": {
+			"key": "Cattle",
+			"display": "Cattle",
+			"animalTypes": {
+				"Beef/Dairy": {
+					"key": "Beef/Dairy",
+					"display": "Beef/Dairy",
+					"housingType": {
+						"Dirt/Concrete lot": {
+							"key": "Dirt/Concrete lot",
+							"display": "Dirt/Concrete lot",
+							"oen_rate": 4
+						}
+					}
+				},
+				"Dairy": {
+					"key": "Dairy",
+					"display": "Dairy",
+					"housingType": {
+						"Tie Stall, Scrape": {
+							"key": "Tie Stall, Scrape",
+							"display": "Tie Stall, Scrape",
+							"oen_rate": 2
+						},
+						"Free Stall, Scrape": {
+							"key": "Free Stall, Scrape",
+							"display": "Free Stall, Scrape",
+							"oen_rate": 6
+						},
+						"Deep Pit Loose Housing": {
+							"key": "Deep Pit Loose Housing",
+							"display": "Deep Pit Loose Housing",
+							"oen_rate": 6
+						}
+					}
+				}
+			}
+		},
+		"Swine": {
+			"key": "Swine",
+			"display": "Swine",
+			"animalTypes": {
+				"Gestation": {
+					"key": "Gestation",
+					"display": "Gestation",
+					"housingType": {
+						"Deep Pit, Natural or Mech. Vent.": {
+							"key": "Deep Pit, Natural or Mech. Vent.",
+							"display": "Deep Pit, Natural or Mech. Vent.",
+							"oen_rate": 50
+						},
+						"Pull Plug, Natural or Mech. Vent.": {
+							"key": "Pull Plug, Natural or Mech. Vent.",
+							"display": "Pull Plug, Natural or Mech. Vent.",
+							"oen_rate": 30
+						}
+					}
+				},
+				"Farrowing": {
+					"key": "Farrowing",
+					"display": "Farrowing",
+					"housingType": {
+						"Pull Plug, Natural or Mech. Vent.": {
+							"key": "Pull Plug, Natural or Mech. Vent.",
+							"display": "Pull Plug, Natural or Mech. Vent.",
+							"oen_rate": 14
+						}
+					}
+				},
+				"Nursery": {
+					"key": "Nursery",
+					"display": "Nursery",
+					"housingType": {
+						"Pull Plug, Natural or Mech. Vent.": {
+							"key": "Pull Plug, Natural or Mech. Vent.",
+							"display": "Pull Plug, Natural or Mech. Vent.",
+							"oen_rate": 42
+						},
+						"Deep Pit, Natural or Mech. Vent.": {
+							"key": "Deep Pit, Natural or Mech. Vent.",
+							"display": "Deep Pit, Natural or Mech. Vent.",
+							"oen_rate": 42
+						}
+					}
+				},
+				"Finishing": {
+					"key": "Finishing",
+					"display": "Finishing",
+					"housingType": {
+						"Deep Pit, Natural or Mech. Vent.": {
+							"key": "Deep Pit, Natural or Mech. Vent.",
+							"display": "Deep Pit, Natural or Mech. Vent.",
+							"oen_rate": 34
+						},
+						"Pull Plug, Natural or Mech. Vent.": {
+							"key": "Pull Plug, Natural or Mech. Vent.",
+							"display": "Pull Plug, Natural or Mech. Vent.",
+							"oen_rate": 20
+						},
+						"Hoop Barn, Deep Bedded, Scrape": {
+							"key": "Hoop Barn, Deep Bedded, Scrape",
+							"display": "Hoop Barn, Deep Bedded, Scrape",
+							"oen_rate": 4
+						},
+						"Cargill (Open Front), Scrape": {
+							"key": "Cargill (Open Front), Scrape",
+							"display": "Cargill (Open Front), Scrape",
+							"oen_rate": 11
+						},
+						"Loose Housing, Scrape": {
+							"key": "Loose Housing, Scrape",
+							"display": "Loose Housing, Scrape",
+							"oen_rate": 11
+						},
+						"Open Concrete Lot, Scrape": {
+							"key": "Open Concrete Lot, Scrape",
+							"display": "Open Concrete Lot, Scrape",
+							"oen_rate": 11
+						}
+					}
+				}
+			}
+		},
+		"Poultry": {
+			"key": "Poultry",
+			"display": "Poultry",
+			"animalTypes": {
+				"Broiler": {
+					"key": "Broiler",
+					"display": "Broiler",
+					"housingType": {
+						"Litter": {
+							"key": "Litter",
+							"display": "Litter",
+							"oen_rate": 1
+						}
+					}
+				},
+				"Turkey": {
+					"key": "Turkey",
+					"display": "Turkey",
+					"housingType": {
+						"Litter": {
+							"key": "Litter",
+							"display": "Litter",
+							"oen_rate": 2
+						}
+					}
+				}
+			}
+		}
+	},
+	"TECH": {
+		"Biofilter": {
+			"key": "Biofilter",
+			"display": "Biofilter on All Exhaust Fans",
+			"odorControlFactor": 0.1
+		},
+		"Geotextile": {
+			"key": "Geotextile",
+			"display": "Geotextile Cover (>=2.4mm or 1 inch)",
+			"odorControlFactor": 0.5
+		},
+		"StrawOrNatural2in": {
+			"key": "StrawOrNatural2in",
+			"display": "Straw or Natural Crust on Manure 2in Thick",
+			"odorControlFactor": 0.5
+		},
+		"StrawOrNatural4in": {
+			"key": "StrawOrNatural4in",
+			"display": "Straw or Natural Crust on Manure 4in Thick",
+			"odorControlFactor": 0.4
+		},
+		"StrawOrNatural6in": {
+			"key": "StrawOrNatural6in",
+			"display": "Straw or Natural Crust on Manure 6in Thick",
+			"odorControlFactor": 0.3
+		},
+		"StrawOrNatural8in": {
+			"key": "StrawOrNatural8in",
+			"display": "Straw or Natural Crust on Manure 8in Thick",
+			"odorControlFactor": 0.2
+		},
+		"ImpermeableCover": {
+			"key": "ImpermeableCover",
+			"display": "Impermeable Cover",
+			"odorControlFactor": 0.1
+		},
+		"OilSprinkling": {
+			"key": "OilSprinkling",
+			"display": "Oil Sprinkling Inside Swine Barns",
+			"odorControlFactor": 0.5
+		}
+	}
+}
