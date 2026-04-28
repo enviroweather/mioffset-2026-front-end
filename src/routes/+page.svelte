@@ -58,12 +58,6 @@
 
 <section class="form-wrapper">
 	<div class="form-header">
-		<h2>Address Entry</h2>
-		<p>Enter your desired Location</p>
-	</div>
-</section>
-<section class="form-wrapper">
-	<div class="form-header">
 		<h2>Odor Emission Calculator</h2>
 		<p>Enter details about animal units and waste storage</p>
 	</div>
@@ -282,17 +276,17 @@
 	}
 
 	.btn-primary {
-		background-color: #4caf50;
+		background-color: var(--color-kelly-green);
 		color: white;
 	}
 
 	.btn-primary:hover:not(:disabled) {
-		background-color: #45a049;
+		background-color: #008934;
 		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 	}
 
 	.btn-primary:active:not(:disabled) {
-		background-color: #3d8b40;
+		background-color: #008934;
 		transform: translateY(1px);
 	}
 

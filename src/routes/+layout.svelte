@@ -46,7 +46,6 @@
 	.app {
 		display: flex;
 		flex-direction: column;
-		min-height: 90vh;
 	}
 
 	.app-header {
