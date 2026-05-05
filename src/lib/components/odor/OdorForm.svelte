@@ -1,6 +1,7 @@
 <script>
 	import data from "$lib/data.json" with { type: "json" };
-	import FormWizard from "./FormWizard.svelte";
+	import { appState } from "$lib/stores/appState.svelte.js";
+	import FormWizard from "../common/FormWizard.svelte";
 
 	let {
 		odorFormState = $bindable({
@@ -112,10 +113,9 @@
 
 <section class="odor-section">
 	<div class="form-header">
-		<h2>Odor Emission Calculator</h2>
-		<p>Enter details about animal units and waste storage</p>
+		<h2>Coordinate Details</h2>
+		<p>Enter your barn's coordinates</p>
 	</div>
-
 	<FormWizard
 		formHeader="Odor Emission Calculator"
 		formDescription="Enter details about animal units and waste storage"

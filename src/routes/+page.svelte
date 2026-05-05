@@ -1,7 +1,7 @@
 <script>
-	import LocationSection from "$lib/LocationEntry.svelte";
-	import OdorSection from "$lib/OdorSelection.svelte";
-
+	import LocationSection from "$lib/components/location/LocationSelection.svelte";
+	import OdorForm from "$lib/components/odor/OdorForm.svelte";
+	import { appState } from "$lib/stores/appState.svelte.js";
 	let locationCoordinates = $state({
 		latitude: 42.72927458118972,
 		longitude: -84.47281270368809,
@@ -18,13 +18,14 @@
 
 <div class="page-container">
 	<!-- Location Section -->
+
 	<section class="section location-wrapper">
-		<LocationSection bind:locationCoordinates />
+		<LocationSection bind:form={appState.location} />
 	</section>
 
 	<!-- Odor Section -->
 	<section class="section odor-wrapper">
-		<OdorSection bind:odorFormState />
+		<OdorForm bind:odorFormState />
 	</section>
 </div>
 
@@ -33,13 +34,33 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 	}
-
 	.section {
 		display: flex;
 		flex-direction: column;
-		padding: 1rem
+		padding: 1rem;
 	}
 
+	.odor-wrapper {
+		border-radius: 8px;
+		padding: 1rem;
+	}
+	.form-header {
+		margin-bottom: 2rem;
+		border-bottom: 2px solid #4caf50;
+		padding-bottom: 1rem;
+	}
+
+	.form-header h2 {
+		margin: 0 0 0.5rem 0;
+		color: #2c3e50;
+		font-size: 1.5rem;
+	}
+
+	.form-header p {
+		margin: 0;
+		color: #666;
+		font-size: 0.95rem;
+	}
 	.location-wrapper {
 		grid-column: 1;
 	}

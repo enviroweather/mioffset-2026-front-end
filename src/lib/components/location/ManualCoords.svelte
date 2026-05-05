@@ -1,79 +1,63 @@
 <script>
-	import CollapisbleButton from "./CollapisbleButton.svelte";
-	let open = $state(false);
-	let {
-		locationCoordinates = $bindable({
-			latitude: 42.72927458118972,
-			longitude: -84.47281270368809,
-		}),
-	} = $props();
-
+	import { appState } from "$lib/stores/appState.svelte.js";
+	
 	function handleSubmit(e) {
 		e.preventDefault();
-		console.log("Location submitted:", locationCoordinates);
+		console.log("Location submitted:", appState.location);
 		// TODO: Send to API or process location data
 	}
 
 	function handleReset() {
-		locationCoordinates.latitude = 42.72927458118972;
-		locationCoordinates.longitude = -84.47281270368809;
+		appState.location.lat = 42.72927458118972;
+		appState.location.lng = -84.47281270368809;
 	}
 </script>
 
 <section class="form-wrapper">
-	<CollapisbleButton title="Choose Location">
-		<div class="form-header">
-			<h2>Location Details</h2>
-			<p>Enter your barn's coordinates</p>
+	<div class="form-header">
+		<h2>Coordinate Details</h2>
+		<p>Enter your barn's coordinates</p>
+	</div>
+
+	<form onsubmit={handleSubmit} onreset={handleReset}>
+		<div class="coord-row">
+			<div class="form-group">
+				<label for="latitude">Latitude</label>
+				<input
+					type="number"
+					id="latitude"
+					bind:value={appState.location.lat}
+					min={-90}
+					max={90}
+					step="any"
+					placeholder="e.g. 42.729"
+					required
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="longitude">Longitude</label>
+				<input
+					type="number"
+					id="longitude"
+					bind:value={appState.location.lng}
+					min={-180}
+					max={180}
+					step="any"
+					placeholder="e.g. -84.472"
+					required
+				/>
+			</div>
 		</div>
 
-		<form onsubmit={handleSubmit} onreset={handleReset}>
-			<div class="coord-row">
-				<div class="form-group">
-					<label for="latitude">Latitude</label>
-					<input
-						type="number"
-						id="latitude"
-						bind:value={locationCoordinates.latitude}
-						min={-90}
-						max={90}
-						step="any"
-						placeholder="e.g. 42.729"
-						required
-					/>
-				</div>
-
-				<div class="form-group">
-					<label for="longitude">Longitude</label>
-					<input
-						type="number"
-						id="longitude"
-						bind:value={locationCoordinates.longitude}
-						min={-180}
-						max={180}
-						step="any"
-						placeholder="e.g. -84.472"
-						required
-					/>
-				</div>
-			</div>
-
-			<div class="form-actions">
-				<button type="submit" class="btn btn-primary">Update Location</button>
-				<button type="reset" class="btn btn-secondary">Reset</button>
-			</div>
-		</form>
-	</CollapisbleButton>
+		<div class="form-actions">
+			<button type="submit" class="btn btn-primary">Update Location</button>
+			<button type="reset" class="btn btn-secondary">Reset</button>
+		</div>
+	</form>
 </section>
 
 <style>
-	.form-wrapper {
-		background: white;
-		padding: 1rem;
-		border-radius: 8px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
 	.form-header {
 		margin-bottom: 2rem;
 		border-bottom: 2px solid #4caf50;
