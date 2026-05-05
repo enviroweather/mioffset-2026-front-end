@@ -1,5 +1,6 @@
 <script>
 	let { children } = $props();
+	
 </script>
 
 <div class="app">
@@ -75,11 +76,8 @@
 	}
 
 	.app-main {
-		flex: 1;
-		max-width: 1200px;
-		width: 100%;
+		flex: 1 auto;
 		margin: 0 auto;
-		padding: 2rem 1rem;
 	}
 
 	.app-footer {
@@ -88,6 +86,7 @@
 		text-align: center;
 		padding: 2rem 1rem;
 		margin-top: auto;
+		margin-bottom: auto;
 		border-top: 1px solid #34495e;
 	}
 

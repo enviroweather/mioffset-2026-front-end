@@ -80,11 +80,9 @@
 <style>
 	.form-wrapper {
 		background: white;
-		padding: 2rem;
+		padding: 1rem;
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		max-width: 600px;
-		margin: 0 auto;
 	}
 
 	.form-header {
@@ -108,13 +106,13 @@
 	form {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 1rem;
 	}
 
 	fieldset {
 		border: 1px solid #ddd;
 		border-radius: 6px;
-		padding: 1.25rem;
+		padding: 1rem;
 		margin: 0;
 	}
 
@@ -122,14 +120,14 @@
 		padding: 0 0.5rem;
 		font-weight: 600;
 		color: #2c3e50;
-		font-size: 0.95rem;
+		font-size: 0.90rem;
 	}
 
 	.form-group {
 		margin: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.25rem;
 	}
 
 	label {
@@ -174,7 +172,7 @@
 	}
 
 	.btn {
-		padding: 0.75rem 1.5rem;
+		padding: 0.5rem;
 		border: none;
 		border-radius: 4px;
 		font-size: 1rem;
