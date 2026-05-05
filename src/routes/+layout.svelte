@@ -15,7 +15,7 @@
 	</main>
 
 	<footer class="app-footer">
-		<p>&copy; 2024 MI OFFSET. All rights reserved.</p>
+		<p>&copy; 2026 MI OFFSET. All rights reserved.</p>
 		<p>
 			<a href="https://enviroweather.msu.edu">Enviroweather</a> | Michigan State
 			University
