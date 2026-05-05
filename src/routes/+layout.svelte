@@ -77,7 +77,6 @@
 
 	.app-main {
 		flex: 1 auto;
-		margin: 0 auto;
 	}
 
 	.app-footer {

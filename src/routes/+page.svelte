@@ -1,5 +1,5 @@
 <script>
-	import LocationSection from "$lib/LocationSelection.svelte";
+	import LocationSection from "$lib/LocationEntry.svelte";
 	import OdorSection from "$lib/OdorSelection.svelte";
 
 	let locationCoordinates = $state({
@@ -32,8 +32,6 @@
 	.page-container {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 0rem;
-		padding: 0rem 0;
 	}
 
 	.section {

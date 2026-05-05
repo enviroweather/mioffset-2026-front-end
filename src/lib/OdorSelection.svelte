@@ -111,6 +111,11 @@
 </script>
 
 <section class="odor-section">
+	<div class="form-header">
+		<h2>Odor Emission Calculator</h2>
+		<p>Enter details about animal units and waste storage</p>
+	</div>
+
 	<FormWizard
 		formHeader="Odor Emission Calculator"
 		formDescription="Enter details about animal units and waste storage"
@@ -125,7 +130,27 @@
 
 <style>
 	.odor-section {
-		display: flex;
-		flex-direction: column;
+		background: white;
+		padding: 1rem;
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.form-header {
+		margin-bottom: 2rem;
+		border-bottom: 2px solid #4caf50;
+		padding-bottom: 1rem;
+	}
+
+	.form-header h2 {
+		margin: 0 0 0.5rem 0;
+		color: #2c3e50;
+		font-size: 1.5rem;
+	}
+
+	.form-header p {
+		margin: 0;
+		color: #666;
+		font-size: 0.95rem;
 	}
 </style>
