@@ -16,53 +16,50 @@
 		}
 	}
 </script>
+
 <section>
 	<form onsubmit={handleSubmit} onreset={handleReset}>
 		{#each steps as step, index}
-			{#if !step.condition || step.condition(formState)}
-				<fieldset>
-					<legend
-						>Step {index + 1}: {step.legend ||
-							step.label.replace(":", "")}</legend
-					>
+			<fieldset>
+				<legend
+					>Step {index + 1}: {step.legend ||
+						step.label.replace(":", "")}</legend
+				>
 
-					<div class="form-group">
-						<label for={step.key}>{step.label}</label>
-						{#if step.type === "select"}
-							<select
-								id={step.key}
-								bind:value={formState[step.key]}
-								disabled={step.disabled ? step.disabled(formState) : false}
-								required={step.required}
-								aria-label={step.label}
+				<div class="form-group">
+					<label for={step.key}>{step.label}</label>
+					{#if step.type === "select"}
+						<select
+							id={step.key}
+							bind:value={formState[step.key]}
+							disabled={step.disabled ? step.disabled(formState) : false}
+							required={step.required}
+							aria-label={step.label}
+						>
+							<option value=""
+								>{step.placeholder ||
+									"Select " + step.label.toLowerCase().replace(":", "")}</option
 							>
-								<option value=""
-									>{step.placeholder ||
-										"Select " +
-											step.label.toLowerCase().replace(":", "")}</option
-								>
-								{#each step.options as option}
-									<option value={option.value}>{option.text}</option>
-								{/each}
-							</select>
-
-						{:else if step.type === "number"}
-							<input
-								type="number"
-								id={step.key}
-								bind:value={formState[step.key]}
-								placeholder={step.placeholder}
-								min={step.min}
-								max={step.max}
-								step={step.step}
-								aria-label={step.label}
-							/>
-						{/if}
-					</div>
-				</fieldset>
-			{/if}
+							{#each step.options as option}
+								<option value={option.value}>{option.text}</option>
+							{/each}
+						</select>
+					{:else if step.type === "number"}
+						<input
+							type="number"
+							id={step.key}
+							bind:value={formState[step.key]}
+							placeholder={step.placeholder}
+							min={step.min}
+							max={step.max}
+							step={step.step}
+							aria-label={step.label}
+						/>
+					{/if}
+				</div>
+			</fieldset>
 		{/each}
-      
+
 		<!-- Form Actions -->
 		<div class="form-actions">
 			<button type="submit" class="btn btn-primary">Submit Form</button>
@@ -72,8 +69,6 @@
 </section>
 
 <style>
-	
-
 	form {
 		display: flex;
 		flex-direction: column;
@@ -91,7 +86,7 @@
 		padding: 0 0.5rem;
 		font-weight: 600;
 		color: #2c3e50;
-		font-size: 0.90rem;
+		font-size: 0.9rem;
 	}
 
 	.form-group {

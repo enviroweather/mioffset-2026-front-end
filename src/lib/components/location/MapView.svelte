@@ -4,10 +4,11 @@
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
 
 	let { onLocationSelect = () => {} } = $props();
-	let L;
+	let currentSpecies = $derived(appState.odor.species || "default");
+	let L = $state();
 	let mapContainer = $state();
-	let map;
-	let marker;
+	let map = $state();
+	let marker = $state();
 
 	onMount(async () => {
 		L = (await import("leaflet")).default;
@@ -26,7 +27,9 @@
 
 		map.on("click", (e) => {
 			const { lat, lng } = e.latlng;
-			let customIcon = L.icon(mapIcons[appState.odor.species]);
+			console.log("current species: " + currentSpecies);
+			let customIcon = L.icon(mapIcons[currentSpecies]);
+
 			if (marker) {
 				marker.setLatLng(e.latlng);
 			} else {
@@ -38,17 +41,18 @@
 			onLocationSelect({ lat, lng });
 		});
 
-		// // Set up resize observer after map is ready
-    const observer = new ResizeObserver(() => {
-      map.invalidateSize();
-    });
-    observer.observe(mapContainer);
+		// Set up resize observer after map is ready
+		const observer = new ResizeObserver(() => {
+			map.invalidateSize();
+		});
+		observer.observe(mapContainer);
 	});
 
 	onDestroy(() => {
 		map?.remove();
 	});
 
+	// Updates upon window resize + lack of observer
 	$effect(() => {
 		if (!mapContainer || !map) return;
 
@@ -61,8 +65,17 @@
 	});
 
 	$effect(() => {
-		
-	})
+		console.log("changed")
+		if (!L || !marker || !map) return;
+
+		const lat = appState.location.lat;
+		const lng = appState.location.lng;
+		const icon = L.icon(mapIcons[currentSpecies]);
+
+		marker.setLatLng({ lat, lng });
+		marker.setIcon(icon);
+		map.setView({ lat, lng }, 200);
+	});
 </script>
 
 <div bind:this={mapContainer} class="map"></div>

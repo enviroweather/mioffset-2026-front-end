@@ -94,21 +94,20 @@
 			appState.odor.housingType = "";
 		}
 	});
+
+	$effect(() => {
+		console.log(appState.odor.species)
+	})
 </script>
 
 <section class="odor-section">
 	<div class="form-header">
-		<h2>Livestock Details</h2>
-		<p>Please provide information about your livestock</p>
+		<h2>Odor Emission Calculator</h2>
+		<p>Enter details about animal units and waste storage</p>
 	</div>
 	<FormWizard
-		formHeader="Odor Emission Calculator"
-		formDescription="Enter details about animal units and waste storage"
-		direction="column"
 		steps={odorSteps}
 		bind:formState={appState.odor}
-		submitLabel="Calculate Odor"
-		resetLabel="Clear Form"
 		onSubmit={handleOdorSubmit}
 	/>
 </section>

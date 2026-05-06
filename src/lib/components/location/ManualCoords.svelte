@@ -1,6 +1,5 @@
 <script>
 	import { appState } from "$lib/stores/appState.svelte.js";
-	
 	function handleSubmit(e) {
 		e.preventDefault();
 		console.log("Location submitted:", appState.location);
