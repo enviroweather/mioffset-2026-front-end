@@ -2,14 +2,14 @@
 // Key is the corresponding species
 // Value is the file path
 export const mapIcons = $state({
-	default: {
-		iconUrl: "marker.svg",
+	"": {
+		iconUrl: "/marker.svg",
 		iconSize: [30, 40],
 		iconAnchor: [15, 40],
 	},
 	cattle: {
 		iconUrl: "cattle.png",
-		iconSize: [50, 20],
-		iconAnchor: [0, 0],
+		iconSize: [77, 51],
+		iconAnchor: [38, 51],
 	},
 });

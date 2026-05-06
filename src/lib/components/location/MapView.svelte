@@ -3,14 +3,14 @@
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
 
-	let { markerSrc = "/cattle.png", onLocationSelect = () => {} } = $props();
-
+	let { onLocationSelect = () => {} } = $props();
+	let L;
 	let mapContainer = $state();
 	let map;
 	let marker;
 
 	onMount(async () => {
-		const L = (await import("leaflet")).default;
+		L = (await import("leaflet")).default;
 		await import("leaflet/dist/leaflet.css");
 
 		map = L.map(mapContainer).setView(
@@ -24,10 +24,9 @@
 			maxZoom: 18,
 		}).addTo(map);
 
-		const customIcon = L.icon(mapIcons.default);
 		map.on("click", (e) => {
 			const { lat, lng } = e.latlng;
-
+			let customIcon = L.icon(mapIcons[appState.odor.species]);
 			if (marker) {
 				marker.setLatLng(e.latlng);
 			} else {
@@ -38,11 +37,32 @@
 			appState.location.lng = lng;
 			onLocationSelect({ lat, lng });
 		});
+
+		// // Set up resize observer after map is ready
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    observer.observe(mapContainer);
 	});
 
 	onDestroy(() => {
 		map?.remove();
 	});
+
+	$effect(() => {
+		if (!mapContainer || !map) return;
+
+		const observer = new ResizeObserver(() => {
+			map.invalidateSize();
+		});
+
+		observer.observe(mapContainer);
+		return () => observer.disconnect();
+	});
+
+	$effect(() => {
+		
+	})
 </script>
 
 <div bind:this={mapContainer} class="map"></div>
