@@ -3,32 +3,20 @@
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import FormWizard from "../common/FormWizard.svelte";
 
-	let {
-		odorFormState = $bindable({
-			species: "",
-			animalType: "",
-			housingType: "",
-			technology: "",
-			area: "",
-		}),
-	} = $props();
-
 	let animalTypes = $derived(
-		odorFormState.species
-			? Object.keys(data.SPECIES[odorFormState.species]?.animalTypes || {})
+		appState.odor.species
+			? Object.keys(data.SPECIES[appState.odor.species]?.animalTypes || {})
 			: [],
 	);
-
 	let housingTypes = $derived(
-		odorFormState.animalType && odorFormState.species
+		appState.odor.animalType && appState.odor.species
 			? Object.keys(
-					data.SPECIES[odorFormState.species]?.animalTypes[
-						odorFormState.animalType
+					data.SPECIES[appState.odor.species]?.animalTypes[
+						appState.odor.animalType
 					]?.housingType || {},
 				)
 			: [],
 	);
-
 	let technologies = $derived(Object.keys(data.TECH || {}));
 
 	const odorSteps = $derived([
@@ -94,34 +82,31 @@
 
 	function handleOdorSubmit(formData) {
 		console.log("Odor form submitted:", formData);
-		// TODO: Send to API or process odor emission data
 	}
 
-	// Reset dependent fields when parent values change
 	$effect(() => {
-		if (!animalTypes.includes(odorFormState.animalType)) {
-			odorFormState.animalType = "";
+		if (!animalTypes.includes(appState.odor.animalType)) {
+			appState.odor.animalType = "";
 		}
 	});
-
 	$effect(() => {
-		if (!housingTypes.includes(odorFormState.housingType)) {
-			odorFormState.housingType = "";
+		if (!housingTypes.includes(appState.odor.housingType)) {
+			appState.odor.housingType = "";
 		}
 	});
 </script>
 
 <section class="odor-section">
 	<div class="form-header">
-		<h2>Coordinate Details</h2>
-		<p>Enter your barn's coordinates</p>
+		<h2>Livestock Details</h2>
+		<p>Please provide information about your livestock</p>
 	</div>
 	<FormWizard
 		formHeader="Odor Emission Calculator"
 		formDescription="Enter details about animal units and waste storage"
 		direction="column"
 		steps={odorSteps}
-		bind:formState={odorFormState}
+		bind:formState={appState.odor}
 		submitLabel="Calculate Odor"
 		resetLabel="Clear Form"
 		onSubmit={handleOdorSubmit}
