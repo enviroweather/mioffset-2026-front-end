@@ -1,4 +1,4 @@
-// src/lib/stores/appState.svelte.js
+// Representation of the current state for any .svelte component to use
 export const appState = $state({
   location: {
     lat: 42.72927458118972,

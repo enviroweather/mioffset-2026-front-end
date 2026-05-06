@@ -40,5 +40,8 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"leaflet": "^1.9.4"
+	}
 }

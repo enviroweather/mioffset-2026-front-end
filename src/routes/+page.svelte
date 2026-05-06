@@ -1,5 +1,6 @@
 <script>
 	import LocationSection from "$lib/components/location/LocationSelection.svelte";
+	import MapView from "$lib/components/location/MapView.svelte";
 	import OdorForm from "$lib/components/odor/OdorForm.svelte";
 	import { appState } from "$lib/stores/appState.svelte.js";
 	let locationCoordinates = $state({
@@ -21,12 +22,14 @@
 
 	<section class="section location-wrapper">
 		<LocationSection bind:form={appState.location} />
+		<MapView/>
 	</section>
 
 	<!-- Odor Section -->
 	<section class="section odor-wrapper">
 		<OdorForm bind:odorFormState />
 	</section>
+
 </div>
 
 <style>
