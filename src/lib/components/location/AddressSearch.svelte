@@ -19,7 +19,6 @@
 	let suggestions = $state([]);
 
 	async function search() {
-		if (query.length < 3) return [];
 		const res = await fetch(
 			`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(appState.location.address)}&format=json&limit=5`,
 			{ headers: { "User-Agent": "Enviroweather/1.0" } },
@@ -34,9 +33,8 @@
 		const results = await search();
 		console.log(results);
 		if (results.length > 0) {
-			locationCoordinates.latitude = parseFloat(results[0].lat);
-			locationCoordinates.longitude = parseFloat(results[0].lon);
-			console.log("Coords:", locationCoordinates);
+			appState.location.lat = parseFloat(results[0].lat);
+			appState.location.lng = parseFloat(results[0].lon);
 		}
 	}
 
@@ -64,6 +62,7 @@
 				id="address"
 				name="address"
 				list="suggestions"
+				placeholder="673 Auditorium Rd, East Lansing, MI 48824"
 				bind:value={appState.location.address}
 			/>
 		</div>

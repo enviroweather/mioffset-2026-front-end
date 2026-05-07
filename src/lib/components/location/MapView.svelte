@@ -68,13 +68,17 @@
 	});
 
 	$effect(() => {
-		if (!L || !marker || !map) return;
+		if (!L || !map) return;
 
 		const lat = appState.location.lat;
 		const lng = appState.location.lng;
 		const icon = L.icon(mapIcons[currentSpecies]);
 
-		marker.setLatLng({ lat, lng });
+		if (marker) {
+			marker.setLatLng({ lat, lng });
+		} else {
+			marker = L.marker({ lat, lng }).addTo(map);
+		}
 		marker.setIcon(icon);
 		map.setView({ lat, lng });
 	});
