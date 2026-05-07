@@ -1,6 +1,7 @@
 <script>
+	import Navigation from "$lib/components/common/Navigation.svelte";
+
 	let { children } = $props();
-	
 </script>
 
 <div class="app">
@@ -9,6 +10,7 @@
 			<h1 class="logo">MI OFFSET</h1>
 			<p class="tagline">Weather for IPM Decisions in Michigan</p>
 		</div>
+		<Navigation />
 	</header>
 
 	<main class="app-main">
@@ -52,13 +54,15 @@
 	.app-header {
 		background-color: var(--color-spartan-green);
 		color: white;
-		padding: 2rem 1rem;
+		padding: 1rem 2rem;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 	}
 
 	.header-content {
-		max-width: 1200px;
-		margin: 0 auto;
+		flex: 1;
 	}
 
 	.logo {

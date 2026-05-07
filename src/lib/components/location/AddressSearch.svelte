@@ -4,6 +4,7 @@
 		DEFAULT_LAT,
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
+
 	let {
 		locationCoordinates = $bindable({
 			latitude: DEFAULT_LAT,
@@ -18,18 +19,25 @@
 	let suggestions = $state([]);
 
 	async function search() {
-		if (query.length < 3) return;
+		if (query.length < 3) return [];
 		const res = await fetch(
-			`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`,
-			{ headers: { "User-Agent": "YourAppName/1.0" } },
+			`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(appState.location.address)}&format=json&limit=5`,
+			{ headers: { "User-Agent": "Enviroweather/1.0" } },
 		);
-		suggestions = await res.json();
+		const data = await res.json();
+		suggestions = data;
+		return data;
 	}
 
 	async function handleSubmit(e) {
 		e.preventDefault();
-		console.log("Address submitted:", appState.location.address);
-		// TODO: Send to API or process location data
+		const results = await search();
+		console.log(results);
+		if (results.length > 0) {
+			locationCoordinates.latitude = parseFloat(results[0].lat);
+			locationCoordinates.longitude = parseFloat(results[0].lon);
+			console.log("Coords:", locationCoordinates);
+		}
 	}
 
 	function handleReset() {
@@ -37,6 +45,10 @@
 		appState.location.lat = DEFAULT_LAT;
 		appState.location.lng = DEFAULT_LNG;
 	}
+
+	$effect(() => {
+		console.log(suggestions);
+	});
 </script>
 
 <section class="form-wrapper">
@@ -45,17 +57,15 @@
 		<p>Enter your farms address</p>
 	</div>
 
-	
 	<form onsubmit={handleSubmit} onreset={handleReset}>
 		<div class="form-group">
 			<label for="address">Address</label>
-			<input id="address" name="address" list="suggestions" bind:value={query} oninput={search} />
-			<datalist id="suggestions">
-				{#each suggestions as s}
-					<option value={s.display_name}></option>
-				{/each}
-			</datalist>
-			<option value={"this is a test"}></option>
+			<input
+				id="address"
+				name="address"
+				list="suggestions"
+				bind:value={appState.location.address}
+			/>
 		</div>
 
 		<div class="form-actions">

@@ -1,0 +1,43 @@
+<script>
+	import { page } from "$app/stores";
+</script>
+
+<div class="nav-content">
+	<a href="/" class="nav-link" class:active={$page.url.pathname === "/"}>
+		Home
+	</a>
+	<a
+		href="/about"
+		class="nav-link"
+		class:active={$page.url.pathname === "/about"}
+	>
+		About
+	</a>
+</div>
+
+<style>
+	.nav-content {
+		display: flex;
+		gap: 2rem;
+		align-items: center;
+	}
+
+	.nav-link {
+		text-decoration: none;
+		color: white;
+		font-size: 0.95rem;
+		font-weight: 500;
+		transition: color 0.3s ease;
+		padding: 0.25rem 0;
+		border-bottom: 2px solid transparent;
+	}
+
+	.nav-link:hover {
+		color: var(--color-kelly-green);
+	}
+
+	.nav-link.active {
+		color: var(--color-kelly-green);
+		border-bottom-color: var(--color-kelly-green);
+	}
+</style>

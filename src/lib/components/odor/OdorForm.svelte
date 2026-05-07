@@ -94,10 +94,6 @@
 			appState.odor.housingType = "";
 		}
 	});
-
-	$effect(() => {
-		console.log(appState.odor.species)
-	})
 </script>
 
 <section class="odor-section">
