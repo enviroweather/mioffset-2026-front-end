@@ -1,8 +1,9 @@
+import { DEFAULT_LAT, DEFAULT_LNG } from "./defaultValues.svelte.js";
 // Representation of the current state for any .svelte component to use
 export const appState = $state({
   location: {
-    lat: 42.72927458118972,
-    lng: -84.47281270368809,
+    lat: DEFAULT_LAT,
+    lng: DEFAULT_LNG,
     address: '',
     mode: 'address', // 'address' | 'coords'
   },

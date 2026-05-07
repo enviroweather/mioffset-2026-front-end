@@ -1,14 +1,32 @@
 <script>
 	import { appState } from "$lib/stores/appState.svelte.js";
-
+	import {
+		DEFAULT_LAT,
+		DEFAULT_LNG,
+	} from "$lib/stores/defaultValues.svelte.js";
 	let {
 		locationCoordinates = $bindable({
-			latitude: 42.72927458118972,
-			longitude: -84.47281270368809,
+			latitude: DEFAULT_LAT,
+			longitude: DEFAULT_LNG,
 		}),
 	} = $props();
 
-	function handleSubmit(e) {
+	//
+	// Address Search Handler
+	//
+	let query = $state("");
+	let suggestions = $state([]);
+
+	async function search() {
+		if (query.length < 3) return;
+		const res = await fetch(
+			`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`,
+			{ headers: { "User-Agent": "YourAppName/1.0" } },
+		);
+		suggestions = await res.json();
+	}
+
+	async function handleSubmit(e) {
 		e.preventDefault();
 		console.log("Address submitted:", appState.location.address);
 		// TODO: Send to API or process location data
@@ -16,6 +34,8 @@
 
 	function handleReset() {
 		appState.location.address = "";
+		appState.location.lat = DEFAULT_LAT;
+		appState.location.lng = DEFAULT_LNG;
 	}
 </script>
 
@@ -25,15 +45,17 @@
 		<p>Enter your farms address</p>
 	</div>
 
+	
 	<form onsubmit={handleSubmit} onreset={handleReset}>
 		<div class="form-group">
 			<label for="address">Address</label>
-			<input
-				type="text"
-				id="address"
-        bind:value={appState.location.address}
-        placeholder="673 Auditorium Rd, East Lansing, MI 48824"
-			/>
+			<input id="address" name="address" list="suggestions" bind:value={query} oninput={search} />
+			<datalist id="suggestions">
+				{#each suggestions as s}
+					<option value={s.display_name}></option>
+				{/each}
+			</datalist>
+			<option value={"this is a test"}></option>
 		</div>
 
 		<div class="form-actions">

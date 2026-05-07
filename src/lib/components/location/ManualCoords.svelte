@@ -1,5 +1,7 @@
 <script>
 	import { appState } from "$lib/stores/appState.svelte.js";
+	import { DEFAULT_LAT, DEFAULT_LNG } from "$lib/stores/defaultValues.svelte.js";
+	
 	function handleSubmit(e) {
 		e.preventDefault();
 		console.log("Location submitted:", appState.location);
@@ -7,8 +9,9 @@
 	}
 
 	function handleReset() {
-		appState.location.lat = 42.72927458118972;
-		appState.location.lng = -84.47281270368809;
+		appState.location.lat = DEFAULT_LAT;
+		appState.location.lng = DEFAULT_LNG;
+		
 	}
 </script>
 

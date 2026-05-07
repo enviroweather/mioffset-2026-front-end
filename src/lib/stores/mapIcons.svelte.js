@@ -9,7 +9,17 @@ export const mapIcons = $state({
 	},
 	"Cattle": {
 		iconUrl: "cattle.png",
-		iconSize: [77, 51],
-		iconAnchor: [38, 51],
+		iconSize: [77, 50],
+		iconAnchor: [38, 25],
 	},
+	"Swine": {
+		iconUrl: "swine.png",
+		iconSize: [77, 50],
+		iconAnchor: [38, 25],
+	},
+	"Poultry": {
+		iconUrl: "poultry.png",
+		iconSize: [77, 70],
+		iconAnchor: [38, 35],
+	}
 });

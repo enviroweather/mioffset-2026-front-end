@@ -3,17 +3,10 @@
 	import MapView from "$lib/components/location/MapView.svelte";
 	import OdorForm from "$lib/components/odor/OdorForm.svelte";
 	import { appState } from "$lib/stores/appState.svelte.js";
+	import { DEFAULT_LAT, DEFAULT_LNG } from "$lib/stores/defaultValues.svelte.js";
 	let locationCoordinates = $state({
-		latitude: 42.72927458118972,
-		longitude: -84.47281270368809,
-	});
-
-	let odorFormState = $state({
-		species: "",
-		animalType: "",
-		housingType: "",
-		technology: "",
-		area: "",
+		latitude: DEFAULT_LAT,
+		longitude: DEFAULT_LNG,
 	});
 </script>
 
@@ -27,7 +20,7 @@
 
 	<!-- Odor Section -->
 	<section class="section odor-wrapper">
-		<OdorForm bind:odorFormState />
+		<OdorForm />
 	</section>
 
 </div>

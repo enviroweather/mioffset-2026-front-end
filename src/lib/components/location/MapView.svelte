@@ -2,6 +2,10 @@
 	import { onMount, onDestroy } from "svelte";
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
+	import {
+		DEFAULT_LAT,
+		DEFAULT_LNG,
+	} from "$lib/stores/defaultValues.svelte.js";
 
 	let { onLocationSelect = () => {} } = $props();
 	let currentSpecies = $derived(appState.odor.species || "default");
@@ -14,10 +18,7 @@
 		L = (await import("leaflet")).default;
 		await import("leaflet/dist/leaflet.css");
 
-		map = L.map(mapContainer).setView(
-			[42.72927458118972, -84.47281270368809],
-			200,
-		);
+		map = L.map(mapContainer).setView([DEFAULT_LAT, DEFAULT_LNG], 200);
 
 		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 			attribution:
@@ -25,9 +26,11 @@
 			maxZoom: 18,
 		}).addTo(map);
 
+		// marker = L.marker({lat: DEFAULT_LAT, lng: DEFAULT_LNG}, { icon: mapIcons[currentSpecies] }).addTo(map);
+
 		map.on("click", (e) => {
 			const { lat, lng } = e.latlng;
-			console.log("current species: " + currentSpecies);
+
 			let customIcon = L.icon(mapIcons[currentSpecies]);
 
 			if (marker) {
@@ -65,7 +68,6 @@
 	});
 
 	$effect(() => {
-		console.log("changed")
 		if (!L || !marker || !map) return;
 
 		const lat = appState.location.lat;
@@ -74,7 +76,7 @@
 
 		marker.setLatLng({ lat, lng });
 		marker.setIcon(icon);
-		map.setView({ lat, lng }, 200);
+		map.setView({ lat, lng });
 	});
 </script>
 
