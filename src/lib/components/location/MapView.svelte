@@ -29,8 +29,7 @@
 		// marker = L.marker({lat: DEFAULT_LAT, lng: DEFAULT_LNG}, { icon: mapIcons[currentSpecies] }).addTo(map);
 
 		map.on("click", (e) => {
-			const { lat, lng } = e.latlng;
-
+			let { lat, lng } = e.latlng;
 			let customIcon = L.icon(mapIcons[currentSpecies]);
 
 			if (marker) {

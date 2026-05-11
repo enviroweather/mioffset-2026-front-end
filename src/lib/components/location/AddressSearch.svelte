@@ -15,26 +15,29 @@
 	//
 	// Address Search Handler
 	//
-	let query = $state("");
 	let suggestions = $state([]);
-
-	async function search() {
-		const res = await fetch(
-			`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(appState.location.address)}&format=json&limit=5`,
-			{ headers: { "User-Agent": "Enviroweather/1.0" } },
-		);
-		const data = await res.json();
-		suggestions = data;
-		return data;
-	}
 
 	async function handleSubmit(e) {
 		e.preventDefault();
-		const results = await search();
-		console.log(results);
-		if (results.length > 0) {
-			appState.location.lat = parseFloat(results[0].lat);
-			appState.location.lng = parseFloat(results[0].lon);
+		try {
+			// calls server.js to run query
+			const res = await fetch(
+				`/api/geocode?query=${encodeURIComponent(appState.location.address)}`,
+			);
+
+			if (!res.ok) {
+				throw new Error(`API call failed with status ${res.status}`);
+			}
+
+			const data = await res.json();
+			const results = data.results || [];
+
+			if (results.length > 0) {
+				appState.location.lat = parseFloat(results[0].position.lat);
+				appState.location.lng = parseFloat(results[0].position.lon);
+			}
+		} catch (error) {
+			console.error("Geocoding error:", error);
 		}
 	}
 
@@ -51,7 +54,7 @@
 
 <section class="form-wrapper">
 	<div class="form-header">
-		<h2>Coordinate Details</h2>
+		<h2>Location Details</h2>
 		<p>Enter your farms address</p>
 	</div>
 
@@ -65,11 +68,6 @@
 				placeholder="673 Auditorium Rd, East Lansing, MI 48824"
 				bind:value={appState.location.address}
 			/>
-		</div>
-
-		<div class="form-actions">
-			<button type="submit" class="btn btn-primary">Update Location</button>
-			<button type="reset" class="btn btn-secondary">Reset</button>
 		</div>
 	</form>
 </section>
@@ -147,52 +145,6 @@
 		outline: none;
 		border-color: #4caf50;
 		box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-	}
-
-	.form-actions {
-		display: flex;
-		gap: 1rem;
-		justify-content: flex-end;
-	}
-
-	.btn {
-		padding: 0.5rem;
-		border: none;
-		border-radius: 4px;
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-
-	.btn-primary {
-		background-color: var(--color-kelly-green);
-		color: white;
-	}
-
-	.btn-primary:hover {
-		background-color: #008934;
-		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-	}
-
-	.btn-primary:active {
-		background-color: #008934;
-		transform: translateY(1px);
-	}
-
-	.btn-secondary {
-		background-color: #95a5a6;
-		color: white;
-	}
-
-	.btn-secondary:hover {
-		background-color: #7f8c8d;
-	}
-
-	.btn-secondary:active {
-		background-color: #6c7a7b;
 	}
 
 	@media (max-width: 640px) {

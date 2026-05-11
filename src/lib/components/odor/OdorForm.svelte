@@ -84,11 +84,13 @@
 		console.log("Odor form submitted:", formData);
 	}
 
+	// Resets upon animal invalid animal type upon change
 	$effect(() => {
 		if (!animalTypes.includes(appState.odor.animalType)) {
 			appState.odor.animalType = "";
 		}
 	});
+	// reset invalid housing type upon change
 	$effect(() => {
 		if (!housingTypes.includes(appState.odor.housingType)) {
 			appState.odor.housingType = "";

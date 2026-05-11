@@ -4,36 +4,66 @@
 	import CollapsibleButton from "$lib/components/common/CollapsibleButton.svelte";
 
 	import { appState } from "$lib/stores/appState.svelte.js";
+	import {
+		DEFAULT_LAT,
+		DEFAULT_LNG,
+	} from "$lib/stores/defaultValues.svelte.js";
 
-	let mode = $state("address");
+	async function handleSubmit(e) {
+		e.preventDefault();
+		try {
+			// calls server.js to run query
+			const res = await fetch(
+				`/api/geocode?query=${encodeURIComponent(appState.location.address)}`,
+			);
+
+			if (!res.ok) {
+				throw new Error(`API call failed with status ${res.status}`);
+			}
+
+			const data = await res.json();
+			const results = data.results || [];
+
+			if (results.length > 0) {
+				appState.location.lat = parseFloat(results[0].position.lat);
+				appState.location.lng = parseFloat(results[0].position.lon);
+			}
+		} catch (error) {
+			console.error("Geocoding error:", error);
+		}
+	}
+
+	async function handleReset(e) {
+		// e.preventDefault();
+		appState.location.lat = DEFAULT_LAT;
+		appState.location.lng = DEFAULT_LNG;
+		appState.location.address = "";
+	}
 </script>
 
 <div class="form-wrapper">
 	<CollapsibleButton title="Choose Location">
-		<div class="toggle">
-			<button
-				class:active={appState.location.mode === "address"}
-				onclick={() => (appState.location.mode = "address")}
-			>
-				Address
-			</button>
-			<button
-				class:active={appState.location.mode === "manual"}
-				onclick={() => (appState.location.mode = "manual")}
-			>
-				Manual
-			</button>
+		<div class="address-wrapper">
+			<Address />
 		</div>
-
-		{#if appState.location.mode === "manual"}
-			<ManualCoords bind:locationCoordinates={appState.location} />
-		{:else if appState.location.mode === "address"}
-			<Address></Address>
-		{/if}
+		<div class="local-footer-wrapper">
+			<div class="latlng-wrapper">
+				<ManualCoords/>
+			</div>
+			<div class="form-actions">
+				<label class="spacer">&nbsp;</label>
+				<div class="button-row">
+					<button type="submit" class="btn btn-primary" onclick={handleSubmit}
+						>Update</button
+					>
+					<button type="reset" class="btn btn-secondary" onclick={handleReset}
+						>Clear</button
+					>
+				</div>
+			</div>
+		</div>
 	</CollapsibleButton>
 </div>
-
-
 
 <style>
 	.form-wrapper {
@@ -43,38 +73,68 @@
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
-	.toggle {
+	.local-footer-wrapper {
 		display: flex;
+		padding-top: 1rem;
+		gap: 1rem;
+	}
+	.latlng-wrapper {
 		flex: 1;
-		margin-left: auto;
-		justify-content: flex-end;
 	}
-
-	button {
-		padding: 0.1rem 1rem;
-		border: 1px solid var(--color-kelly-green);
-		background: white;
-		cursor: pointer;
+	
+	.form-actions {
+		display: flex;
+		align-items: center;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+	
+	.spacer{
+		visibility: hidden;
+	}
+	.button-row {
+		display: flex;
+		gap: 1rem;
+	}
+	.btn {
+		padding: 0.5rem;
+		border: none;
+		border-radius: 4px;
 		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
 		transition: all 0.3s ease;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
 	}
 
-	button:first-child {
-		border-radius: 4px 0 0 4px;
-	}
-
-	button:last-child {
-		border-radius: 0 4px 4px 0;
-		border-left: none;
-	}
-
-	button.active {
-		background: var(--color-kelly-green);
+	.btn-primary {
+		background-color: var(--color-kelly-green);
 		color: white;
 	}
 
-	button:hover,
-	button:focus {
-		border-color: var(--color-spartan-green);
+	.btn-primary:hover {
+		background-color: #008934;
+		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+		font-weight: 500;
+	}
+
+	.btn-primary:active {
+		background-color: #008934;
+		transform: translateY(1px);
+	}
+
+	.btn-secondary {
+		background-color: #95a5a6;
+		color: white;
+	}
+
+	.btn-secondary:hover {
+		background-color: #7f8c8d;
+		font-weight: 500;
+	}
+
+	.btn-secondary:active {
+		background-color: #6c7a7b;
 	}
 </style>

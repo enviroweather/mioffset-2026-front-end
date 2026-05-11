@@ -72,13 +72,13 @@
 	form {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.5rem;
 	}
 
 	fieldset {
 		border: 1px solid #ddd;
 		border-radius: 6px;
-		padding: 1rem;
+		padding: 0.5rem;
 		margin: 0;
 	}
 
@@ -157,6 +157,7 @@
 	.btn-primary:hover:not(:disabled) {
 		background-color: #008934;
 		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+		font-weight: 500;
 	}
 
 	.btn-primary:active:not(:disabled) {
@@ -171,6 +172,7 @@
 
 	.btn-secondary:hover {
 		background-color: #7f8c8d;
+		font-weight: 500;
 	}
 
 	.btn-secondary:active {
