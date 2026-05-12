@@ -59,6 +59,7 @@
 	}
 	.location-wrapper {
 		grid-column: 1;
+		gap: 1rem;
 	}
 
 	.odor-wrapper {

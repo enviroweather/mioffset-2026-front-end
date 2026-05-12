@@ -1,7 +1,6 @@
 <script>
 	import ManualCoords from "$lib/components/location/ManualCoords.svelte";
 	import Address from "$lib/components/location/AddressSearch.svelte";
-	import CollapsibleButton from "$lib/components/common/CollapsibleButton.svelte";
 
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import {
@@ -42,27 +41,35 @@
 </script>
 
 <div class="form-wrapper">
-	<CollapsibleButton title="Choose Location">
-		<div class="address-wrapper">
-			<Address />
+	<div class="form-header">
+		<h2>Location Details</h2>
+		<p>Enter your farms address</p>
+	</div>
+
+	<!-- <CollapsibleButton title="Choose Location"> -->
+	<div class="address-wrapper">
+		<Address />
+		<div class="form-actions">
+			<label class="spacer">&nbsp;</label>
+			<button type="submit" class="btn btn-primary" onclick={handleSubmit}
+				>Search</button
+			>
 		</div>
-		<div class="local-footer-wrapper">
-			<div class="latlng-wrapper">
-				<ManualCoords/>
-			</div>
-			<div class="form-actions">
-				<label class="spacer">&nbsp;</label>
-				<div class="button-row">
-					<button type="submit" class="btn btn-primary" onclick={handleSubmit}
-						>Update</button
-					>
-					<button type="reset" class="btn btn-secondary" onclick={handleReset}
-						>Clear</button
-					>
-				</div>
+	</div>
+	<div class="local-footer-wrapper">
+		<div class="latlng-wrapper">
+			<ManualCoords />
+		</div>
+		<div class="form-actions">
+			<label class="spacer">&nbsp;</label>
+			<div class="button-row">
+				<button type="reset" class="btn btn-secondary" onclick={handleReset}
+					>Clear</button
+				>
 			</div>
 		</div>
-	</CollapsibleButton>
+	</div>
+	<!-- </CollapsibleButton> -->
 </div>
 
 <style>
@@ -73,6 +80,29 @@
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
+	.form-header {
+		margin-bottom: 2rem;
+		border-bottom: 2px solid #4caf50;
+		padding-bottom: 1rem;
+	}
+
+	.form-header h2 {
+		margin: 0 0 0.5rem 0;
+		color: #2c3e50;
+		font-size: 1.5rem;
+	}
+
+	.form-header p {
+		margin: 0;
+		color: #666;
+		font-size: 0.95rem;
+	}
+
+	.address-wrapper {
+		display: flex;
+		gap: 1rem;
+		flex-direction: row;
+	}
 	.local-footer-wrapper {
 		display: flex;
 		padding-top: 1rem;
@@ -81,15 +111,15 @@
 	.latlng-wrapper {
 		flex: 1;
 	}
-	
+
 	.form-actions {
 		display: flex;
 		align-items: center;
 		flex-direction: column;
 		gap: 0.2rem;
 	}
-	
-	.spacer{
+
+	.spacer {
 		visibility: hidden;
 	}
 	.button-row {

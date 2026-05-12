@@ -53,11 +53,6 @@
 </script>
 
 <section class="form-wrapper">
-	<div class="form-header">
-		<h2>Location Details</h2>
-		<p>Enter your farms address</p>
-	</div>
-
 	<form onsubmit={handleSubmit} onreset={handleReset}>
 		<div class="form-group">
 			<label for="address">Address</label>
@@ -73,40 +68,22 @@
 </section>
 
 <style>
-	.form-header {
-		margin-bottom: 2rem;
-		border-bottom: 2px solid #4caf50;
-		padding-bottom: 1rem;
-	}
-
-	.form-header h2 {
-		margin: 0 0 0.5rem 0;
-		color: #2c3e50;
-		font-size: 1.5rem;
-	}
-
-	.form-header p {
-		margin: 0;
-		color: #666;
-		font-size: 0.95rem;
-	}
-
 	form {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		width: 100%;
 	}
 
-	.coord-row {
-		display: flex;
-		gap: 1rem;
+	.form-wrapper {
+		width: 100%;
 	}
 
 	.form-group {
 		display: flex;
 		flex-direction: column;
 		gap: 0.2rem;
-		flex: 1;
+		width: 100%;
 	}
 
 	label {
@@ -121,6 +98,8 @@
 		border-radius: 4px;
 		font-size: 1rem;
 		font-family: inherit;
+		width: 100%;
+		box-sizing: border-box;
 		transition: all 0.3s ease;
 	}
 
