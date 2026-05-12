@@ -146,7 +146,7 @@
 	.btn-primary:hover {
 		background-color: #008934;
 		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-		font-weight: 500;
+		transform: scaleX(1.03);
 	}
 
 	.btn-primary:active {
@@ -161,7 +161,7 @@
 
 	.btn-secondary:hover {
 		background-color: #7f8c8d;
-		font-weight: 500;
+		transform: scaleX(1.03);
 	}
 
 	.btn-secondary:active {
