@@ -33,44 +33,37 @@
 	}
 
 	async function handleReset(e) {
-		// e.preventDefault();
+		e.preventDefault();
 		appState.location.lat = DEFAULT_LAT;
 		appState.location.lng = DEFAULT_LNG;
 		appState.location.address = "";
 	}
 </script>
 
-<div class="form-wrapper">
-	<div class="form-header">
-		<h2>Location Details</h2>
-		<p>Enter your farms address</p>
+<div class="address-wrapper">
+	<Address />
+	<div class="form-actions">
+		<label class="spacer">&nbsp;</label>
+		<button type="submit" class="btn btn-primary" onclick={handleSubmit}
+			>Search</button
+		>
 	</div>
-
-	<!-- <CollapsibleButton title="Choose Location"> -->
-	<div class="address-wrapper">
-		<Address />
-		<div class="form-actions">
-			<label class="spacer">&nbsp;</label>
-			<button type="submit" class="btn btn-primary" onclick={handleSubmit}
-				>Search</button
+</div>
+<div class="local-footer-wrapper">
+	<div class="latlng-wrapper">
+		<ManualCoords />
+	</div>
+	<div class="form-actions">
+		<label class="spacer">&nbsp;</label>
+		<div class="button-row">
+			<button type="reset" class="btn btn-secondary" onclick={handleReset}
+				>Clear</button
 			>
 		</div>
 	</div>
-	<div class="local-footer-wrapper">
-		<div class="latlng-wrapper">
-			<ManualCoords />
-		</div>
-		<div class="form-actions">
-			<label class="spacer">&nbsp;</label>
-			<div class="button-row">
-				<button type="reset" class="btn btn-secondary" onclick={handleReset}
-					>Clear</button
-				>
-			</div>
-		</div>
-	</div>
-	<!-- </CollapsibleButton> -->
 </div>
+
+<!-- </CollapsibleButton> -->
 
 <style>
 	.form-wrapper {
@@ -136,6 +129,7 @@
 		transition: all 0.3s ease;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
+		margin-top: auto;
 	}
 
 	.btn-primary {

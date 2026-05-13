@@ -92,15 +92,14 @@
 
 	label {
 		font-weight: 500;
+		font-size: 0.9rem;
 		color: #333;
-		font-size: 1rem;
 	}
 
 	input {
 		padding: 0.5rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
-		font-size: 1rem;
 		font-family: inherit;
 		width: 100%;
 		transition: all 0.3s ease;

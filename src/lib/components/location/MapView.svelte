@@ -1,4 +1,6 @@
 <script>
+	import ManualCoords from "$lib/components/location/ManualCoords.svelte";
+
 	import { onMount, onDestroy } from "svelte";
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
@@ -6,6 +8,8 @@
 		DEFAULT_LAT,
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
+	import AddressSearch from "./AddressSearch.svelte";
+	import LocationSelection from "./LocationSelection.svelte";
 
 	let { onLocationSelect = () => {} } = $props();
 	let currentSpecies = $derived(appState.odor.species || "default");
@@ -13,11 +17,14 @@
 	let mapContainer = $state();
 	let map = $state();
 	let marker = $state();
+	let overlayEl;
 
 	onMount(async () => {
 		L = (await import("leaflet")).default;
 		await import("leaflet/dist/leaflet.css");
 
+		L.DomEvent.disableClickPropagation(overlayEl);
+		L.DomEvent.disableScrollPropagation(overlayEl);
 		map = L.map(mapContainer).setView([DEFAULT_LAT, DEFAULT_LNG], 200);
 
 		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -83,14 +90,30 @@
 	});
 </script>
 
-<div bind:this={mapContainer} class="map"></div>
+<div bind:this={mapContainer} class="map">
+	<div class="overlay" bind:this={overlayEl}>
+		<LocationSelection></LocationSelection>
+	</div>
+</div>
 
 <style>
 	.map {
 		width: 100%;
 		height: 100%;
+		position: relative;
 		min-height: 450px;
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+	.overlay {
+		position: absolute;
+		bottom: 1rem;
+		left: 1rem;
+		z-index: 1000; /* must be above Leaflet's panes */
+		background: white;
+		border: 1px, solid, var(--color-kelly-green);
+		padding: 0.5rem;
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 	}
 </style>

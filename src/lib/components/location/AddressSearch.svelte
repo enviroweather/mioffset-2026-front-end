@@ -96,7 +96,6 @@
 		padding: 0.5rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
-		font-size: 1rem;
 		font-family: inherit;
 		width: 100%;
 		box-sizing: border-box;
@@ -124,27 +123,5 @@
 		outline: none;
 		border-color: #4caf50;
 		box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-	}
-
-	@media (max-width: 640px) {
-		.form-wrapper {
-			padding: 1.5rem 1rem;
-		}
-
-		.form-header h2 {
-			font-size: 1.25rem;
-		}
-
-		.coord-row {
-			flex-direction: column;
-		}
-
-		.form-actions {
-			flex-direction: column;
-		}
-
-		.btn {
-			width: 100%;
-		}
 	}
 </style>

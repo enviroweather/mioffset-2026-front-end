@@ -14,7 +14,7 @@
 	<!-- Location Section -->
 
 	<section class="section location-wrapper">
-		<LocationSection bind:form={appState.location} />
+		<!-- <LocationSection bind:form={appState.location} /> -->
 		<MapView/>
 	</section>
 
