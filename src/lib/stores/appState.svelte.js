@@ -6,6 +6,8 @@ export const appState = $state({
     lng: DEFAULT_LNG,
     address: '',
     mode: 'address', // 'address' | 'coords'
+    oen_rate: 0,
+    odorControlFactor: 0
   },
   odor: {
     species: '',

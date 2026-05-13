@@ -153,6 +153,11 @@
 		}
 	},
 	"TECH": {
+		"None": {
+			"key": "No adjustment",
+			"display": "No Technology Adjustment",
+			"odorControlFactor": 0.0
+		},
 		"Biofilter": {
 			"key": "Biofilter",
 			"display": "Biofilter on All Exhaust Fans",

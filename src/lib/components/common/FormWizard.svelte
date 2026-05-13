@@ -1,5 +1,5 @@
 <script>
-	let { steps, formState = $bindable() } = $props();
+	let { steps, formState = $bindable(), oenRate = null, odorControlFactor = null} = $props();
 
 	function handleSubmit(e) {
 		e.preventDefault();
@@ -60,10 +60,25 @@
 			</fieldset>
 		{/each}
 
-		<!-- Form Actions -->
 		<div class="form-actions">
-			<button type="submit" class="btn btn-primary">Submit Form</button>
-			<button type="reset" class="btn btn-secondary">Clear Form</button>
+			<div class="calculated-numbers">
+				<div class="Odor Emission Number">
+					{#if oenRate !== null && oenRate !== undefined}
+						<span class="rate-label">Odor Emission Rate:</span>
+						<span class="rate-value">{oenRate}</span>
+					{/if}
+				</div>
+				<div class="Odor Control Factor">
+					{#if odorControlFactor !== null && odorControlFactor !== undefined}
+						<span class="rate-label">Odor Control Factor:</span>
+						<span class="rate-value">{odorControlFactor}</span>
+					{/if}
+				</div>
+			</div>
+			<div class="form-buttons">
+				<button type="submit" class="btn btn-primary">Submit Form</button>
+				<button type="reset" class="btn btn-secondary">Clear Form</button>
+			</div>
 		</div>
 	</form>
 </section>
@@ -134,7 +149,31 @@
 		display: flex;
 		gap: 1rem;
 		margin-top: 1rem;
-		justify-content: flex-end;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.form-buttons {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.rate {
+		display: flex;
+		align-items: baseline;
+		gap: 0.4rem;
+		font-size: 0.95rem;
+		color: #2c3e50;
+	}
+
+	.rate-label {
+		font-weight: 500;
+		color: #555;
+	}
+
+	.rate-value {
+		font-weight: 700;
+		color: var(--color-kelly-green, #2c3e50);
 	}
 
 	.btn {
@@ -191,6 +230,12 @@
 		.form-actions {
 			flex-direction: column;
 			justify-content: stretch;
+			align-items: stretch;
+		}
+
+		.form-buttons {
+			flex-direction: column;
+			width: 100%;
 		}
 
 		.btn {

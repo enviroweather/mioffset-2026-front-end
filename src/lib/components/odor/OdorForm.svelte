@@ -19,6 +19,21 @@
 	);
 	let technologies = $derived(Object.keys(data.TECH || {}));
 
+	let oenRate = $derived(
+		appState.odor.species &&
+			appState.odor.animalType &&
+			appState.odor.housingType
+			? (data.SPECIES[appState.odor.species]?.animalTypes[
+					appState.odor.animalType
+				]?.housingType[appState.odor.housingType]?.oen_rate ?? null)
+			: null,
+	);
+
+	let odorControlFactor = $derived(
+		appState.odor.technology
+			? data.TECH[appState.odor.technology].odorControlFactor
+			: null,
+	);
 	const odorSteps = $derived([
 		{
 			key: "species",
@@ -60,12 +75,12 @@
 			legend: "Select Technology Adjustment",
 			type: "select",
 			options: [
-				{ value: "", text: "No Technology Adjustment" },
 				...technologies.map((tech) => ({
 					value: tech,
 					text: data.TECH[tech].display,
 				})),
 			],
+			required: true,
 			condition: (state) => state.housingType !== "",
 		},
 		{
@@ -96,6 +111,11 @@
 			appState.odor.housingType = "";
 		}
 	});
+
+	$effect(() => {
+		appState.odor.oenRate = oenRate;
+		appState.odor.odorControlFactor = odorControlFactor
+	});
 </script>
 
 <section class="odor-section">
@@ -106,6 +126,8 @@
 	<FormWizard
 		steps={odorSteps}
 		bind:formState={appState.odor}
+		{oenRate}
+		{odorControlFactor}
 		onSubmit={handleOdorSubmit}
 	/>
 </section>
