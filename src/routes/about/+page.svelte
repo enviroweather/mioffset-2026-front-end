@@ -1,3 +1,4 @@
+<!-- Intro & Description -->
 <div class="about-container">
 	<h1>MI OFFSET 2018</h1>
 	<h2>
@@ -51,6 +52,7 @@
 		Shapefile, for export to GIS applications.
 	</p>
 
+	<!-- Usage Steps -->
 	<div class="modelPreText">
 		To use this tool:
 		<ol class="breadcrumbs">
@@ -65,6 +67,7 @@
 </div>
 
 <style>
+	/* Typography */
 	.about-container {
 		max-width: 800px;
 		margin: 0 auto;
@@ -88,6 +91,7 @@
 		margin-bottom: 1rem;
 	}
 
+	/* Links */
 	a {
 		color: var(--color-kelly-green);
 		text-decoration: none;
@@ -103,6 +107,7 @@
 		margin-bottom: 2rem;
 	}
 
+	/* Responsive */
 	@media (max-width: 640px) {
 		.about-container {
 			padding: 1rem;

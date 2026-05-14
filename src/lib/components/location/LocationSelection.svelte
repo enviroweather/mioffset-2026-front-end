@@ -1,4 +1,5 @@
 <script>
+	// --- Imports ---
 	import ManualCoords from "$lib/components/location/ManualCoords.svelte";
 	import Address from "$lib/components/location/AddressSearch.svelte";
 
@@ -8,10 +9,14 @@
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
 
+	// --- State ---
+	let noResults = $state(false);
+
+	// --- Handlers ---
 	async function handleSubmit(e) {
 		e.preventDefault();
+		noResults = false;
 		try {
-			// calls server.js to run query
 			const res = await fetch(
 				`/api/geocode?query=${encodeURIComponent(appState.location.address)}`,
 			);
@@ -26,6 +31,9 @@
 			if (results.length > 0) {
 				appState.location.lat = parseFloat(results[0].position.lat);
 				appState.location.lng = parseFloat(results[0].position.lon);
+				appState.location.hasSelection = true;
+			} else {
+				noResults = true;
 			}
 		} catch (error) {
 			console.error("Geocoding error:", error);
@@ -33,46 +41,47 @@
 	}
 
 	async function handleReset(e) {
-		// e.preventDefault();
+		e.preventDefault();
 		appState.location.lat = DEFAULT_LAT;
 		appState.location.lng = DEFAULT_LNG;
 		appState.location.address = "";
+		appState.location.hasSelection = false;
+		noResults = false;
 	}
 </script>
 
-<div class="form-wrapper">
-	<div class="form-header">
-		<h2>Location Details</h2>
-		<p>Enter your farms address</p>
+<!-- Address Search Row -->
+<div class="address-wrapper">
+	<Address />
+	<div class="form-actions">
+		<label class="spacer">&nbsp;</label>
+		<button type="submit" class="btn btn-primary" onclick={handleSubmit}
+			>Search</button
+		>
 	</div>
-
-	<!-- <CollapsibleButton title="Choose Location"> -->
-	<div class="address-wrapper">
-		<Address />
-		<div class="form-actions">
-			<label class="spacer">&nbsp;</label>
-			<button type="submit" class="btn btn-primary" onclick={handleSubmit}
-				>Search</button
+</div>
+{#if noResults}
+	<p class="no-results">No results found. Try a different address.</p>
+{/if}
+<!-- Manual Coords & Reset -->
+<div class="local-footer-wrapper">
+	<div class="latlng-wrapper">
+		<ManualCoords />
+	</div>
+	<div class="form-actions">
+		<label class="spacer">&nbsp;</label>
+		<div class="button-row">
+			<button type="reset" class="btn btn-secondary" onclick={handleReset}
+				>Clear</button
 			>
 		</div>
 	</div>
-	<div class="local-footer-wrapper">
-		<div class="latlng-wrapper">
-			<ManualCoords />
-		</div>
-		<div class="form-actions">
-			<label class="spacer">&nbsp;</label>
-			<div class="button-row">
-				<button type="reset" class="btn btn-secondary" onclick={handleReset}
-					>Clear</button
-				>
-			</div>
-		</div>
-	</div>
-	<!-- </CollapsibleButton> -->
 </div>
 
+<!-- </CollapsibleButton> -->
+
 <style>
+	/* Layout */
 	.form-wrapper {
 		background: white;
 		padding: 1rem;
@@ -126,6 +135,7 @@
 		display: flex;
 		gap: 1rem;
 	}
+	/* Buttons */
 	.btn {
 		padding: 0.5rem;
 		border: none;
@@ -136,6 +146,7 @@
 		transition: all 0.3s ease;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
+		margin-top: auto;
 	}
 
 	.btn-primary {
@@ -146,7 +157,7 @@
 	.btn-primary:hover {
 		background-color: #008934;
 		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-		font-weight: 500;
+		transform: scaleX(1.03);
 	}
 
 	.btn-primary:active {
@@ -161,10 +172,16 @@
 
 	.btn-secondary:hover {
 		background-color: #7f8c8d;
-		font-weight: 500;
+		transform: scaleX(1.03);
 	}
 
 	.btn-secondary:active {
 		background-color: #6c7a7b;
+	}
+
+	.no-results {
+		margin: 0.25rem 0 0;
+		font-size: 0.85rem;
+		color: #c0392b;
 	}
 </style>

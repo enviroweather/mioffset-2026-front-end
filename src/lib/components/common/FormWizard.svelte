@@ -1,9 +1,23 @@
 <script>
-	let { steps, formState = $bindable() } = $props();
+	// --- Props ---
+	let {
+		steps,
+		formState = $bindable(),
+		oenRate = null,
+		odorControlFactor = null,
+		totalEmission = null,
+		onSubmit = () => {},
+	} = $props();
 
+	// --- Derived ---
+	let canSubmit = $derived(
+		steps.every(step => !step.required || (formState[step.key] !== '' && formState[step.key] != null))
+	);
+
+	// --- Handlers ---
 	function handleSubmit(e) {
 		e.preventDefault();
-		alert(JSON.stringify(formState, null, 2));
+		onSubmit(formState);
 	}
 
 	function handleReset() {
@@ -19,6 +33,7 @@
 
 <section>
 	<form onsubmit={handleSubmit} onreset={handleReset}>
+		<!-- Form Steps -->
 		{#each steps as step, index}
 			<fieldset>
 				<legend
@@ -60,15 +75,33 @@
 			</fieldset>
 		{/each}
 
-		<!-- Form Actions -->
+		<!-- Calculated Results -->
 		<div class="form-actions">
-			<button type="submit" class="btn btn-primary">Submit Form</button>
-			<button type="reset" class="btn btn-secondary">Clear Form</button>
+			<div class="calculated-numbers">
+				<div class="Odor Emission Number">
+					{#if oenRate !== null && oenRate !== undefined}
+						<span class="rate-label">Odor Emission Rate:</span>
+						<span class="rate-value">{oenRate}</span>
+					{/if}
+				</div>
+				<div class="Odor Control Factor">
+					{#if odorControlFactor !== null && odorControlFactor !== undefined}
+						<span class="rate-label">Odor Control Factor:</span>
+						<span class="rate-value">{odorControlFactor}</span>
+					{/if}
+				</div>
+			</div>
+			<!-- Form Actions -->
+			<div class="form-buttons">
+				<button type="submit" class="btn btn-primary" disabled={!canSubmit}>Submit Details</button>
+				<button type="reset" class="btn btn-secondary">Clear Form</button>
+			</div>
 		</div>
 	</form>
 </section>
 
 <style>
+	/* Fieldset & Labels */
 	form {
 		display: flex;
 		flex-direction: column;
@@ -102,6 +135,7 @@
 		font-size: 0.95rem;
 	}
 
+	/* Inputs */
 	select,
 	input {
 		padding: 0.75rem;
@@ -130,13 +164,39 @@
 		cursor: not-allowed;
 	}
 
+	/* Form Actions */
 	.form-actions {
 		display: flex;
 		gap: 1rem;
 		margin-top: 1rem;
-		justify-content: flex-end;
+		justify-content: space-between;
+		align-items: center;
 	}
 
+	.form-buttons {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.rate {
+		display: flex;
+		align-items: baseline;
+		gap: 0.4rem;
+		font-size: 0.95rem;
+		color: #2c3e50;
+	}
+
+	.rate-label {
+		font-weight: 500;
+		color: #555;
+	}
+
+	.rate-value {
+		font-weight: 700;
+		color: var(--color-kelly-green, #2c3e50);
+	}
+
+	/* Buttons */
 	.btn {
 		padding: 0.5rem;
 		border: none;
@@ -154,10 +214,14 @@
 		color: white;
 	}
 
+	.btn-primary:disabled{
+		opacity: 0.5;
+		cursor :not-allowed;
+	}
 	.btn-primary:hover:not(:disabled) {
 		background-color: #008934;
 		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-		font-weight: 500;
+		transform: scaleX(1.03);
 	}
 
 	.btn-primary:active:not(:disabled) {
@@ -172,13 +236,14 @@
 
 	.btn-secondary:hover {
 		background-color: #7f8c8d;
-		font-weight: 500;
+		transform: scaleX(1.03);
 	}
 
 	.btn-secondary:active {
 		background-color: #6c7a7b;
 	}
 
+	/* Responsive */
 	@media (max-width: 640px) {
 		.form-wrapper {
 			padding: 1.5rem 1rem;
@@ -191,6 +256,12 @@
 		.form-actions {
 			flex-direction: column;
 			justify-content: stretch;
+			align-items: stretch;
+		}
+
+		.form-buttons {
+			flex-direction: column;
+			width: 100%;
 		}
 
 		.btn {

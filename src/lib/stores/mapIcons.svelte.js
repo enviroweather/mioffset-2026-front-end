@@ -1,6 +1,4 @@
-// key value pairs used to keep track of the map icon images to use
-// Key is the corresponding species
-// Value is the file path
+// --- Icon Definitions ---
 export const mapIcons = $state({
 	"default": {
 		iconUrl: "marker.svg",

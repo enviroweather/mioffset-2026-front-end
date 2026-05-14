@@ -1,7 +1,9 @@
+// --- Imports ---
 import { apiVersion, ext, baseURL, TOMTOM_API_KEY } from "$env/static/private";
 import { version } from "$service-worker";
 import { json } from "@sveltejs/kit";
 
+// --- GET Handler ---
 export async function GET({ url }) {
 	const query = url.searchParams.get("query");
 

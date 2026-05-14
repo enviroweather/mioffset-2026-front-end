@@ -1,4 +1,5 @@
 <script>
+	// --- Imports ---
 	import { page } from "$app/stores";
 </script>
 
@@ -16,6 +17,7 @@
 </div>
 
 <style>
+	/* Nav Links */
 	.nav-content {
 		display: flex;
 		gap: 2rem;
@@ -36,6 +38,7 @@
 		color: var(--color-kelly-green);
 	}
 
+	/* Active State */
 	.nav-link.active {
 		color: var(--color-kelly-green);
 		border-bottom-color: var(--color-kelly-green);

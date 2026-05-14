@@ -1,10 +1,12 @@
 <script>
+	// --- Imports ---
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import {
 		DEFAULT_LAT,
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
 
+	// --- Props ---
 	let {
 		locationCoordinates = $bindable({
 			latitude: DEFAULT_LAT,
@@ -12,11 +14,10 @@
 		}),
 	} = $props();
 
-	//
-	// Address Search Handler
-	//
+	// --- State ---
 	let suggestions = $state([]);
 
+	// --- Handlers ---
 	async function handleSubmit(e) {
 		e.preventDefault();
 		try {
@@ -47,6 +48,7 @@
 		appState.location.lng = DEFAULT_LNG;
 	}
 
+	// --- Effects ---
 	$effect(() => {
 		console.log(suggestions);
 	});
@@ -68,6 +70,7 @@
 </section>
 
 <style>
+	/* Input */
 	form {
 		display: flex;
 		flex-direction: column;
@@ -96,14 +99,13 @@
 		padding: 0.5rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
-		font-size: 1rem;
 		font-family: inherit;
 		width: 100%;
 		box-sizing: border-box;
 		transition: all 0.3s ease;
 	}
 
-	/* Hides the input arrows (found here https://www.w3schools.com/howto/howto_css_hide_arrow_number.asp) */
+	/* Spinner Override */
 	/* Chrome, Safari, Edge, Opera */
 	input::-webkit-outer-spin-button,
 	input::-webkit-inner-spin-button {
@@ -116,6 +118,7 @@
 		-moz-appearance: textfield;
 	}
 
+	/* Focus & Hover */
 	input:hover {
 		border-color: #999;
 	}
@@ -124,27 +127,5 @@
 		outline: none;
 		border-color: #4caf50;
 		box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-	}
-
-	@media (max-width: 640px) {
-		.form-wrapper {
-			padding: 1.5rem 1rem;
-		}
-
-		.form-header h2 {
-			font-size: 1.25rem;
-		}
-
-		.coord-row {
-			flex-direction: column;
-		}
-
-		.form-actions {
-			flex-direction: column;
-		}
-
-		.btn {
-			width: 100%;
-		}
 	}
 </style>

@@ -1,11 +1,13 @@
 <script>
+	// --- Imports ---
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
 
+	// --- State ---
 	let latFocused = $state(false);
 	let lngFocused = $state(false);
 
-	// updates the displayed numbers only if we don't have it focused
+	// --- Display Derived ---
 	let latDisplay = $derived(
 		latFocused
 			? (appState.location.lat ?? "")
@@ -35,6 +37,7 @@
 					oninput={(e) => {
 						const v = e.currentTarget.value;
 						appState.location.lat = v === "" ? null : Number(v);
+						if (v !== "") appState.location.hasSelection = true;
 					}}
 					onfocus={() => (latFocused = true)}
 					onblur={() => (latFocused = false)}
@@ -54,6 +57,7 @@
 					oninput={(e) => {
 						const v = e.currentTarget.value;
 						appState.location.lng = v === "" ? null : Number(v);
+						if (v !== "") appState.location.hasSelection = true;
 					}}
 					onfocus={() => (lngFocused = true)}
 					onblur={() => (lngFocused = false)}
@@ -68,6 +72,7 @@
 </section>
 
 <style>
+	/* Layout */
 	.form-wrapper {
 		width: 100%;
 	}
@@ -92,21 +97,21 @@
 
 	label {
 		font-weight: 500;
+		font-size: 0.9rem;
 		color: #333;
-		font-size: 1rem;
 	}
 
+	/* Inputs */
 	input {
 		padding: 0.5rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
-		font-size: 1rem;
 		font-family: inherit;
 		width: 100%;
 		transition: all 0.3s ease;
 	}
 
-	/* Hides the input arrows (found here https://www.w3schools.com/howto/howto_css_hide_arrow_number.asp) */
+	/* Spinner Override */
 	/* Chrome, Safari, Edge, Opera */
 	input::-webkit-outer-spin-button,
 	input::-webkit-inner-spin-button {
@@ -119,6 +124,7 @@
 		-moz-appearance: textfield;
 	}
 
+	/* Focus & Hover */
 	input:hover {
 		border-color: #999;
 	}
