@@ -30,25 +30,9 @@
 					>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span
 				>
 			</div>
-			{#if sharedLocation}
-				<div class="location-info">
-					<span class="location-label">Location:</span>
-					{#if sharedLocation.address}
-						<span class="location-value">{sharedLocation.address}</span>
-						<span class="location-coords"
-							>({Number(sharedLocation.lat).toFixed(LATLNG_PRECISION)}, {Number(
-								sharedLocation.lng,
-							).toFixed(LATLNG_PRECISION)})</span
-						>
-					{:else}
-						<span class="location-value"
-							>{Number(sharedLocation.lat).toFixed(LATLNG_PRECISION)}, {Number(
-								sharedLocation.lng,
-							).toFixed(LATLNG_PRECISION)}</span
-						>
-					{/if}
-				</div>
-			{/if}
+			<div class="submission">
+				<button>Show Results</button>
+			</div>
 		</div>
 		<!-- Data Table -->
 		<div class="table-wrapper">
@@ -172,6 +156,22 @@
 		font-variant-numeric: tabular-nums;
 	}
 
+	/* Submit Button */
+	.submission {
+		display: flex;
+		margin-left: auto;
+		margin-right: 0;
+	}
+	.submission button {
+		padding: 0.5rem;
+		border: none;
+		border-radius: 4px;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		margin-top: auto;
+	}
 	/* Table */
 	.table-wrapper {
 		overflow-x: auto;
