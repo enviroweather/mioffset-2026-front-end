@@ -8,6 +8,7 @@
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
 	import LocationSelection from "./LocationSelection.svelte";
+	import { createFootprintSVG, placeOverlay } from "$lib/utils/mapOverlay.js";
 
 	// --- Props & State ---
 	let { onLocationSelect = () => {} } = $props();
@@ -18,6 +19,7 @@
 	// Non-reactive — managed manually to avoid effect loops
 	let marker;
 	let overlayEl;
+	let svgOverlay;
 
 	// --- Lifecycle ---
 	onMount(async () => {
@@ -41,6 +43,8 @@
 			appState.location.hasSelection = true;
 			onLocationSelect({ lat, lng });
 		});
+
+		svgOverlay = placeOverlay(L, map, createFootprintSVG(), appState.location.lat, appState.location.lng);
 	});
 
 	onDestroy(() => {
