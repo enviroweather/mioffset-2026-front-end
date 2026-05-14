@@ -68,6 +68,7 @@
 				marker.remove();
 				marker = null;
 			}
+			map.setView([DEFAULT_LAT, DEFAULT_LNG]);
 			return;
 		}
 
@@ -111,6 +112,7 @@
 		z-index: 1000; /* must be above Leaflet's panes */
 		background: white;
 		border: 1px solid var(--color-kelly-green);
+		transition: all 0.3s ease;
 		padding: 0.5rem;
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);

@@ -4,8 +4,8 @@
 	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
 
 	// --- State ---
-	let latFocused = $state(false);
-	let lngFocused = $state(false);
+	let latFocused = $state(true);
+	let lngFocused = $state(true);
 
 	// --- Display Derived ---
 	let latDisplay = $derived(

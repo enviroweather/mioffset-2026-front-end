@@ -1,10 +1,12 @@
 <script>
 	// --- Imports ---
+	import showLocationUnknown from "$lib/components/location/LocationUnknown.svelte"
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import {
 		DEFAULT_LAT,
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
+
 
 	// --- Props ---
 	let {
@@ -12,35 +14,11 @@
 			latitude: DEFAULT_LAT,
 			longitude: DEFAULT_LNG,
 		}),
+		handleSubmit
 	} = $props();
 
 	// --- State ---
 	let suggestions = $state([]);
-
-	// --- Handlers ---
-	async function handleSubmit(e) {
-		e.preventDefault();
-		try {
-			// calls server.js to run query
-			const res = await fetch(
-				`/api/geocode?query=${encodeURIComponent(appState.location.address)}`,
-			);
-
-			if (!res.ok) {
-				throw new Error(`API call failed with status ${res.status}`);
-			}
-
-			const data = await res.json();
-			const results = data.results || [];
-
-			if (results.length > 0) {
-				appState.location.lat = parseFloat(results[0].position.lat);
-				appState.location.lng = parseFloat(results[0].position.lon);
-			}
-		} catch (error) {
-			console.error("Geocoding error:", error);
-		}
-	}
 
 	function handleReset() {
 		appState.location.address = "";

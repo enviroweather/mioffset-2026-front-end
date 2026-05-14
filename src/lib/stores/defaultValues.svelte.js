@@ -10,7 +10,7 @@ export const DEFAULT_LOCATION = {
   lng: DEFAULT_LNG,
   address: '',
   mode: 'address',
-  hasSelection: false,
+  hasSelection: true,
 };
 
 // --- Default Odor ---

@@ -21,6 +21,10 @@
 </div>
 
 <style>
+	/* allow for font weight resizing on chrome */
+	* {
+		-webkit-font-smoothing: antialiased;
+	}
 	/* Grid Layout */
 	.page-container {
 		display: grid;

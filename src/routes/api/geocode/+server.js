@@ -25,6 +25,7 @@ export async function GET({ url }) {
 		}
 
 		const data = await res.json();
+		console.log(data);
 		return json(data);
 	} catch (error) {
 		console.error("Geocoding error:", error);
