@@ -1,0 +1,258 @@
+<script>
+	// --- Imports ---
+	import { appState, entries } from "$lib/stores/appState.svelte.js";
+	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
+
+	// --- Actions ---
+	function removeEntry(i) {
+		entries.splice(i, 1);
+	}
+
+	// --- Derived ---
+	let totalOEF = $derived(
+		entries.reduce((sum, e) => sum + (e.odor.totalEmission ?? 0), 0),
+	);
+
+	let sharedLocation = $derived(
+		entries.length > 0
+			? { lat: appState.location.lat, lng: appState.location.lng }
+			: null,
+	);
+</script>
+
+{#if entries.length > 0}
+	<section class="entries-section">
+		<!-- Section Header -->
+		<div class="entries-header">
+			<div class="header-left">
+				<h2>Submitted Entries</h2>
+				<span class="entry-count"
+					>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span
+				>
+			</div>
+			{#if sharedLocation}
+				<div class="location-info">
+					<span class="location-label">Location:</span>
+					{#if sharedLocation.address}
+						<span class="location-value">{sharedLocation.address}</span>
+						<span class="location-coords"
+							>({Number(sharedLocation.lat).toFixed(LATLNG_PRECISION)}, {Number(
+								sharedLocation.lng,
+							).toFixed(LATLNG_PRECISION)})</span
+						>
+					{:else}
+						<span class="location-value"
+							>{Number(sharedLocation.lat).toFixed(LATLNG_PRECISION)}, {Number(
+								sharedLocation.lng,
+							).toFixed(LATLNG_PRECISION)}</span
+						>
+					{/if}
+				</div>
+			{/if}
+		</div>
+		<!-- Data Table -->
+		<div class="table-wrapper">
+			<table>
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Species</th>
+						<th>Animal Type</th>
+						<th>Housing Type</th>
+						<th>Technology</th>
+						<th>Area (sq ft)</th>
+						<th>Odor Emission Rate</th>
+						<th>Odor Control Factor</th>
+						<th>Total Odor Emission</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each entries as entry, i}
+						<tr>
+							<td class="entry-num">{i + 1}</td>
+							<td>{entry.odor.species || "-"}</td>
+							<td>{entry.odor.animalType || "-"}</td>
+							<td>{entry.odor.housingType || "-"}</td>
+							<td>{entry.odor.technology || "-"}</td>
+							<td
+								>{entry.odor.area != null && entry.odor.area !== ""
+									? entry.odor.area
+									: "-"}</td
+							>
+							<td class="numeric"
+								>{entry.odor.oenRate != null ? entry.odor.oenRate : "-"}</td
+							>
+							<td class="numeric"
+								>{entry.odor.odorControlFactor != null
+									? entry.odor.odorControlFactor
+									: "-"}</td
+							>
+							<td class="numeric"
+								>{entry.odor.totalEmission != null
+									? entry.odor.totalEmission.toFixed(2)
+									: "-"}</td
+							>
+							<td class="remove-cell">
+								<button
+									class="remove-btn"
+									onclick={() => removeEntry(i)}
+									aria-label="Remove entry">×</button
+								>
+							</td>
+						</tr>
+					{/each}
+					<tr class="total-row">
+						<td colspan="8"></td>
+						<td class="numeric total-value">{totalOEF.toFixed(2)}</td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+{/if}
+
+<style>
+	/* Header */
+	.entries-section {
+		background: white;
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		padding: 1rem 1.5rem;
+	}
+
+	.entries-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-bottom: 2px solid #4caf50;
+		padding-bottom: 0.75rem;
+		margin-bottom: 1rem;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.header-left {
+		display: flex;
+		align-items: baseline;
+		gap: 0.75rem;
+	}
+
+	.entries-header h2 {
+		margin: 0;
+		color: #2c3e50;
+		font-size: 1.5rem;
+	}
+
+	.entry-count {
+		color: #666;
+		font-size: 0.9rem;
+	}
+
+	.location-info {
+		display: flex;
+		align-items: baseline;
+		gap: 0.4rem;
+		font-size: 0.9rem;
+	}
+
+	.location-label {
+		font-weight: 600;
+		color: #555;
+	}
+
+	.location-value {
+		color: #2c3e50;
+	}
+
+	.location-coords {
+		color: #888;
+		font-size: 0.85rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	/* Table */
+	.table-wrapper {
+		overflow-x: auto;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.9rem;
+		min-width: 600px;
+	}
+
+	thead tr {
+		background-color: #f5f5f5;
+	}
+
+	th {
+		text-align: left;
+		padding: 0.6rem 0.75rem;
+		font-weight: 600;
+		color: #2c3e50;
+		white-space: nowrap;
+		border-bottom: 2px solid #ddd;
+	}
+
+	td {
+		padding: 0.6rem 0.75rem;
+		border-bottom: 1px solid #eee;
+		color: #333;
+	}
+
+	tbody tr:hover:not(.total-row) {
+		background-color: #f9fffe;
+	}
+
+	/* Totals Row */
+	.total-row td {
+		border-top: 2px solid #4caf50;
+		background-color: #f5f5f5;
+		border-bottom: none;
+	}
+
+	.total-value {
+		font-weight: 700;
+		color: #2c3e50;
+	}
+
+	/* Remove Button */
+	.remove-cell {
+		padding: 0 0.4rem;
+		text-align: center;
+	}
+
+	.remove-btn {
+		background: none;
+		border: none;
+		color: #aaa;
+		font-size: 1.1rem;
+		line-height: 1;
+		cursor: pointer;
+		padding: 0.2rem 0.4rem;
+		border-radius: 3px;
+		transition:
+			color 0.2s,
+			background 0.2s;
+	}
+
+	.remove-btn:hover {
+		color: #e74c3c;
+		background: #fdf0ee;
+	}
+
+	/* Numeric Cells */
+	.entry-num {
+		font-weight: 700;
+		color: #4caf50;
+		text-align: center;
+	}
+
+	.numeric {
+		font-variant-numeric: tabular-nums;
+		text-align: left;
+	}
+</style>

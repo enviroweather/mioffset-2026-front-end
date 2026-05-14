@@ -156,7 +156,7 @@
 		"None": {
 			"key": "No adjustment",
 			"display": "No Technology Adjustment",
-			"odorControlFactor": 0.0
+			"odorControlFactor": 1.0
 		},
 		"Biofilter": {
 			"key": "Biofilter",

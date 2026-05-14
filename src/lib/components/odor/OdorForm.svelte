@@ -1,8 +1,10 @@
 <script>
+	// --- Imports ---
 	import data from "$lib/data.json" with { type: "json" };
-	import { appState } from "$lib/stores/appState.svelte.js";
+	import { appState, entries, resetAppState } from "$lib/stores/appState.svelte.js";
 	import FormWizard from "../common/FormWizard.svelte";
 
+	// --- Dropdown Options ---
 	let animalTypes = $derived(
 		appState.odor.species
 			? Object.keys(data.SPECIES[appState.odor.species]?.animalTypes || {})
@@ -19,6 +21,7 @@
 	);
 	let technologies = $derived(Object.keys(data.TECH || {}));
 
+	// --- Emission Calculations ---
 	let oenRate = $derived(
 		appState.odor.species &&
 			appState.odor.animalType &&
@@ -34,6 +37,16 @@
 			? data.TECH[appState.odor.technology].odorControlFactor
 			: null,
 	);
+
+	// E = (oenRate × odorControlFactor × area) / 10000
+	// Equation taken from legacy code
+	// area in sq ft, odorControlFactor is transmission fraction (1.0 for no technology)
+	let totalEmission = $derived(
+		oenRate != null && odorControlFactor != null && appState.odor.area != null && appState.odor.area !== ''
+			? (oenRate * odorControlFactor * Number(appState.odor.area)) / 10000
+			: null,
+	);
+	// --- Form Step Config ---
 	const odorSteps = $derived([
 		{
 			key: "species",
@@ -95,10 +108,29 @@
 		},
 	]);
 
+	// --- Submit Handler ---
 	function handleOdorSubmit(formData) {
-		console.log("Odor form submitted:", formData);
+		entries.push({
+			odor: {
+				species: formData.species,
+				animalType: formData.animalType,
+				housingType: formData.housingType,
+				technology: formData.technology,
+				area: formData.area,
+				oenRate: oenRate,
+				odorControlFactor: odorControlFactor,
+				totalEmission: totalEmission,
+			},
+			location: {
+				lat: appState.location.lat,
+				lng: appState.location.lng,
+				address: appState.location.address,
+			},
+		});
+		resetAppState();
 	}
 
+	// --- Effects ---
 	// Resets upon animal invalid animal type upon change
 	$effect(() => {
 		if (!animalTypes.includes(appState.odor.animalType)) {
@@ -114,7 +146,8 @@
 
 	$effect(() => {
 		appState.odor.oenRate = oenRate;
-		appState.odor.odorControlFactor = odorControlFactor
+		appState.odor.odorControlFactor = odorControlFactor;
+		appState.odor.totalEmission = totalEmission;
 	});
 </script>
 
@@ -128,11 +161,13 @@
 		bind:formState={appState.odor}
 		{oenRate}
 		{odorControlFactor}
+		{totalEmission}
 		onSubmit={handleOdorSubmit}
 	/>
 </section>
 
 <style>
+	/* Section Wrapper */
 	.odor-section {
 		background: white;
 		padding: 1rem;
@@ -140,6 +175,7 @@
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
+	/* Form Header */
 	.form-header {
 		margin-bottom: 2rem;
 		border-bottom: 2px solid #4caf50;

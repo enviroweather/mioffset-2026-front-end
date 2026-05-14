@@ -1,5 +1,5 @@
-<!-- Collapsible.svelte -->
 <script>
+	// --- Props & State ---
 	import { slide } from "svelte/transition";
 	let { title, children } = $props();
 	let open = $state(true);
@@ -19,7 +19,7 @@
 </div>
 
 <style>
-	/* CSS for collapse button */
+	/* Toggle Button */
 	.collapsible {
 		border-radius: 4px;
 		overflow: hidden;
@@ -32,6 +32,7 @@
 		align-items: center;
 	}
 
+	/* Content Panel */
 	.content {
 		padding: 1rem;
 		border: 1px solid #ccc;

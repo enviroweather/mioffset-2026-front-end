@@ -1,10 +1,12 @@
 <script>
+	// --- Imports & Props ---
 	import Navigation from "$lib/components/common/Navigation.svelte";
 
 	let { children } = $props();
 </script>
 
 <div class="app">
+	<!-- Header -->
 	<header class="app-header">
 		<div class="header-content">
 			<h1 class="logo">MI OFFSET</h1>
@@ -13,10 +15,12 @@
 		<Navigation />
 	</header>
 
+	<!-- Main Content -->
 	<main class="app-main">
 		{@render children()}
 	</main>
 
+	<!-- Footer -->
 	<footer class="app-footer">
 		<p>&copy; 2026 MI OFFSET. All rights reserved.</p>
 		<p>
@@ -27,6 +31,7 @@
 </div>
 
 <style>
+	/* Global Styles */
 	:root {
 		--color-spartan-green: #18453b;
 		--color-kelly-green: #4caf50;
@@ -46,11 +51,13 @@
 		box-sizing: border-box;
 	}
 
+	/* Layout */
 	.app {
 		display: flex;
 		flex-direction: column;
 	}
 
+	/* Header */
 	.app-header {
 		background-color: var(--color-spartan-green);
 		color: white;
@@ -83,6 +90,7 @@
 		flex: 1 auto;
 	}
 
+	/* Footer */
 	.app-footer {
 		background-color: var(--color-spartan-green);
 		color: white;
@@ -109,6 +117,7 @@
 		text-decoration: underline;
 	}
 
+	/* Responsive */
 	@media (max-width: 640px) {
 		.logo {
 			font-size: 1.4rem;

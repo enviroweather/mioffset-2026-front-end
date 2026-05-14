@@ -1,4 +1,5 @@
 <script>
+	// --- Imports ---
 	import ManualCoords from "$lib/components/location/ManualCoords.svelte";
 	import Address from "$lib/components/location/AddressSearch.svelte";
 
@@ -8,10 +9,14 @@
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
 
+	// --- State ---
+	let noResults = $state(false);
+
+	// --- Handlers ---
 	async function handleSubmit(e) {
 		e.preventDefault();
+		noResults = false;
 		try {
-			// calls server.js to run query
 			const res = await fetch(
 				`/api/geocode?query=${encodeURIComponent(appState.location.address)}`,
 			);
@@ -26,6 +31,9 @@
 			if (results.length > 0) {
 				appState.location.lat = parseFloat(results[0].position.lat);
 				appState.location.lng = parseFloat(results[0].position.lon);
+				appState.location.hasSelection = true;
+			} else {
+				noResults = true;
 			}
 		} catch (error) {
 			console.error("Geocoding error:", error);
@@ -37,9 +45,12 @@
 		appState.location.lat = DEFAULT_LAT;
 		appState.location.lng = DEFAULT_LNG;
 		appState.location.address = "";
+		appState.location.hasSelection = false;
+		noResults = false;
 	}
 </script>
 
+<!-- Address Search Row -->
 <div class="address-wrapper">
 	<Address />
 	<div class="form-actions">
@@ -49,6 +60,10 @@
 		>
 	</div>
 </div>
+{#if noResults}
+	<p class="no-results">No results found. Try a different address.</p>
+{/if}
+<!-- Manual Coords & Reset -->
 <div class="local-footer-wrapper">
 	<div class="latlng-wrapper">
 		<ManualCoords />
@@ -66,6 +81,7 @@
 <!-- </CollapsibleButton> -->
 
 <style>
+	/* Layout */
 	.form-wrapper {
 		background: white;
 		padding: 1rem;
@@ -119,6 +135,7 @@
 		display: flex;
 		gap: 1rem;
 	}
+	/* Buttons */
 	.btn {
 		padding: 0.5rem;
 		border: none;
@@ -160,5 +177,11 @@
 
 	.btn-secondary:active {
 		background-color: #6c7a7b;
+	}
+
+	.no-results {
+		margin: 0.25rem 0 0;
+		font-size: 0.85rem;
+		color: #c0392b;
 	}
 </style>

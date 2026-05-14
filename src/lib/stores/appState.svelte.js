@@ -1,19 +1,14 @@
-import { DEFAULT_LAT, DEFAULT_LNG } from "./defaultValues.svelte.js";
-// Representation of the current state for any .svelte component to use
+import { DEFAULT_LOCATION, DEFAULT_ODOR } from "./defaultValues.svelte.js";
+
+// --- State ---
 export const appState = $state({
-  location: {
-    lat: DEFAULT_LAT,
-    lng: DEFAULT_LNG,
-    address: '',
-    mode: 'address', // 'address' | 'coords'
-    oen_rate: 0,
-    odorControlFactor: 0
-  },
-  odor: {
-    species: '',
-    animalType: '',
-    housingType: '',
-    technology: '',
-    area: '',
-  }
+  location: { ...DEFAULT_LOCATION },
+  odor: { ...DEFAULT_ODOR },
 });
+
+export const entries = $state([]);
+
+// --- Actions ---
+export function resetAppState() {
+  Object.assign(appState.odor, DEFAULT_ODOR);
+}

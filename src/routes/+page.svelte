@@ -1,21 +1,12 @@
 <script>
-	import LocationSection from "$lib/components/location/LocationSelection.svelte";
+	// --- Imports ---
 	import MapView from "$lib/components/location/MapView.svelte";
 	import OdorForm from "$lib/components/odor/OdorForm.svelte";
-	import { appState } from "$lib/stores/appState.svelte.js";
-	import {
-		DEFAULT_LAT,
-		DEFAULT_LNG,
-	} from "$lib/stores/defaultValues.svelte.js";
-	let locationCoordinates = $state({
-		latitude: DEFAULT_LAT,
-		longitude: DEFAULT_LNG,
-	});
+	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 </script>
 
+<!-- Odor & Map -->
 <div class="page-container">
-	<!-- Odor Section -->
-
 	<section class="section odor-wrapper">
 		<OdorForm />
 	</section>
@@ -24,7 +15,13 @@
 	</section>
 </div>
 
+<!-- Entries -->
+<div class="entries-container">
+	<EntriesTable />
+</div>
+
 <style>
+	/* Grid Layout */
 	.page-container {
 		display: grid;
 		grid-template-columns: 1fr 2fr;
@@ -35,6 +32,7 @@
 		padding: 1rem;
 	}
 
+	/* Section Wrappers */
 	.odor-wrapper {
 		border-radius: 8px;
 		padding: 1rem;
@@ -43,6 +41,11 @@
 		gap: 1rem;
 	}
 
+	.entries-container {
+		padding: 0 1rem 1rem;
+	}
+
+	/* Responsive */
 	@media (max-width: 1024px) {
 		.page-container {
 			grid-template-columns: 1fr;
