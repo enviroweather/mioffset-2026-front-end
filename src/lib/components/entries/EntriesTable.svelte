@@ -1,7 +1,10 @@
 <script>
 	// --- Imports ---
-	import { appState, entries, saveCurrentLocation } from "$lib/stores/appState.svelte.js";
-	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
+	import {
+		appState,
+		entries,
+		calculateResults,
+	} from "$lib/stores/appState.svelte.js";
 
 	// --- Actions ---
 	function removeEntry(i) {
@@ -13,14 +16,13 @@
 		entries.reduce((sum, e) => sum + (e.odor.totalEmission ?? 0), 0),
 	);
 
-	let sharedLocation = $derived(
-		entries.length > 0
-			? { lat: appState.location.lat, lng: appState.location.lng }
-			: null,
-	);
+	function loadPreviousForm(odorData, index) {
+		appState.odor = odorData;
+		entries.splice(index, 1);
+	}
 </script>
 
-{#if entries.length > 0}
+{#if true}
 	<section class="entries-section">
 		<!-- Section Header -->
 		<div class="entries-header">
@@ -29,9 +31,6 @@
 				<span class="entry-count"
 					>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span
 				>
-			</div>
-			<div class="submission">
-				<button class="btn-results" onclick={saveCurrentLocation}>Show Results</button>
 			</div>
 		</div>
 		<!-- Data Table -->
@@ -53,7 +52,11 @@
 				</thead>
 				<tbody>
 					{#each entries as entry, i}
-						<tr>
+						<tr
+							onclick={() => {
+								loadPreviousForm(entry.odor, i);
+							}}
+						>
 							<td class="entry-num">{i + 1}</td>
 							<td>{entry.odor.species || "-"}</td>
 							<td>{entry.odor.animalType || "-"}</td>
@@ -87,9 +90,15 @@
 						</tr>
 					{/each}
 					<tr class="total-row">
+						<td>
+							<div class="submission-btn">
+								<button class="btn-results" onclick={calculateResults}
+									>Show Results</button
+								>
+							</div>
+						</td>
 						<td colspan="8"></td>
 						<td class="numeric total-value">{totalOEF.toFixed(2)}</td>
-						<td></td>
 					</tr>
 				</tbody>
 			</table>
@@ -135,9 +144,10 @@
 	}
 
 	/* Submit Button */
-	.submission {
+	.submission-btn {
 		display: flex;
-		margin-left: auto;
+		margin-top: 0.5rem;
+		min-width: 170px;
 	}
 	.btn-results {
 		padding: 0.5rem 1rem;
