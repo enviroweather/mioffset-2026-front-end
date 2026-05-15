@@ -1,16 +1,13 @@
 <script>
-	// --- Props & State ---
 	import { slide } from "svelte/transition";
-	let { title, children } = $props();
+
+	// --- Props & State ---
+	let { children } = $props();
 	let open = $state(true);
 </script>
 
-<div class="collapsible">
-	<button class="btn header" onclick={() => (open = !open)}>
-		<span>{title}</span>
-		<span>{open ? "▲" : "▼"}</span>
-	</button>
-
+<div class="box">
+	<button class="btn" onclick={() => (open = !open)}>{open ? "-" : "+"}</button>
 	{#if open}
 		<div class="content" transition:slide>
 			{@render children()}
@@ -19,33 +16,26 @@
 </div>
 
 <style>
-	/* Toggle Button */
-	.collapsible {
+	.box {
+		border: 1px solid #ccc;
 		border-radius: 4px;
 		overflow: hidden;
-	}
-
-	.header {
-		width: 100%;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	/* Content Panel */
-	.content {
-		padding: 1rem;
-		border: 1px solid #ccc;
-		border-top: none;
-		border-radius: 0 0 4px 4px;
+		cursor: auto;
 	}
 
 	.btn {
-		padding: 0.75rem;
-		border: 1px solid #ccc;
-		border-radius: 4px;
+		border: none;
+		background: none;
 		font-size: 1rem;
+		padding: 0.1rem 0.4rem;
 		font-family: inherit;
-		transition: all 0.3s ease;
+		color: var(--color-spartan-green);
+		cursor: pointer;
+		line-height: 1;
+	}
+
+	.content {
+		padding: 1rem;
+		border-top: 1px solid #ccc;
 	}
 </style>

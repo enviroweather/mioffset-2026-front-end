@@ -1,14 +1,14 @@
 <script>
 	// --- Imports ---
 	import { onMount, onDestroy } from "svelte";
-	import {
-		appState,
-		entries,
-	} from "$lib/stores/appState.svelte.js";
+	import { appState, entries } from "$lib/stores/appState.svelte.js";
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
 	import {
 		DEFAULT_LAT,
 		DEFAULT_LNG,
+		LANDMARK_ZOOM,
+		MAX_ZOOM,
+		MIN_ZOOM,
 	} from "$lib/stores/defaultValues.svelte.js";
 	import LocationSelection from "./LocationSelection.svelte";
 	import { createFootprintSVG, placeOverlay } from "$lib/utils/mapOverlay.js";
@@ -19,7 +19,7 @@
 	let L = $state();
 	let mapContainer = $state();
 	let map = $state();
-	// Non-reactive — managed manually to avoid effect loops
+	// Non-reactive - managed manually to avoid effect loops
 	let marker;
 	let overlayEl;
 	let svgOverlay;
@@ -28,60 +28,74 @@
 	onMount(async () => {
 		L = (await import("leaflet")).default;
 		await import("leaflet/dist/leaflet.css");
+		initMap();
+		registerMapEvents();
+	});
 
+	onDestroy(() => map?.remove());
+
+	function initMap() {
+		const michiganBounds = L.latLngBounds(L.latLng(41.7, -90.5), L.latLng(48.3, -82.4));
+		map = L.map(mapContainer, {
+			minZoom: MIN_ZOOM,
+			maxZoom: MAX_ZOOM,
+			maxBounds: michiganBounds,
+			maxBoundsViscosity: 1.0,
+		});
+		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+		}).addTo(map);
+		map.fitBounds(michiganBounds);
+		// Prevent the location overlay from panning/zooming the map underneath it
 		L.DomEvent.disableClickPropagation(overlayEl);
 		L.DomEvent.disableScrollPropagation(overlayEl);
-		map = L.map(mapContainer).setView([DEFAULT_LAT, DEFAULT_LNG], 200);
+	}
 
-		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-			attribution:
-				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-			maxZoom: 18,
-		}).addTo(map);
-
+	function registerMapEvents() {
 		map.on("click", (e) => {
-			let { lat, lng } = e.latlng;
+			const { lat, lng } = e.latlng;
 			appState.location.lat = lat;
 			appState.location.lng = lng;
 			appState.location.hasSelection = true;
 			onLocationSelect({ lat, lng });
+			if (appState.location.zoom === MIN_ZOOM)
+				map.setView({ lat, lng }, LANDMARK_ZOOM);
 		});
-	});
-
-	onDestroy(() => {
-		map?.remove();
-	});
-
-	// --- Effects ---
-	$effect(() => {
-		if (!mapContainer || !map) return;
-
-		const observer = new ResizeObserver(() => {
-			map.invalidateSize();
+		map.on("zoom", () => {
+			appState.location.zoom = map.getZoom();
 		});
+	}
 
-		observer.observe(mapContainer);
-		return () => observer.disconnect();
-	});
-
-	// --- SVG Overlay ---
+	// --- SVG Overlay helpers ---
 	function showSVGOverlay() {
 		if (!L || !map || !appState.location.hasSelection) return;
 		if (svgOverlay) map.removeLayer(svgOverlay);
 		svgOverlay = placeOverlay(L, map, createFootprintSVG(), appState.location.lat, appState.location.lng);
 	}
 
-	function removeSVGOverlay() {
-		if (!L || !map || !appState.location.hasSelection) return;
-		if (svgOverlay) map.removeLayer(svgOverlay);
+	function clearSVGOverlay() {
+		if (!svgOverlay) return;
+		map.removeLayer(svgOverlay);
+		svgOverlay = null;
 	}
-	// Show overlay when results are calculated
+
+	// --- Effects ---
+
+	// Keep map sized correctly when its container resizes
 	$effect(() => {
-		if (appState.mapIsUpToDate) showSVGOverlay();
-		if (!appState.mapIsUpToDate) removeSVGOverlay();
+		if (!mapContainer || !map) return;
+		const observer = new ResizeObserver(() => map.invalidateSize());
+		observer.observe(mapContainer);
+		return () => observer.disconnect();
 	});
 
-	// Mark map stale when entries or location change
+	// Show/hide SVG footprint based on whether results are up to date
+	$effect(() => {
+		if (appState.mapIsUpToDate) showSVGOverlay();
+		else clearSVGOverlay();
+	});
+
+	// Mark results stale whenever entries or the selected location change
 	$effect(() => {
 		void entries.length;
 		void appState.location.lat;
@@ -89,35 +103,24 @@
 		appState.mapIsUpToDate = false;
 	});
 
-	// Sync current (in-progress) marker with appState
+	// Sync the in-progress marker position and icon with appState
 	$effect(() => {
 		if (!L || !map) return;
 
 		if (!appState.location.hasSelection) {
-			if (marker) {
-				marker.remove();
-				marker = null;
-			}
-			if (svgOverlay) {
-				map.removeLayer(svgOverlay);
-				svgOverlay = null;
-			}
+			marker?.remove(); marker = null;
+			clearSVGOverlay();
 			map.setView([DEFAULT_LAT, DEFAULT_LNG]);
 			return;
 		}
 
-		const lat = appState.location.lat;
-		const lng = appState.location.lng;
+		const { lat, lng } = appState.location;
 		const defaultIcon = appState.mapIsUpToDate ? "default-fresh" : "default";
 		const iconKey = currentSpecies !== "default" ? currentSpecies : defaultIcon;
 		const icon = L.icon(mapIcons[iconKey] ?? mapIcons["default"]);
 
-		if (marker) {
-			marker.setLatLng({ lat, lng });
-			marker.setIcon(icon);
-		} else {
-			marker = L.marker({ lat, lng }, { icon }).addTo(map);
-		}
+		if (marker) { marker.setLatLng({ lat, lng }); marker.setIcon(icon); }
+		else marker = L.marker({ lat, lng }, { icon }).addTo(map);
 		map.setView({ lat, lng });
 	});
 </script>
@@ -144,8 +147,8 @@
 	/* Location Overlay */
 	.overlay {
 		position: absolute;
-		bottom: 1rem;
-		left: 1rem;
+		top: 1rem;
+		right: 1rem;
 		z-index: 1000; /* must be above Leaflet's panes */
 		background: white;
 		border: 1px solid var(--color-kelly-green);

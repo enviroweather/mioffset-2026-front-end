@@ -8,6 +8,7 @@
 		DEFAULT_LAT,
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
+	import CollapsibleButton from "../common/CollapsibleButton.svelte";
 
 	// --- State ---
 	let noResults = $state(false);
@@ -55,32 +56,36 @@
 	});
 </script>
 
-<!-- Address Search Row -->
-{#if noResults}
-	<LocationUnknown></LocationUnknown>
-{/if}
-<div class="address-wrapper">
-	<Address {handleSubmit} />
-	<div class="form-actions">
-		<label class="spacer" for="spacing">&nbsp;</label>
-		<button type="submit" class="btn btn-primary" onclick={handleSubmit}
-			>Search</button
-		>
-	</div>
-</div>
-<!-- Manual Coords & Reset -->
-<div class="local-footer-wrapper">
-	<div class="latlng-wrapper">
-		<ManualCoords />
-	</div>
-	<div class="form-actions">
-		<label class="spacer" for="spacing">&nbsp;</label>
-		<div class="button-row">
-			<button type="reset" class="btn btn-secondary" onclick={handleReset}
-				>Reset</button
-			>
+<div class="collapse-wrapper">
+	<CollapsibleButton>
+		<!-- Address Search Row -->
+		{#if noResults}
+			<LocationUnknown></LocationUnknown>
+		{/if}
+		<div class="address-wrapper">
+			<Address {handleSubmit} />
+			<div class="form-actions">
+				<label class="spacer" for="spacing">&nbsp;</label>
+				<button type="submit" class="btn btn-primary" onclick={handleSubmit}
+					>Search</button
+				>
+			</div>
 		</div>
-	</div>
+		<!-- Manual Coords & Reset -->
+		<div class="local-footer-wrapper">
+			<div class="latlng-wrapper">
+				<ManualCoords />
+			</div>
+			<div class="form-actions">
+				<label class="spacer" for="spacing">&nbsp;</label>
+				<div class="button-row">
+					<button type="reset" class="btn btn-secondary" onclick={handleReset}
+						>Reset</button
+					>
+				</div>
+			</div>
+		</div>
+	</CollapsibleButton>
 </div>
 
 <!-- </CollapsibleButton> -->
