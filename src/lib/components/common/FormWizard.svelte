@@ -18,11 +18,6 @@
 		),
 	);
 
-	function handleSubmit(e) {
-		e.preventDefault();
-		onSubmit();
-	}
-
 	function handleReset() {
 		for (let step of steps) {
 			if (step.type === "select") {
@@ -35,7 +30,7 @@
 </script>
 
 <section>
-	<form onsubmit={handleSubmit} onreset={handleReset}>
+	<form onsubmit={(e) => { e.preventDefault(); onSubmit(formState); }} onreset={handleReset}>
 		<!-- Form Steps -->
 		{#each steps as step, index}
 			<fieldset>

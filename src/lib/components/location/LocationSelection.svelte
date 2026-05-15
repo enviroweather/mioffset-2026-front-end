@@ -62,7 +62,7 @@
 <div class="address-wrapper">
 	<Address {handleSubmit} />
 	<div class="form-actions">
-		<label class="spacer">&nbsp;</label>
+		<label class="spacer" for="spacing">&nbsp;</label>
 		<button type="submit" class="btn btn-primary" onclick={handleSubmit}
 			>Search</button
 		>
@@ -74,7 +74,7 @@
 		<ManualCoords />
 	</div>
 	<div class="form-actions">
-		<label class="spacer">&nbsp;</label>
+		<label class="spacer" for="spacing">&nbsp;</label>
 		<div class="button-row">
 			<button type="reset" class="btn btn-secondary" onclick={handleReset}
 				>Reset</button
@@ -157,11 +157,5 @@
 
 	.btn-secondary:active {
 		background-color: #6c7a7b;
-	}
-
-	.no-results {
-		margin: 0.25rem 0 0;
-		font-size: 0.85rem;
-		color: #c0392b;
 	}
 </style>
