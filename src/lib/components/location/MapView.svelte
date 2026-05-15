@@ -23,6 +23,8 @@
 	let marker;
 	let overlayEl;
 	let svgOverlay;
+	let navigating = false;
+	let initialized = false;
 
 	// --- Lifecycle ---
 	onMount(async () => {
@@ -35,7 +37,10 @@
 	onDestroy(() => map?.remove());
 
 	function initMap() {
-		const michiganBounds = L.latLngBounds(L.latLng(41.7, -90.5), L.latLng(48.3, -82.4));
+		const michiganBounds = L.latLngBounds(
+			L.latLng(41.55, -90.5),
+			L.latLng(48.3, -82.4),
+		);
 		map = L.map(mapContainer, {
 			minZoom: MIN_ZOOM,
 			maxZoom: MAX_ZOOM,
@@ -43,9 +48,11 @@
 			maxBoundsViscosity: 1.0,
 		});
 		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+			attribution:
+				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 		}).addTo(map);
 		map.fitBounds(michiganBounds);
+		appState.location.zoom = map.getZoom(); // sync so MIN_ZOOM condition works on first click
 		// Prevent the location overlay from panning/zooming the map underneath it
 		L.DomEvent.disableClickPropagation(overlayEl);
 		L.DomEvent.disableScrollPropagation(overlayEl);
@@ -58,8 +65,6 @@
 			appState.location.lng = lng;
 			appState.location.hasSelection = true;
 			onLocationSelect({ lat, lng });
-			if (appState.location.zoom === MIN_ZOOM)
-				map.setView({ lat, lng }, LANDMARK_ZOOM);
 		});
 		map.on("zoom", () => {
 			appState.location.zoom = map.getZoom();
@@ -70,7 +75,13 @@
 	function showSVGOverlay() {
 		if (!L || !map || !appState.location.hasSelection) return;
 		if (svgOverlay) map.removeLayer(svgOverlay);
-		svgOverlay = placeOverlay(L, map, createFootprintSVG(), appState.location.lat, appState.location.lng);
+		svgOverlay = placeOverlay(
+			L,
+			map,
+			createFootprintSVG(),
+			appState.location.lat,
+			appState.location.lng,
+		);
 	}
 
 	function clearSVGOverlay() {
@@ -108,7 +119,8 @@
 		if (!L || !map) return;
 
 		if (!appState.location.hasSelection) {
-			marker?.remove(); marker = null;
+			marker?.remove();
+			marker = null;
 			clearSVGOverlay();
 			map.setView([DEFAULT_LAT, DEFAULT_LNG]);
 			return;
@@ -119,9 +131,20 @@
 		const iconKey = currentSpecies !== "default" ? currentSpecies : defaultIcon;
 		const icon = L.icon(mapIcons[iconKey] ?? mapIcons["default"]);
 
-		if (marker) { marker.setLatLng({ lat, lng }); marker.setIcon(icon); }
-		else marker = L.marker({ lat, lng }, { icon }).addTo(map);
-		map.setView({ lat, lng });
+		if (marker) {
+			marker.setLatLng({ lat, lng });
+			marker.setIcon(icon);
+		} else marker = L.marker({ lat, lng }, { icon }).addTo(map);
+
+		if (!initialized) { initialized = true; return; }
+		if (navigating) return;
+		if (appState.location.zoom === MIN_ZOOM) {
+			navigating = true;
+			map.flyTo({ lat, lng }, LANDMARK_ZOOM, { duration: 1.5 });
+			map.once("moveend", () => { navigating = false; });
+		} else {
+			map.panTo({ lat, lng });
+		}
 	});
 </script>
 
@@ -156,5 +179,7 @@
 		padding: 0.5rem;
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		max-width: 320px;
+		width: max-content;
 	}
 </style>
