@@ -134,28 +134,6 @@
 		font-size: 0.9rem;
 	}
 
-	.location-info {
-		display: flex;
-		align-items: baseline;
-		gap: 0.4rem;
-		font-size: 0.9rem;
-	}
-
-	.location-label {
-		font-weight: 600;
-		color: #555;
-	}
-
-	.location-value {
-		color: #2c3e50;
-	}
-
-	.location-coords {
-		color: #888;
-		font-size: 0.85rem;
-		font-variant-numeric: tabular-nums;
-	}
-
 	/* Submit Button */
 	.submission {
 		display: flex;

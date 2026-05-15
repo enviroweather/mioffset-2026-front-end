@@ -103,10 +103,6 @@
 		text-decoration: underline;
 	}
 
-	section {
-		margin-bottom: 2rem;
-	}
-
 	/* Responsive */
 	@media (max-width: 640px) {
 		.about-container {

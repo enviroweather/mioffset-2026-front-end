@@ -19,13 +19,14 @@ export async function GET({ url }) {
 			`https://${baseURL}/search/${apiVersion}/geocode/${encodeURIComponent(query)}.${ext}?key=${TOMTOM_API_KEY}`,
 			{ headers: { "User-Agent": "Enviroweather/1.0" } },
 		);
-		console.log(`https://${baseURL}/search/${apiVersion}/geocode/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}`);
+		console.log(
+			`https://${baseURL}/search/${apiVersion}/geocode/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}`,
+		);
 		if (!res.ok) {
 			throw new Error(`TomTom API failed with status ${res.status}`);
 		}
 
 		const data = await res.json();
-		console.log(data);
 		return json(data);
 	} catch (error) {
 		console.error("Geocoding error:", error);

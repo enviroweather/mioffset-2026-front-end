@@ -11,13 +11,16 @@
 
 	// --- Derived ---
 	let canSubmit = $derived(
-		steps.every(step => !step.required || (formState[step.key] !== '' && formState[step.key] != null))
+		steps.every(
+			(step) =>
+				!step.required ||
+				(formState[step.key] !== "" && formState[step.key] != null),
+		),
 	);
 
-	// --- Handlers ---
 	function handleSubmit(e) {
 		e.preventDefault();
-		onSubmit(formState);
+		onSubmit();
 	}
 
 	function handleReset() {
@@ -93,7 +96,9 @@
 			</div>
 			<!-- Form Actions -->
 			<div class="form-buttons">
-				<button type="submit" class="btn btn-primary" disabled={!canSubmit}>Submit Details</button>
+				<button type="submit" class="btn btn-primary" disabled={!canSubmit}
+					>Submit Details</button
+				>
 				<button type="reset" class="btn btn-secondary">Clear Form</button>
 			</div>
 		</div>
@@ -178,14 +183,6 @@
 		gap: 1rem;
 	}
 
-	.rate {
-		display: flex;
-		align-items: baseline;
-		gap: 0.4rem;
-		font-size: 0.95rem;
-		color: #2c3e50;
-	}
-
 	.rate-label {
 		font-weight: 500;
 		color: #555;
@@ -214,9 +211,9 @@
 		color: white;
 	}
 
-	.btn-primary:disabled{
+	.btn-primary:disabled {
 		opacity: 0.5;
-		cursor :not-allowed;
+		cursor: not-allowed;
 	}
 	.btn-primary:hover:not(:disabled) {
 		background-color: #008934;
@@ -245,14 +242,6 @@
 
 	/* Responsive */
 	@media (max-width: 640px) {
-		.form-wrapper {
-			padding: 1.5rem 1rem;
-		}
-
-		.form-header h2 {
-			font-size: 1.25rem;
-		}
-
 		.form-actions {
 			flex-direction: column;
 			justify-content: stretch;

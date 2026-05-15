@@ -1,12 +1,10 @@
 <script>
 	// --- Imports ---
-	import showLocationUnknown from "$lib/components/location/LocationUnknown.svelte"
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import {
 		DEFAULT_LAT,
 		DEFAULT_LNG,
 	} from "$lib/stores/defaultValues.svelte.js";
-
 
 	// --- Props ---
 	let {
@@ -17,19 +15,12 @@
 		handleSubmit
 	} = $props();
 
-	// --- State ---
-	let suggestions = $state([]);
-
 	function handleReset() {
 		appState.location.address = "";
 		appState.location.lat = DEFAULT_LAT;
 		appState.location.lng = DEFAULT_LNG;
 	}
 
-	// --- Effects ---
-	$effect(() => {
-		console.log(suggestions);
-	});
 </script>
 
 <section class="form-wrapper">
@@ -39,7 +30,6 @@
 			<input
 				id="address"
 				name="address"
-				list="suggestions"
 				placeholder="673 Auditorium Rd, East Lansing, MI 48824"
 				bind:value={appState.location.address}
 			/>
@@ -89,11 +79,6 @@
 	input::-webkit-inner-spin-button {
 		-webkit-appearance: none;
 		margin: 0;
-	}
-
-	/* Firefox */
-	input[type="number"] {
-		-moz-appearance: textfield;
 	}
 
 	/* Focus & Hover */

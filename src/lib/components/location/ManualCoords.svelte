@@ -2,7 +2,7 @@
 	// --- Imports ---
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
-
+	let { handleSubmit } = $props();
 	// --- State ---
 	let latFocused = $state(true);
 	let lngFocused = $state(true);
@@ -26,7 +26,7 @@
 </script>
 
 <section class="form-wrapper">
-	<form onsubmit={handleSubmit} onreset={handleReset}>
+	<form onsubmit={(e) => e.preventDefault()}>
 		<div class="coord-row">
 			<div class="form-group">
 				<label for="latitude">Latitude</label>
