@@ -4,7 +4,7 @@ import { DEFAULT_LOCATION, DEFAULT_ODOR } from "./defaultValues.svelte.js";
 export const appState = $state({
   location: { ...DEFAULT_LOCATION },
   odor: { ...DEFAULT_ODOR },
-  mapIsUpToDate: true,
+  mapIsUpToDate: false,
 });
 
 export const entries = $state([]);
