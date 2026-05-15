@@ -29,7 +29,7 @@ export function createFootprintSVG() {
     const ns = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('xmlns', ns);
-    svg.setAttribute('viewBox', '-1.05 -1.05 2.1 2.1');
+    svg.setAttribute('viewBox', '-1.15 -1.15 2.3 2.3');
     // none — lets Leaflet stretch the SVG to match the geographic bounds exactly
     svg.setAttribute('preserveAspectRatio', 'none');
 
@@ -47,7 +47,7 @@ export function createFootprintSVG() {
         text.setAttribute('x', '0');
         text.setAttribute('y', String(-(r + 0.04)));
         text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('font-size', '0.07');
+        text.setAttribute('font-size', '0.05');
         text.setAttribute('fill', 'rgba(44, 62, 80, 0.85)');
         text.setAttribute('stroke', 'white');
         text.setAttribute('stroke-width', '0.015');

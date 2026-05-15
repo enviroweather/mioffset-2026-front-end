@@ -1,6 +1,6 @@
 <script>
 	// --- Imports ---
-	import { appState, entries } from "$lib/stores/appState.svelte.js";
+	import { appState, entries, saveCurrentLocation } from "$lib/stores/appState.svelte.js";
 	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
 
 	// --- Actions ---
@@ -31,7 +31,7 @@
 				>
 			</div>
 			<div class="submission">
-				<button>Show Results</button>
+				<button class="btn-results" onclick={saveCurrentLocation}>Show Results</button>
 			</div>
 		</div>
 		<!-- Data Table -->
@@ -160,17 +160,28 @@
 	.submission {
 		display: flex;
 		margin-left: auto;
-		margin-right: 0;
 	}
-	.submission button {
-		padding: 0.5rem;
+	.btn-results {
+		padding: 0.5rem 1rem;
 		border: none;
 		border-radius: 4px;
 		font-size: 1rem;
 		font-weight: 600;
 		cursor: pointer;
+		background-color: var(--color-kelly-green);
+		color: white;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
 		transition: all 0.3s ease;
-		margin-top: auto;
+	}
+	.btn-results:hover {
+		background-color: #008934;
+		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+		transform: scaleX(1.03);
+	}
+	.btn-results:active {
+		background-color: #008934;
+		transform: translateY(1px);
 	}
 	/* Table */
 	.table-wrapper {

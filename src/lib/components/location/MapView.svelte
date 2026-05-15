@@ -1,7 +1,7 @@
 <script>
 	// --- Imports ---
 	import { onMount, onDestroy } from "svelte";
-	import { appState } from "$lib/stores/appState.svelte.js";
+	import { appState, savedLocations } from "$lib/stores/appState.svelte.js";
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
 	import {
 		DEFAULT_LAT,
@@ -20,6 +20,7 @@
 	let marker;
 	let overlayEl;
 	let svgOverlay;
+	let savedMarkers = [];
 
 	// --- Lifecycle ---
 	onMount(async () => {
@@ -42,9 +43,24 @@
 			appState.location.lng = lng;
 			appState.location.hasSelection = true;
 			onLocationSelect({ lat, lng });
+			if(svgOverlay)
+				map.removeLayer(svgOverlay);
+			svgOverlay = placeOverlay(
+				L,
+				map,
+				createFootprintSVG(),
+				appState.location.lat,
+				appState.location.lng,
+			);
 		});
 
-		svgOverlay = placeOverlay(L, map, createFootprintSVG(), appState.location.lat, appState.location.lng);
+		// svgOverlay = placeOverlay(
+		// 	L,
+		// 	map,
+		// 	createFootprintSVG(),
+		// 	appState.location.lat,
+		// 	appState.location.lng,
+		// );
 	});
 
 	onDestroy(() => {
@@ -63,6 +79,19 @@
 		return () => observer.disconnect();
 	});
 
+	// Add a permanent marker for each saved location
+	$effect(() => {
+		if (!L || !map) return;
+		for (let i = savedMarkers.length; i < savedLocations.length; i++) {
+			const loc = savedLocations[i];
+			const icon = L.icon(mapIcons["default"]);
+			const m = L.marker([loc.lat, loc.lng], { icon })
+				.bindTooltip(`Total OEF: ${loc.totalOEF.toFixed(2)}`, { sticky: true })
+				.addTo(map);
+			savedMarkers.push(m);
+		}
+	});
+
 	// Sync current (in-progress) marker with appState
 	$effect(() => {
 		if (!L || !map) return;
@@ -71,6 +100,10 @@
 			if (marker) {
 				marker.remove();
 				marker = null;
+			}
+			if (svgOverlay) {
+				map.removeLayer(svgOverlay);
+				svgOverlay = placeOverlay(L, map, createFootprintSVG(), DEFAULT_LAT, DEFAULT_LNG);
 			}
 			map.setView([DEFAULT_LAT, DEFAULT_LNG]);
 			return;
