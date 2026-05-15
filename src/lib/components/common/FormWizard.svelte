@@ -92,7 +92,7 @@
 			<!-- Form Actions -->
 			<div class="form-buttons">
 				<button type="submit" class="btn btn-primary" disabled={!canSubmit}
-					>Submit Details</button
+					>Update Site</button
 				>
 				<button type="reset" class="btn btn-secondary">Clear Form</button>
 			</div>

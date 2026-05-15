@@ -5,6 +5,11 @@ export const mapIcons = $state({
 		iconSize: [30, 40],
 		iconAnchor: [15, 40],
 	},
+	"default-fresh": {
+		iconUrl: "marker-blue.svg",
+		iconSize: [30, 40],
+		iconAnchor: [15, 40],
+	},
 	"Cattle": {
 		iconUrl: "cattle.png",
 		iconSize: [77, 50],

@@ -1,7 +1,11 @@
 <script>
 	// --- Imports ---
 	import { onMount, onDestroy } from "svelte";
-	import { appState, savedLocations } from "$lib/stores/appState.svelte.js";
+	import {
+		appState,
+		entries,
+		savedLocations,
+	} from "$lib/stores/appState.svelte.js";
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
 	import {
 		DEFAULT_LAT,
@@ -43,8 +47,7 @@
 			appState.location.lng = lng;
 			appState.location.hasSelection = true;
 			onLocationSelect({ lat, lng });
-			if(svgOverlay)
-				map.removeLayer(svgOverlay);
+			if (svgOverlay) map.removeLayer(svgOverlay);
 			svgOverlay = placeOverlay(
 				L,
 				map,
@@ -53,14 +56,6 @@
 				appState.location.lng,
 			);
 		});
-
-		// svgOverlay = placeOverlay(
-		// 	L,
-		// 	map,
-		// 	createFootprintSVG(),
-		// 	appState.location.lat,
-		// 	appState.location.lng,
-		// );
 	});
 
 	onDestroy(() => {
@@ -79,18 +74,27 @@
 		return () => observer.disconnect();
 	});
 
-	// Add a permanent marker for each saved location
+	// Mark map stale when entries or location change
 	$effect(() => {
-		if (!L || !map) return;
-		for (let i = savedMarkers.length; i < savedLocations.length; i++) {
-			const loc = savedLocations[i];
-			const icon = L.icon(mapIcons["default"]);
-			const m = L.marker([loc.lat, loc.lng], { icon })
-				.bindTooltip(`Total OEF: ${loc.totalOEF.toFixed(2)}`, { sticky: true })
-				.addTo(map);
-			savedMarkers.push(m);
-		}
+		void entries.length;
+		void appState.location.lat;
+		void appState.location.lng;
+		appState.mapIsUpToDate = false;
 	});
+
+	// Add a permanent marker for each saved location
+	// $effect(() => {
+	// 	if (!L || !map) return;
+	// 	for (let i = savedMarkers.length; i < savedLocations.length; i++) {
+	// 		const loc = savedLocations[i];
+	// 		const defaultIcon = appState.mapIsUpToDate ? "default-fresh" : "default";
+	// 		const icon = L.icon(mapIcons[defaultIcon]);
+	// 		const m = L.marker([loc.lat, loc.lng], { icon })
+	// 			.bindTooltip(`Total OEF: ${loc.totalOEF.toFixed(2)}`, { sticky: true })
+	// 			.addTo(map);
+	// 		savedMarkers.push(m);
+	// 	}
+	// });
 
 	// Sync current (in-progress) marker with appState
 	$effect(() => {
@@ -103,7 +107,13 @@
 			}
 			if (svgOverlay) {
 				map.removeLayer(svgOverlay);
-				svgOverlay = placeOverlay(L, map, createFootprintSVG(), DEFAULT_LAT, DEFAULT_LNG);
+				svgOverlay = placeOverlay(
+					L,
+					map,
+					createFootprintSVG(),
+					DEFAULT_LAT,
+					DEFAULT_LNG,
+				);
 			}
 			map.setView([DEFAULT_LAT, DEFAULT_LNG]);
 			return;
@@ -111,7 +121,9 @@
 
 		const lat = appState.location.lat;
 		const lng = appState.location.lng;
-		const icon = L.icon(mapIcons[currentSpecies] ?? mapIcons["default"]);
+		const defaultIcon = appState.mapIsUpToDate ? "default-fresh" : "default";
+		const iconKey = currentSpecies !== "default" ? currentSpecies : defaultIcon;
+		const icon = L.icon(mapIcons[iconKey] ?? mapIcons["default"]);
 
 		if (marker) {
 			marker.setLatLng({ lat, lng });
@@ -141,6 +153,7 @@
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
+
 	/* Location Overlay */
 	.overlay {
 		position: absolute;

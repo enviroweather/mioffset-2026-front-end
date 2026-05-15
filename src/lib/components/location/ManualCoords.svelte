@@ -119,9 +119,10 @@
 		margin: 0;
 	}
 
-	/* Firefox */
 	input[type="number"] {
+		-webkit-appearance: textfield;
 		-moz-appearance: textfield;
+		appearance: textfield;
 	}
 
 	/* Focus & Hover */

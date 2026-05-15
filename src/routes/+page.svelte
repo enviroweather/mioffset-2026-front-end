@@ -4,6 +4,10 @@
 	import OdorForm from "$lib/components/odor/OdorForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 </script>
+<!-- Entries -->
+<div class="entries-container">
+	<EntriesTable />
+</div>
 
 <!-- Odor & Map -->
 <div class="page-container">
@@ -15,10 +19,6 @@
 	</section>
 </div>
 
-<!-- Entries -->
-<div class="entries-container">
-	<EntriesTable />
-</div>
 
 <style>
 	/* allow for font weight resizing on chrome */
