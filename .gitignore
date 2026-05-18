@@ -24,4 +24,4 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 # Testing
-static/test_kml_file.kml
+#static/test_kml_file.kml
