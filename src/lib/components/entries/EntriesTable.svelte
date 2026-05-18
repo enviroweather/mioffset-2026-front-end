@@ -7,7 +7,8 @@
 	} from "$lib/stores/appState.svelte.js";
 
 	// --- Actions ---
-	function removeEntry(i) {
+	function removeEntry(e, i) {
+		e.stopPropagation();
 		entries.splice(i, 1);
 	}
 
@@ -83,7 +84,7 @@
 							<td class="remove-cell">
 								<button
 									class="remove-btn"
-									onclick={() => removeEntry(i)}
+									onclick={(e) => removeEntry(e, i)}
 									aria-label="Remove entry">×</button
 								>
 							</td>

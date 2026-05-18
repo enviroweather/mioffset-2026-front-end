@@ -127,8 +127,6 @@
 				address: appState.location.address,
 			},
 		});
-		console.log("odor form submitted");
-		console.log(formData)
 		resetAppState();
 	}
 
