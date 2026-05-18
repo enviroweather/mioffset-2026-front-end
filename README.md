@@ -1,65 +1,102 @@
-# Svelte library
+# MI Offset – Odor Dispersion Map
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+MI Offset is a web application that calculates how far odor will travel based on site details and wind patterns. This repo is the front-end interface. See the About page within the app for more details.
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
+**Tech stack:**
+- [SvelteKit 2](https://svelte.dev/docs/kit) + [Svelte 5](https://svelte.dev) (runes mode)
+- [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/) interactive map - tiles
+- [TomTom Search API](https://developer.tomtom.com/) - address geocoding
+- [Vercel](https://vercel.com/pricing)
+- TypeScript, Vite
 
-## Creating a project
+**Deployment:** Uses the native `adapter-auto` with Vercel. The app contains server-side routes, so it requires Vercel's serverless setup - in its current state it cannot be hosted on a purely static file host (like github pages).
 
-If you're seeing this, you've probably already done this step. Congrats!
+---
 
-```sh
-# create a new project in the current directory
-npx sv create
+## Requirements
 
-# create a new project in my-app
-npx sv create my-app
-```
+- **[Node.js 22+](https://nodejs.org/en/download)**
+- **[pnpm](https://pnpm.io/installation)**
+- **[TomTom Developer account](https://developer.tomtom.com/)** with an API key
+  - Register → keys → API & SDK Keys → Copy the API key
+- **[Vercel account](https://vercel.com/)** (Needed for deployment only)
 
-To recreate this project with the same configuration:
+---
 
-```sh
-# recreate this project
-pnpm dlx sv@0.15.1 create --template library --no-types --install pnpm MIOffset_BetaAI_Site
-```
+## Getting Started
+
+1. Clone the repo
+2. Create a `.env` file in the project root:
+
+   ```sh
+   TOMTOM_API_KEY="your_key_here"
+   baseURL="api.tomtom.com"
+   apiVersion=2
+   ```
+
+   Never commit `.env` - it is already in `.gitignore`.
+
+3. Install dependencies:
+
+   ```sh
+   pnpm install
+   ```
+
+---
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+No build step needed before running the dev server:
 
 ```sh
-npm run dev
+pnpm dev
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+# or open the app in a new browser tab automatically:
+pnpm dev -- --open
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+---
 
 ## Building
 
-To build your library:
+Build a production version of the app:
 
 ```sh
-npm pack
+pnpm build
 ```
 
-To create a production version of your showcase app:
+Preview the production build locally before deploying:
 
 ```sh
-npm run build
+pnpm preview
 ```
 
-You can preview the production build with `npm run preview`.
+---
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Deploying to Vercel
 
-## Publishing
+1. Push the repo to GitHub
+2. Import the repo in the [Vercel dashboard](https://vercel.com/new)
+3. In the Vercel project settings under **Environment Variables**, add all four variables from the `.env` file above
+4. Open Settings → Build And Deployment
+5. Override install command, replace with `pnpm install`
+6. Deploy - Vercel detects SvelteKit via `adapter-auto` and configures automatically
+7. Subsequent pushes to `main` redeploy automatically with the same environment variables
 
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
+Alternatively, you could deploy via the [Vercel CLI](https://vercel.com/docs/cli):
 
 ```sh
-npm publish
+vercel deploy
 ```
+
+---
+
+## Free Tier Limits
+
+This project relies on services with free tier usage limits:
+
+| Service | Free Tier Limit | Details |
+|---|---|---|
+| TomTom Search API | 2,500 daily transactions | [developer.tomtom.com/pricing](https://developer.tomtom.com/pricing) |
+| OpenStreetMap Tiles | No key required. Heavy usage violates the usage policy. | [OSM Tile Usage Policy](https://operations.osmfoundation.org/policies/tiles/) |
+| Vercel Hobby Plan | 100 GB bandwidth/month, limited serverless invocations | [vercel.com/pricing](https://vercel.com/pricing) |
