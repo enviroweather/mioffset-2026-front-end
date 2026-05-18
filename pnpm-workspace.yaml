@@ -1,4 +1,4 @@
 allowBuilds:
-  node: set this to true or false
+  node: true
 onlyBuiltDependencies:
   - esbuild

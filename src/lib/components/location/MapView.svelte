@@ -11,7 +11,7 @@
 		MIN_ZOOM,
 	} from "$lib/stores/defaultValues.svelte.js";
 	import LocationSelection from "./LocationSelection.svelte";
-	import { createFootprintSVG, placeOverlay } from "$lib/utils/mapOverlay.js";
+	import { renderKML } from "$lib/utils/mapOverlay.js";
 
 	// --- Props & State ---
 	let { onLocationSelect = () => {} } = $props();
@@ -22,7 +22,7 @@
 	// Non-reactive - managed manually to avoid effect loops
 	let marker;
 	let overlayEl;
-	let svgOverlay;
+	let kmlLayer;
 	let navigating = false;
 	let initialized = false;
 
@@ -71,23 +71,15 @@
 		});
 	}
 
-	// --- SVG Overlay helpers ---
-	function showSVGOverlay() {
-		if (!L || !map || !appState.location.hasSelection) return;
-		if (svgOverlay) map.removeLayer(svgOverlay);
-		svgOverlay = placeOverlay(
-			L,
-			map,
-			createFootprintSVG(),
-			appState.location.lat,
-			appState.location.lng,
-		);
+	async function showKMLLayer() {
+		clearKMLLayer();
+		kmlLayer = await renderKML(map, '/test_kml_file.kml');
 	}
 
-	function clearSVGOverlay() {
-		if (!svgOverlay) return;
-		map.removeLayer(svgOverlay);
-		svgOverlay = null;
+	function clearKMLLayer() {
+		if (!kmlLayer) return;
+		map.removeLayer(kmlLayer);
+		kmlLayer = null;
 	}
 
 	// --- Effects ---
@@ -100,10 +92,10 @@
 		return () => observer.disconnect();
 	});
 
-	// Show/hide SVG footprint based on whether results are up to date
+	// Show/hide KML layer based on whether results are up to date
 	$effect(() => {
-		if (appState.mapIsUpToDate) showSVGOverlay();
-		else clearSVGOverlay();
+		if (appState.mapIsUpToDate) showKMLLayer();
+		else clearKMLLayer();
 	});
 
 	// Mark results stale whenever entries or the selected location change
@@ -111,6 +103,7 @@
 		void entries.length;
 		void appState.location.lat;
 		void appState.location.lng;
+		// void JSON.stringify(appState.odor); // invalidate map upon the odor form change, unsure if this is good
 		appState.mapIsUpToDate = false;
 	});
 
@@ -121,7 +114,7 @@
 		if (!appState.location.hasSelection) {
 			marker?.remove();
 			marker = null;
-			clearSVGOverlay();
+			clearKMLLayer();
 			map.setView([DEFAULT_LAT, DEFAULT_LNG]);
 			return;
 		}

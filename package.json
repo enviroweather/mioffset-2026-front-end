@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@vercel/analytics": "^2.0.1",
 		"leaflet": "^1.9.4",
+		"leaflet-kml": "^1.0.1",
 		"node": "^22.22.3",
 		"type": "^2.7.3"
 	}
