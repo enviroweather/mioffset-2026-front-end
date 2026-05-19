@@ -99,14 +99,6 @@
 					{
 						"type": "Feature",
 						"geometry": {
-							"type": "Point",
-							"coordinates": [-84.23689, 43.14319]
-						},
-						"properties": { "name": "Odor source", "odor_emission_factor": 10 }
-					},
-					{
-						"type": "Feature",
-						"geometry": {
 							"type": "Polygon",
 							"coordinates": [
 								[
