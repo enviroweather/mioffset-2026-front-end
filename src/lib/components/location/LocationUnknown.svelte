@@ -1,19 +1,19 @@
 <script>
 	import { appState } from "$lib/stores/appState.svelte.js";
-	let hide = $state(false);
+	let visible = $state(true);
 
 	function handleClose() {
-		hide = true;
+		visible = false;
 	}
 
-	// allows the error to be shown again after change
+	// re-show when the address changes so the user can retry
 	$effect(() => {
 		appState.location.address;
-		hide = false;
+		visible = true;
 	});
 </script>
 
-{#if !hide}
+{#if visible}
 	<div class="error-wrapper">
 		<button class="hide-error" onclick={handleClose}><b>X</b></button>
 		<span class="error-message">Address not found. Please try again</span>

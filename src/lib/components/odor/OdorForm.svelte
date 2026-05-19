@@ -5,12 +5,12 @@
 	import FormWizard from "../common/FormWizard.svelte";
 
 	// --- Dropdown Options ---
-	let animalTypes = $derived(
+	let animalTypeOptions = $derived(
 		appState.odor.species
 			? Object.keys(data.SPECIES[appState.odor.species]?.animalTypes || {})
 			: [],
 	);
-	let housingTypes = $derived(
+	let housingTypeOptions = $derived(
 		appState.odor.animalType && appState.odor.species
 			? Object.keys(
 					data.SPECIES[appState.odor.species]?.animalTypes[
@@ -64,7 +64,7 @@
 			label: "Animal Type:",
 			legend: "Select Animal Type",
 			type: "select",
-			options: animalTypes.map((type) => ({ value: type, text: type })),
+			options: animalTypeOptions.map((type) => ({ value: type, text: type })),
 			required: true,
 			disabled: (state) => !state.species,
 			condition: (state) => state.species !== "",
@@ -74,7 +74,7 @@
 			label: "Housing Type:",
 			legend: "Select Housing Type",
 			type: "select",
-			options: housingTypes.map((housing) => ({
+			options: housingTypeOptions.map((housing) => ({
 				value: housing,
 				text: housing,
 			})),
@@ -131,19 +131,15 @@
 	}
 
 	// --- Effects ---
-	// Resets upon animal invalid animal type upon change
-	$effect(() => {
-		if (!animalTypes.includes(appState.odor.animalType)) {
-			appState.odor.animalType = "";
-		}
-	});
-	// reset invalid housing type upon change
-	$effect(() => {
-		if (!housingTypes.includes(appState.odor.housingType)) {
-			appState.odor.housingType = "";
-		}
-	});
+	function resetIfInvalid(options, key) {
+		if (!options.includes(appState.odor[key])) appState.odor[key] = "";
+	}
 
+	// when species/animalType changes, the previously selected child value may no longer be valid
+	$effect(() => resetIfInvalid(animalTypeOptions, "animalType"));
+	$effect(() => resetIfInvalid(housingTypeOptions, "housingType"));
+
+	// keep appState in sync so handleOdorSubmit captures the computed values at submit time
 	$effect(() => {
 		appState.odor.oenRate = oenRate;
 		appState.odor.odorControlFactor = odorControlFactor;

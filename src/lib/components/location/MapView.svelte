@@ -1,6 +1,6 @@
 <script>
 	// --- Imports ---
-	import { onMount, onDestroy } from "svelte";
+	import { onMount, onDestroy, untrack } from "svelte";
 	import { appState, entries } from "$lib/stores/appState.svelte.js";
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
 	import {
@@ -19,6 +19,7 @@
 	let L = $state();
 	let mapContainer = $state();
 	let map = $state();
+
 	// Non-reactive - managed manually to avoid effect loops
 	let marker;
 	let overlayEl;
@@ -45,14 +46,15 @@
 			minZoom: MIN_ZOOM,
 			maxZoom: MAX_ZOOM,
 			maxBounds: michiganBounds,
-			maxBoundsViscosity: 1.0,
+			maxBoundsViscosity: 1.0, // 1.0 = fully rigid boundary, no rubber-band when panning to the edge
 		});
 		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 			attribution:
 				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 		}).addTo(map);
 		map.fitBounds(michiganBounds);
-		appState.location.zoom = map.getZoom(); // sync so MIN_ZOOM condition works on first click
+		appState.location.zoom = map.getZoom(); // sync so first click zooms in
+
 		// Prevent the location overlay from panning/zooming the map underneath it
 		L.DomEvent.disableClickPropagation(overlayEl);
 		L.DomEvent.disableScrollPropagation(overlayEl);
@@ -71,9 +73,11 @@
 		});
 	}
 
+	// --- KML Layer ---
+
 	async function showKMLLayer() {
 		clearKMLLayer();
-		kmlLayer = await renderKML(map, '/test_kml_file.kml');
+		kmlLayer = await renderKML(map, "/test_kml_file.kml");
 	}
 
 	function clearKMLLayer() {
@@ -82,9 +86,47 @@
 		kmlLayer = null;
 	}
 
+	// --- Marker ---
+
+	function resetToDefaultView() {
+		marker?.remove();
+		marker = null;
+		clearKMLLayer();
+		map.setView([DEFAULT_LAT, DEFAULT_LNG]);
+	}
+
+	function resolveMarkerIcon() {
+		const freshness = appState.mapIsUpToDate ? "default-fresh" : "default";
+		const key = currentSpecies !== "default" ? currentSpecies : freshness;
+		return L.icon(mapIcons[key] ?? mapIcons["default"]);
+	}
+
+	function placeOrUpdateMarker(lat, lng, icon) {
+		if (marker) {
+			marker.setLatLng({ lat, lng });
+			marker.setIcon(icon);
+		} else {
+			marker = L.marker({ lat, lng }, { icon }).addTo(map);
+		}
+	}
+
+	function navigateToLocation(lat, lng) {
+		if (navigating) return;
+		// untrack: read zoom without creating a dependency - zoom changes shouldn't re-trigger this effect
+		if (untrack(() => appState.location.zoom) === MIN_ZOOM) {
+			navigating = true;
+			map.flyTo({ lat, lng }, LANDMARK_ZOOM, { duration: 1.5 });
+			map.once("moveend", () => {
+				navigating = false;
+			});
+		} else {
+			map.panTo({ lat, lng });
+		}
+	}
+
 	// --- Effects ---
 
-	// Keep map sized correctly when its container resizes
+	// Keep map div sized correctly upon container resize
 	$effect(() => {
 		if (!mapContainer || !map) return;
 		const observer = new ResizeObserver(() => map.invalidateSize());
@@ -100,44 +142,30 @@
 
 	// Mark results stale whenever entries or the selected location change
 	$effect(() => {
+		// touch these to subscribe - Svelte tracks reads inside $effect
 		void entries.length;
 		void appState.location.lat;
 		void appState.location.lng;
-		// void JSON.stringify(appState.odor); // invalidate map upon the odor form change, unsure if this is good
 		appState.mapIsUpToDate = false;
 	});
 
-	// Sync the in-progress marker position and icon with appState
+	// Sync marker position, icon, and camera with appState
 	$effect(() => {
 		if (!L || !map) return;
-
 		if (!appState.location.hasSelection) {
-			marker?.remove();
-			marker = null;
-			clearKMLLayer();
-			map.setView([DEFAULT_LAT, DEFAULT_LNG]);
+			resetToDefaultView();
 			return;
 		}
 
 		const { lat, lng } = appState.location;
-		const defaultIcon = appState.mapIsUpToDate ? "default-fresh" : "default";
-		const iconKey = currentSpecies !== "default" ? currentSpecies : defaultIcon;
-		const icon = L.icon(mapIcons[iconKey] ?? mapIcons["default"]);
+		placeOrUpdateMarker(lat, lng, resolveMarkerIcon());
 
-		if (marker) {
-			marker.setLatLng({ lat, lng });
-			marker.setIcon(icon);
-		} else marker = L.marker({ lat, lng }, { icon }).addTo(map);
-
-		if (!initialized) { initialized = true; return; }
-		if (navigating) return;
-		if (appState.location.zoom === MIN_ZOOM) {
-			navigating = true;
-			map.flyTo({ lat, lng }, LANDMARK_ZOOM, { duration: 1.5 });
-			map.once("moveend", () => { navigating = false; });
-		} else {
-			map.panTo({ lat, lng });
+		// skip navigation on first placement - marker was just set
+		if (!initialized) {
+			initialized = true;
+			return;
 		}
+		navigateToLocation(lat, lng);
 	});
 </script>
 
@@ -145,7 +173,7 @@
 <div bind:this={mapContainer} class="map">
 	<!-- Location Overlay -->
 	<div class="overlay" bind:this={overlayEl}>
-		<LocationSelection></LocationSelection>
+		<LocationSelection />
 	</div>
 </div>
 

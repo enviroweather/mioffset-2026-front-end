@@ -1,19 +1,8 @@
 <script>
 	// --- Imports ---
 	import { appState } from "$lib/stores/appState.svelte.js";
-	import {
-		DEFAULT_LAT,
-		DEFAULT_LNG,
-	} from "$lib/stores/defaultValues.svelte.js";
-
 	// --- Props ---
-	let {
-		locationCoordinates = $bindable({
-			latitude: DEFAULT_LAT,
-			longitude: DEFAULT_LNG,
-		}),
-		handleSubmit
-	} = $props();
+	let { handleSubmit } = $props();
 
 	function handleReset() {
 		appState.location.address = "";

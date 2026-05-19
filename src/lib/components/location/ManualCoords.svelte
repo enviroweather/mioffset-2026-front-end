@@ -2,12 +2,16 @@
 	// --- Imports ---
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
-	let { handleSubmit } = $props();
+
+	function parseCoordInput(value) {
+		return value === "" ? null : Number(value);
+	}
 	// --- State ---
-	let latFocused = $state(true);
-	let lngFocused = $state(true);
+	let latFocused = $state(false);
+	let lngFocused = $state(false);
 
 	// --- Display Derived ---
+	// show full precision when focused so user can edit exact value; truncate when blurred for readability
 	let latDisplay = $derived(
 		latFocused
 			? (appState.location.lat ?? "")
@@ -15,7 +19,6 @@
 				? Number(appState.location.lat).toFixed(LATLNG_PRECISION)
 				: "",
 	);
-
 	let lngDisplay = $derived(
 		lngFocused
 			? (appState.location.lng ?? "")
@@ -36,7 +39,7 @@
 					value={latDisplay}
 					oninput={(e) => {
 						const v = e.currentTarget.value;
-						appState.location.lat = v === "" ? null : Number(v);
+						appState.location.lat = parseCoordInput(v);
 						if (v !== "") appState.location.hasSelection = true;
 					}}
 					onfocus={() => (latFocused = true)}
@@ -56,7 +59,7 @@
 					value={lngDisplay}
 					oninput={(e) => {
 						const v = e.currentTarget.value;
-						appState.location.lng = v === "" ? null : Number(v);
+						appState.location.lng = parseCoordInput(v);
 						if (v !== "") appState.location.hasSelection = true;
 					}}
 					onfocus={() => (lngFocused = true)}

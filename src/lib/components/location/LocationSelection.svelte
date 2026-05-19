@@ -38,6 +38,7 @@
 			}
 		} catch (error) {
 			console.error("Geocoding error:", error);
+			noResults = true;
 		}
 	}
 
@@ -50,6 +51,7 @@
 		noResults = false;
 	}
 
+	// subscribe to address changes to clear the no-results state
 	$effect(() => {
 		appState.location.address;
 		noResults = false;
@@ -60,7 +62,7 @@
 	<CollapsibleButton>
 		<!-- Address Search Row -->
 		{#if noResults}
-			<LocationUnknown></LocationUnknown>
+			<LocationUnknown />
 		{/if}
 		<div class="address-wrapper">
 			<Address {handleSubmit} />
@@ -87,8 +89,6 @@
 		</div>
 	</CollapsibleButton>
 </div>
-
-<!-- </CollapsibleButton> -->
 
 <style>
 	/* Layout */

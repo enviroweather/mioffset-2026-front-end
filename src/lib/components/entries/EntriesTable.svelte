@@ -8,7 +8,7 @@
 
 	// --- Actions ---
 	function removeEntry(e, i) {
-		e.stopPropagation();
+		e.stopPropagation(); // prevent row's "restoreEntry" onclick from also firing
 		entries.splice(i, 1);
 	}
 
@@ -17,95 +17,91 @@
 		entries.reduce((sum, e) => sum + (e.odor.totalEmission ?? 0), 0),
 	);
 
-	function loadPreviousForm(odorData, index) {
+	function restoreEntry(odorData, index) {
 		appState.odor = odorData;
 		entries.splice(index, 1);
 	}
 </script>
 
-{#if true}
-	<section class="entries-section">
-		<!-- Section Header -->
-		<div class="entries-header">
-			<div class="header-left">
-				<h2>Submitted Entries</h2>
-				<span class="entry-count"
-					>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span
-				>
-			</div>
+<section class="entries-section">
+	<!-- Section Header -->
+	<div class="entries-header">
+		<div class="header-left">
+			<h2>Submitted Entries</h2>
+			<span class="entry-count"
+				>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span
+			>
 		</div>
-		<!-- Data Table -->
-		<div class="table-wrapper">
-			<table>
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Species</th>
-						<th>Animal Type</th>
-						<th>Housing Type</th>
-						<th>Technology</th>
-						<th>Area (sq ft)</th>
-						<th>Odor Emission Rate</th>
-						<th>Odor Control Factor</th>
-						<th>Total Odor Emission</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each entries as entry, i}
-						<tr
-							onclick={() => {
-								loadPreviousForm(entry.odor, i);
-							}}
+	</div>
+	<!-- Data Table -->
+	<div class="table-wrapper">
+		<table>
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Species</th>
+					<th>Animal Type</th>
+					<th>Housing Type</th>
+					<th>Technology</th>
+					<th>Area (sq ft)</th>
+					<th>Odor Emission Rate</th>
+					<th>Odor Control Factor</th>
+					<th>Total Odor Emission</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each entries as entry, i}
+					<tr
+						onclick={() => restoreEntry(entry.odor, i)}
+					>
+						<td class="entry-num">{i + 1}</td>
+						<td>{entry.odor.species || "-"}</td>
+						<td>{entry.odor.animalType || "-"}</td>
+						<td>{entry.odor.housingType || "-"}</td>
+						<td>{entry.odor.technology || "-"}</td>
+						<td
+							>{entry.odor.area != null && entry.odor.area !== ""
+								? entry.odor.area
+								: "-"}</td
 						>
-							<td class="entry-num">{i + 1}</td>
-							<td>{entry.odor.species || "-"}</td>
-							<td>{entry.odor.animalType || "-"}</td>
-							<td>{entry.odor.housingType || "-"}</td>
-							<td>{entry.odor.technology || "-"}</td>
-							<td
-								>{entry.odor.area != null && entry.odor.area !== ""
-									? entry.odor.area
-									: "-"}</td
+						<td class="numeric"
+							>{entry.odor.oenRate != null ? entry.odor.oenRate : "-"}</td
+						>
+						<td class="numeric"
+							>{entry.odor.odorControlFactor != null
+								? entry.odor.odorControlFactor
+								: "-"}</td
+						>
+						<td class="numeric"
+							>{entry.odor.totalEmission != null
+								? entry.odor.totalEmission.toFixed(2)
+								: "-"}</td
+						>
+						<td class="remove-cell">
+							<button
+								class="remove-btn"
+								onclick={(e) => removeEntry(e, i)}
+								aria-label="Remove entry">×</button
 							>
-							<td class="numeric"
-								>{entry.odor.oenRate != null ? entry.odor.oenRate : "-"}</td
-							>
-							<td class="numeric"
-								>{entry.odor.odorControlFactor != null
-									? entry.odor.odorControlFactor
-									: "-"}</td
-							>
-							<td class="numeric"
-								>{entry.odor.totalEmission != null
-									? entry.odor.totalEmission.toFixed(2)
-									: "-"}</td
-							>
-							<td class="remove-cell">
-								<button
-									class="remove-btn"
-									onclick={(e) => removeEntry(e, i)}
-									aria-label="Remove entry">×</button
-								>
-							</td>
-						</tr>
-					{/each}
-					<tr class="total-row">
-						<td>
-							<div class="submission-btn">
-								<button class="btn-results" onclick={calculateResults}
-									>Show Results</button
-								>
-							</div>
 						</td>
-						<td colspan="8"></td>
-						<td class="numeric total-value">{totalOEF.toFixed(2)}</td>
 					</tr>
-				</tbody>
-			</table>
-		</div>
-	</section>
-{/if}
+				{/each}
+				<tr class="total-row">
+					<td>
+						<div class="submission-btn">
+							<button class="btn-results" onclick={calculateResults}
+								>Show Results</button
+							>
+						</div>
+					</td>
+					<td colspan="8"></td>
+					<td class="numeric total-value">{totalOEF.toFixed(2)}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</section>
 
 <style>
 	/* Header */
@@ -201,6 +197,10 @@
 		padding: 0.6rem 0.75rem;
 		border-bottom: 1px solid #eee;
 		color: #333;
+	}
+
+	tbody tr:not(.total-row) {
+		cursor: pointer;
 	}
 
 	tbody tr:hover:not(.total-row) {

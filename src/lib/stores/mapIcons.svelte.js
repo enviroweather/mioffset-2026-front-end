@@ -1,4 +1,5 @@
 // --- Icon Definitions ---
+// PascalCase keys ("Cattle", "Swine", "Poultry") match appState.odor.species values from the form.
 export const mapIcons = $state({
 	"default": {
 		iconUrl: "marker.svg",
