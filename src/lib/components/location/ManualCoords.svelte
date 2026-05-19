@@ -40,7 +40,6 @@
 					oninput={(e) => {
 						const v = e.currentTarget.value;
 						appState.location.lat = parseCoordInput(v);
-						if (v !== "") appState.location.hasSelection = true;
 					}}
 					onfocus={() => (latFocused = true)}
 					onblur={() => (latFocused = false)}
@@ -60,7 +59,6 @@
 					oninput={(e) => {
 						const v = e.currentTarget.value;
 						appState.location.lng = parseCoordInput(v);
-						if (v !== "") appState.location.hasSelection = true;
 					}}
 					onfocus={() => (lngFocused = true)}
 					onblur={() => (lngFocused = false)}

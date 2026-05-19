@@ -1,20 +1,25 @@
 <script>
 	// --- Imports ---
-	import data from "$lib/data.json" with { type: "json" };
-	import { appState, entries, resetAppState } from "$lib/stores/appState.svelte.js";
+	import data from "$lib/data/animalData.json" with { type: "json" };
+	import {
+		appState,
+		entries,
+		resetAppState,
+	} from "$lib/stores/appState.svelte.js";
+	import { CalculateOdorControlFactor } from "$lib/utils/OdorEmissionFactor.js";
 	import FormWizard from "../common/FormWizard.svelte";
 
 	// --- Dropdown Options ---
 	let animalTypeOptions = $derived(
-		appState.odor.species
-			? Object.keys(data.SPECIES[appState.odor.species]?.animalTypes || {})
+		appState.emission.species
+			? Object.keys(data.SPECIES[appState.emission.species]?.animalTypes || {})
 			: [],
 	);
 	let housingTypeOptions = $derived(
-		appState.odor.animalType && appState.odor.species
+		appState.emission.animalType && appState.emission.species
 			? Object.keys(
-					data.SPECIES[appState.odor.species]?.animalTypes[
-						appState.odor.animalType
+					data.SPECIES[appState.emission.species]?.animalTypes[
+						appState.emission.animalType
 					]?.housingType || {},
 				)
 			: [],
@@ -23,28 +28,27 @@
 
 	// --- Emission Calculations ---
 	let oenRate = $derived(
-		appState.odor.species &&
-			appState.odor.animalType &&
-			appState.odor.housingType
-			? (data.SPECIES[appState.odor.species]?.animalTypes[
-					appState.odor.animalType
-				]?.housingType[appState.odor.housingType]?.oen_rate ?? null)
+		appState.emission.species &&
+			appState.emission.animalType &&
+			appState.emission.housingType
+			? (data.SPECIES[appState.emission.species]?.animalTypes[
+					appState.emission.animalType
+				]?.housingType[appState.emission.housingType]?.oen_rate ?? null)
 			: null,
 	);
 
 	let odorControlFactor = $derived(
-		appState.odor.technology
-			? data.TECH[appState.odor.technology].odorControlFactor
+		appState.emission.technology
+			? data.TECH[appState.emission.technology].odorControlFactor
 			: null,
 	);
 
-	// E = (oenRate × odorControlFactor × area) / 10000
-	// Equation taken from legacy code
-	// area in sq ft, odorControlFactor is transmission fraction (1.0 for no technology)
 	let totalEmission = $derived(
-		oenRate != null && odorControlFactor != null && appState.odor.area != null && appState.odor.area !== ''
-			? (oenRate * odorControlFactor * Number(appState.odor.area)) / 10000
-			: null,
+		CalculateOdorControlFactor(
+			oenRate,
+			odorControlFactor,
+			appState.emission.area,
+		),
 	);
 	// --- Form Step Config ---
 	const odorSteps = $derived([
@@ -132,7 +136,7 @@
 
 	// --- Effects ---
 	function resetIfInvalid(options, key) {
-		if (!options.includes(appState.odor[key])) appState.odor[key] = "";
+		if (!options.includes(appState.emission[key])) appState.emission[key] = "";
 	}
 
 	// when species/animalType changes, the previously selected child value may no longer be valid
@@ -141,52 +145,17 @@
 
 	// keep appState in sync so handleOdorSubmit captures the computed values at submit time
 	$effect(() => {
-		appState.odor.oenRate = oenRate;
-		appState.odor.odorControlFactor = odorControlFactor;
-		appState.odor.totalEmission = totalEmission;
+		appState.emission.oenRate = oenRate;
+		appState.emission.odorControlFactor = odorControlFactor;
+		appState.emission.totalEmission = totalEmission;
 	});
 </script>
 
-<section class="odor-section">
-	<div class="form-header">
-		<h2>Odor Emission Calculator</h2>
-		<p>Enter details about animal units and waste storage</p>
-	</div>
-	<FormWizard
-		steps={odorSteps}
-		bind:formState={appState.odor}
-		{oenRate}
-		{odorControlFactor}
-		{totalEmission}
-		onSubmit={handleOdorSubmit}
-	/>
-</section>
-
-<style>
-	/* Section Wrapper */
-	.odor-section {
-		background: white;
-		padding: 1rem;
-		border-radius: 8px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	/* Form Header */
-	.form-header {
-		margin-bottom: 2rem;
-		border-bottom: 2px solid #4caf50;
-		padding-bottom: 1rem;
-	}
-
-	.form-header h2 {
-		margin: 0 0 0.5rem 0;
-		color: #2c3e50;
-		font-size: 1.5rem;
-	}
-
-	.form-header p {
-		margin: 0;
-		color: #666;
-		font-size: 0.95rem;
-	}
-</style>
+<FormWizard
+	steps={odorSteps}
+	bind:formState={appState.emission}
+	{oenRate}
+	{odorControlFactor}
+	{totalEmission}
+	onSubmit={handleOdorSubmit}
+/>

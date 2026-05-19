@@ -13,23 +13,22 @@ export const LANDMARK_ZOOM = 12;
 export const LATLNG_PRECISION = 3;
 // --- Default Location ---
 export const DEFAULT_LOCATION = {
-  lat: DEFAULT_LAT,
-  lng: DEFAULT_LNG,
-  zoom: MIN_ZOOM,
-  address: '',
-  mode: 'address',
-  hasSelection: true,
+	lat: DEFAULT_LAT,
+	lng: DEFAULT_LNG,
+	zoom: MIN_ZOOM,
+	address: "",
+	mode: "address",
 };
 
 // --- Default Odor ---
-export const DEFAULT_ODOR = {
-  species: '',
-  animalType: '',
-  housingType: '',
-  technology: '',
-  area: '',
-  oenRate: null,
-  odorControlFactor: null,
-  totalEmission: null,
+export const DEFAULT_EMISSION = {
+	species: "",
+	animalType: "",
+	housingType: "",
+	technology: "",
+	area: "",
+	storageType: "",
+	oenRate: null,
+	odorControlFactor: null,
+	totalEmission: null,
 };
-

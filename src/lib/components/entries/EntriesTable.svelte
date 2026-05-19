@@ -18,7 +18,7 @@
 	);
 
 	function restoreEntry(odorData, index) {
-		appState.odor = odorData;
+		appState.emission = odorData;
 		entries.splice(index, 1);
 	}
 </script>
@@ -42,6 +42,7 @@
 					<th>Species</th>
 					<th>Animal Type</th>
 					<th>Housing Type</th>
+					<th>Storage Type</th>
 					<th>Technology</th>
 					<th>Area (sq ft)</th>
 					<th>Odor Emission Rate</th>
@@ -52,13 +53,12 @@
 			</thead>
 			<tbody>
 				{#each entries as entry, i}
-					<tr
-						onclick={() => restoreEntry(entry.odor, i)}
-					>
+					<tr onclick={() => restoreEntry(entry.odor, i)}>
 						<td class="entry-num">{i + 1}</td>
 						<td>{entry.odor.species || "-"}</td>
 						<td>{entry.odor.animalType || "-"}</td>
 						<td>{entry.odor.housingType || "-"}</td>
+						<td>{entry.odor.storageType || "-"}</td>
 						<td>{entry.odor.technology || "-"}</td>
 						<td
 							>{entry.odor.area != null && entry.odor.area !== ""
@@ -97,6 +97,7 @@
 					</td>
 					<td colspan="8"></td>
 					<td class="numeric total-value">{totalOEF.toFixed(2)}</td>
+					<td></td>
 				</tr>
 			</tbody>
 		</table>

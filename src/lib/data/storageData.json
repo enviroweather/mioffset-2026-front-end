@@ -1,0 +1,29 @@
+{
+	"STORAGE": {
+		"Concrete Tank": {
+			"key": "Concrete Tank",
+			"display": "Concrete Tank Above or Below Ground",
+			"oen_rate": 28
+		},
+		"Crusted Manure Stockpile": {
+			"key": "Crusted Manure Stockpile",
+			"display": "Crusted Solid Manure Stockpile",
+			"oen_rate": 2
+		},
+		"Multi Earthen Basin": {
+			"key": "Multi Earthen Basin",
+			"display": "Earthen Basin, Multiple Cells",
+			"oen_rate": 13
+		},
+		"Single Earthen Basin": {
+			"key": "Single Earthen Basin",
+			"display": "Earthen Basin, Single Cells",
+			"oen_rate": 13
+		},
+		"Steel Tank": {
+			"key": "Steel Tank",
+			"display": "Steel Tank Above or Below Ground",
+			"oen_rate": 28
+		}
+	}
+}

@@ -1,9 +1,7 @@
 <script>
 	// --- Imports ---
 	import MapView from "$lib/components/location/MapView.svelte";
-	import OdorForm from "$lib/components/odor/OdorForm.svelte";
-	import StorageForm from "$lib/components/odor/StorageForm.svelte";
-	import ManualForm from "$lib/components/odor/ManualForm.svelte";
+	import EmissionForm from "$lib/components/emission/EmissionForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 </script>
 
@@ -12,7 +10,7 @@
 		<EntriesTable />
 	</div>
 	<section class="section odor-wrapper">
-		<OdorForm />
+		<EmissionForm />
 	</section>
 
 	<section class="section location-wrapper">

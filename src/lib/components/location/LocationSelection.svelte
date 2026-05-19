@@ -32,7 +32,6 @@
 			if (results.length > 0) {
 				appState.location.lat = parseFloat(results[0].position.lat);
 				appState.location.lng = parseFloat(results[0].position.lon);
-				appState.location.hasSelection = true;
 			} else {
 				noResults = true;
 			}
@@ -47,7 +46,6 @@
 		appState.location.lat = DEFAULT_LAT;
 		appState.location.lng = DEFAULT_LNG;
 		appState.location.address = "";
-		appState.location.hasSelection = true;
 		noResults = false;
 	}
 

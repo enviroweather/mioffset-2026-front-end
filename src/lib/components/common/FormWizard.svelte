@@ -30,8 +30,14 @@
 </script>
 
 <section>
-	<form onsubmit={(e) => { e.preventDefault(); onSubmit(formState); }} onreset={handleReset}>
-		<!-- Form Steps -->
+	<form
+		onsubmit={(e) => {
+			e.preventDefault();
+			onSubmit(formState);
+		}}
+		onreset={handleReset}
+	>
+		<!-- Display Form Steps -->
 		{#each steps as step, index}
 			<fieldset>
 				<legend

@@ -4,8 +4,6 @@
 	import { appState, entries } from "$lib/stores/appState.svelte.js";
 	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
 	import {
-		DEFAULT_LAT,
-		DEFAULT_LNG,
 		LANDMARK_ZOOM,
 		MAX_ZOOM,
 		MIN_ZOOM,
@@ -15,7 +13,7 @@
 
 	// --- Props & State ---
 	let { onLocationSelect = () => {} } = $props();
-	let currentSpecies = $derived(appState.odor.species || "default");
+	let currentSpecies = $derived(appState.emission.species || "default");
 	let L = $state();
 	let mapContainer = $state();
 	let map = $state();
@@ -65,7 +63,6 @@
 			const { lat, lng } = e.latlng;
 			appState.location.lat = lat;
 			appState.location.lng = lng;
-			appState.location.hasSelection = true;
 			onLocationSelect({ lat, lng });
 		});
 		map.on("zoom", () => {
@@ -88,13 +85,6 @@
 
 	// --- Marker ---
 
-	function resetToDefaultView() {
-		marker?.remove();
-		marker = null;
-		clearKMLLayer();
-		map.setView([DEFAULT_LAT, DEFAULT_LNG]);
-	}
-
 	function resolveMarkerIcon() {
 		const freshness = appState.mapIsUpToDate ? "default-fresh" : "default";
 		const key = currentSpecies !== "default" ? currentSpecies : freshness;
@@ -112,8 +102,9 @@
 
 	function navigateToLocation(lat, lng) {
 		if (navigating) return;
-		// untrack: read zoom without creating a dependency - zoom changes shouldn't re-trigger this effect
-		if (untrack(() => appState.location.zoom) === MIN_ZOOM) {
+		// untrack: reads zoom without creating an effect dependency - changes in zoom shouldn't run the effect
+		let zoom = untrack(() => appState.location.zoom);
+		if (zoom === MIN_ZOOM) {
 			navigating = true;
 			map.flyTo({ lat, lng }, LANDMARK_ZOOM, { duration: 1.5 });
 			map.once("moveend", () => {
@@ -152,11 +143,6 @@
 	// Sync marker position, icon, and camera with appState
 	$effect(() => {
 		if (!L || !map) return;
-		if (!appState.location.hasSelection) {
-			resetToDefaultView();
-			return;
-		}
-
 		const { lat, lng } = appState.location;
 		placeOrUpdateMarker(lat, lng, resolveMarkerIcon());
 
@@ -181,9 +167,9 @@
 	/* Map Container */
 	.map {
 		width: 100%;
+		min-height: 700px;
 		height: 100%;
 		position: relative;
-		min-height: 450px;
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
