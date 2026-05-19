@@ -4,8 +4,13 @@
 // export const DEFAULT_LAT = 44.347418;
 // export const DEFAULT_LNG = -85.410177;
 // -- MSU Geography Building --
-export const DEFAULT_LAT = 42.729256;
-export const DEFAULT_LNG = -84.472938;
+// export const DEFAULT_LAT = 42.729256;
+// export const DEFAULT_LNG = -84.472938;
+
+// TODO: GEOJSON TESTING VARIABLES, REMOVE
+export const DEFAULT_LAT = 43.14319;
+export const DEFAULT_LNG = -84.23689;
+
 export const DEFAULT_ZOOM = 6.5;
 export const MIN_ZOOM = 7;
 export const MAX_ZOOM = 18;

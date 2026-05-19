@@ -6,7 +6,7 @@
 	import {
 		appState,
 		entries,
-		resetAppState,
+		resetFormState,
 	} from "$lib/stores/appState.svelte.js";
 	import { CalculateOdorControlFactor } from "$lib/utils/OdorEmissionFactor.js";
 
@@ -87,7 +87,7 @@
 				address: appState.location.address,
 			},
 		});
-		resetAppState();
+		resetFormState();
 	}
 
 	// --- Effects ---

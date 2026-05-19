@@ -3,13 +3,17 @@
 	import {
 		appState,
 		entries,
-		resetAppState,
+		resetFormState,
 	} from "$lib/stores/appState.svelte.js";
 	import FormWizard from "../common/FormWizard.svelte";
+
+	// --- Local Form State (isolated from appState.emission.totalEmission) ---
+	let manualFormState = $state({ manualEmission: null });
+
 	// --- Form Step Config ---
-	const manualSteps = $derived([
+	const manualSteps = [
 		{
-			key: "totalEmission",
+			key: "manualEmission",
 			label: "Odor Emission Factor:",
 			legend: "Enter OEF",
 			type: "number",
@@ -19,16 +23,13 @@
 			helpText: "Total Odor Emission Factor (OEF) for This Site",
 			required: true,
 		},
-	]);
-
-	// --- Emission Binding ---
-	let totalEmission = $derived(appState.emission.totalEmission);
+	];
 
 	// --- Submit Handler ---
 	function handleOdorSubmit(formData) {
 		entries.push({
 			odor: {
-				totalEmission: totalEmission,
+				totalEmission: formData.manualEmission,
 			},
 			location: {
 				lat: appState.location.lat,
@@ -36,19 +37,13 @@
 				address: appState.location.address,
 			},
 		});
-		resetAppState();
+		manualFormState.manualEmission = null;
+		resetFormState();
 	}
-
-	// keep appState in sync so handleOdorSubmit captures the computed values at submit time
-	$effect(() => {
-		appState.emission.totalEmission = totalEmission;
-		console.log("total emission updated")
-	});
 </script>
 
 <FormWizard
 	steps={manualSteps}
-	bind:formState={appState.emission}
-  {totalEmission}
+	bind:formState={manualFormState}
 	onSubmit={handleOdorSubmit}
 />

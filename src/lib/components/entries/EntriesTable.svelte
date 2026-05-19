@@ -3,7 +3,7 @@
 	import {
 		appState,
 		entries,
-		calculateResults,
+		representResults,
 	} from "$lib/stores/appState.svelte.js";
 
 	// --- Actions ---
@@ -21,6 +21,11 @@
 		appState.emission = odorData;
 		entries.splice(index, 1);
 	}
+
+	// --- Effects ---
+	$effect(() => {
+		appState.emission.totalEmission = totalOEF;
+	});
 </script>
 
 <section class="entries-section">
@@ -90,7 +95,7 @@
 				<tr class="total-row">
 					<td>
 						<div class="submission-btn">
-							<button class="btn-results" onclick={calculateResults}
+							<button class="btn-results" onclick={representResults}
 								>Show Results</button
 							>
 						</div>

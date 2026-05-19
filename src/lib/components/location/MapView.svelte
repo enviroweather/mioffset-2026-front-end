@@ -9,19 +9,20 @@
 		MIN_ZOOM,
 	} from "$lib/stores/defaultValues.svelte.js";
 	import LocationSelection from "./LocationSelection.svelte";
-	import { renderKML } from "$lib/utils/mapOverlay.js";
+	import { renderGEOJSON } from "$lib/utils/mapRenderLayers.js";
 
 	// --- Props & State ---
 	let { onLocationSelect = () => {} } = $props();
 	let currentSpecies = $derived(appState.emission.species || "default");
-	let L = $state();
-	let mapContainer = $state();
-	let map = $state();
+	let L = $state.raw(null);
+	let mapContainer = $state(null);
+	let map = $state.raw(null);
 
 	// Non-reactive - managed manually to avoid effect loops
 	let marker;
 	let overlayEl;
 	let kmlLayer;
+	let geoJSONLayer;
 	let navigating = false;
 	let initialized = false;
 
@@ -83,6 +84,18 @@
 		kmlLayer = null;
 	}
 
+	// --- GEOJSON Layer ---
+	async function showGeoJSONLayer() {
+		clearGeoJSONLayer();
+		geoJSONLayer = await renderGEOJSON(map, "/example_fod_geojson.json");
+	}
+
+	function clearGeoJSONLayer() {
+		if (!geoJSONLayer) return;
+		map.removeLayer(geoJSONLayer);
+		geoJSONLayer = null;
+	}
+
 	// --- Marker ---
 
 	function resolveMarkerIcon() {
@@ -127,8 +140,9 @@
 
 	// Show/hide KML layer based on whether results are up to date
 	$effect(() => {
-		if (appState.mapIsUpToDate) showKMLLayer();
-		else clearKMLLayer();
+		if (appState.mapIsUpToDate) {
+			showGeoJSONLayer();
+		} else clearGeoJSONLayer();
 	});
 
 	// Mark results stale whenever entries or the selected location change

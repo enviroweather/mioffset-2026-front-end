@@ -1,7 +1,7 @@
 <script>
 	import OdorForm from "./OdorForm.svelte";
 	import StorageForm from "./StorageForm.svelte";
-	import { resetAppState } from "$lib/stores/appState.svelte.js";
+	import { resetFormState } from "$lib/stores/appState.svelte.js";
 	import ManualForm from "./ManualForm.svelte";
 
 	let activeForm = $state("animal");
@@ -9,12 +9,12 @@
 	const subtitles = {
 		animal: "Enter details about animal units and waste storage",
 		storage: "Enter details about waste storage",
-		manual: "Enter your total Odor Emission Factor for this site"
+		manual: "Enter your total Odor Emission Factor for this site",
 	};
 
 	function switchForm(form) {
 		if (form === activeForm) return;
-		resetAppState();
+		resetFormState();
 		activeForm = form;
 	}
 </script>
@@ -40,11 +40,11 @@
 						Storage
 					</button>
 					<button
-					class="tab"
-					class:active={activeForm === "manual"}
-					onclick={() => switchForm("manual")}
+						class="tab"
+						class:active={activeForm === "manual"}
+						onclick={() => switchForm("manual")}
 					>
-					Manual
+						Manual
 					</button>
 				</div>
 			</div>
@@ -59,7 +59,7 @@
 		<StorageForm />
 	{/if}
 	{#if activeForm === "manual"}
-		<ManualForm/>
+		<ManualForm />
 	{/if}
 </div>
 
@@ -103,7 +103,7 @@
 
 	.form-tabs {
 		display: flex;
-    color: black;
+		color: black;
 		gap: 0.5rem;
 		align-self: center;
 	}
