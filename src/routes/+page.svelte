@@ -2,6 +2,8 @@
 	// --- Imports ---
 	import MapView from "$lib/components/location/MapView.svelte";
 	import OdorForm from "$lib/components/odor/OdorForm.svelte";
+	import StorageForm from "$lib/components/odor/StorageForm.svelte";
+	import ManualForm from "$lib/components/odor/ManualForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 </script>
 
@@ -26,11 +28,11 @@
 	/* Grid Layout */
 	.page-container {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 0.5fr 1fr;
 		grid-template-areas:
 			"entries entries"
 			"odor    map";
-		gap: 1rem;
+		gap: 0rem;
 	}
 
 	.section {
