@@ -2,6 +2,8 @@ import {
 	DEFAULT_LOCATION,
 	DEFAULT_EMISSION as DEFAULT_EMISSION,
 	LATLNG_PRECISION,
+	DEFAULT_LAT,
+	DEFAULT_LNG,
 } from "./defaultValues.svelte.js";
 
 // --- State ---
@@ -21,11 +23,16 @@ export function resetFormState() {
 // sample function that will call our API to get the shape file
 export async function representResults() {
 	let output = await fetchData();
-	if (verifyState(output.inputs.lat, output.inputs.lon, output.inputs.oef)) {
-		appState.mapIsUpToDate = true;
-	} else {
-		console.error("Failed to match API data to local setup, try again");
-	}
+	// TODO: Temp code to snap the location to the test geoJSON
+	appState.location.lat = output.inputs.lat
+	appState.location.lng = DEFAULT_LNG
+	appState.mapIsUpToDate = true;
+
+	// if (verifyState(output.inputs.lat, output.inputs.lon, output.inputs.oef)) {
+	// 	appState.mapIsUpToDate = true;
+	// } else {
+	// 	console.error("Failed to match API data to local setup, try again");
+	// }
 }
 
 async function fetchData(url = "example_fod_output.json") {
