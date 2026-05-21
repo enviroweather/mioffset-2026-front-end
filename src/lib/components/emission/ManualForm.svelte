@@ -7,9 +7,6 @@
 	} from "$lib/stores/appState.svelte.js";
 	import FormWizard from "../common/FormWizard.svelte";
 
-	// --- Local Form State (isolated from appState.emission.totalEmission) ---
-	let manualFormState = $state({ manualEmission: null });
-
 	// --- Form Step Config ---
 	const manualSteps = [
 		{
@@ -38,17 +35,16 @@
 			},
 			snapshot: {
 				location: { ...appState.location },
-				emission: { ...appState.emission },
+				formDraft: { ...appState.formDrafts.manual },
 				activeForm: appState.activeForm,
 			},
 		});
-		manualFormState.manualEmission = null;
 		resetFormState();
 	}
 </script>
 
 <FormWizard
 	steps={manualSteps}
-	bind:formState={manualFormState}
+	bind:formState={appState.formDrafts.manual}
 	onSubmit={handleOdorSubmit}
 />

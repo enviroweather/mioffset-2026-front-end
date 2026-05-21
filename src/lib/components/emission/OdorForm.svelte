@@ -11,15 +11,15 @@
 
 	// --- Dropdown Options ---
 	let animalTypeOptions = $derived(
-		appState.emission.species
-			? Object.keys(data.SPECIES[appState.emission.species]?.animalTypes || {})
+		appState.formDrafts.animal.species
+			? Object.keys(data.SPECIES[appState.formDrafts.animal.species]?.animalTypes || {})
 			: [],
 	);
 	let housingTypeOptions = $derived(
-		appState.emission.animalType && appState.emission.species
+		appState.formDrafts.animal.animalType && appState.formDrafts.animal.species
 			? Object.keys(
-					data.SPECIES[appState.emission.species]?.animalTypes[
-						appState.emission.animalType
+					data.SPECIES[appState.formDrafts.animal.species]?.animalTypes[
+						appState.formDrafts.animal.animalType
 					]?.housingType || {},
 				)
 			: [],
@@ -28,18 +28,18 @@
 
 	// --- Emission Calculations ---
 	let oenRate = $derived(
-		appState.emission.species &&
-			appState.emission.animalType &&
-			appState.emission.housingType
-			? (data.SPECIES[appState.emission.species]?.animalTypes[
-					appState.emission.animalType
-				]?.housingType[appState.emission.housingType]?.oen_rate ?? null)
+		appState.formDrafts.animal.species &&
+			appState.formDrafts.animal.animalType &&
+			appState.formDrafts.animal.housingType
+			? (data.SPECIES[appState.formDrafts.animal.species]?.animalTypes[
+					appState.formDrafts.animal.animalType
+				]?.housingType[appState.formDrafts.animal.housingType]?.oen_rate ?? null)
 			: null,
 	);
 
 	let odorControlFactor = $derived(
-		appState.emission.technology
-			? data.TECH[appState.emission.technology].odorControlFactor
+		appState.formDrafts.animal.technology
+			? data.TECH[appState.formDrafts.animal.technology].odorControlFactor
 			: null,
 	);
 
@@ -47,7 +47,7 @@
 		CalculateOdorControlFactor(
 			oenRate,
 			odorControlFactor,
-			appState.emission.area,
+			appState.formDrafts.animal.area,
 		),
 	);
 	// --- Form Step Config ---
@@ -132,7 +132,7 @@
 			},
 			snapshot: {
 				location: { ...appState.location },
-				emission: { ...appState.emission },
+				formDraft: { ...appState.formDrafts.animal },
 				activeForm: appState.activeForm,
 			},
 		});
@@ -141,24 +141,17 @@
 
 	// --- Effects ---
 	function resetIfInvalid(options, key) {
-		if (!options.includes(appState.emission[key])) appState.emission[key] = "";
+		if (!options.includes(appState.formDrafts.animal[key])) appState.formDrafts.animal[key] = "";
 	}
 
 	// when species/animalType changes, the previously selected child value may no longer be valid
 	$effect(() => resetIfInvalid(animalTypeOptions, "animalType"));
 	$effect(() => resetIfInvalid(housingTypeOptions, "housingType"));
-
-	// keep appState in sync so handleOdorSubmit captures the computed values at submit time
-	$effect(() => {
-		appState.emission.oenRate = oenRate;
-		appState.emission.odorControlFactor = odorControlFactor;
-		appState.emission.totalEmission = totalEmission;
-	});
 </script>
 
 <FormWizard
 	steps={odorSteps}
-	bind:formState={appState.emission}
+	bind:formState={appState.formDrafts.animal}
 	{oenRate}
 	{odorControlFactor}
 	{totalEmission}

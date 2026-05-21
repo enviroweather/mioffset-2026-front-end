@@ -14,14 +14,14 @@
 
 	// --- Emission Calculations ---
 	let oenRate = $derived(
-		appState.emission.storageType
-			? (storageData.STORAGE[appState.emission.storageType]?.oen_rate ?? null)
+		appState.formDrafts.storage.storageType
+			? (storageData.STORAGE[appState.formDrafts.storage.storageType]?.oen_rate ?? null)
 			: null,
 	);
 
 	let odorControlFactor = $derived(
-		appState.emission.technology
-			? animalData.TECH[appState.emission.technology]?.odorControlFactor
+		appState.formDrafts.storage.technology
+			? animalData.TECH[appState.formDrafts.storage.technology]?.odorControlFactor
 			: null,
 	);
 
@@ -29,7 +29,7 @@
 		CalculateOdorControlFactor(
 			oenRate,
 			odorControlFactor,
-			appState.emission.area,
+			appState.formDrafts.storage.area,
 		),
 	);
 
@@ -88,24 +88,17 @@
 			},
 			snapshot: {
 				location: { ...appState.location },
-				emission: { ...appState.emission },
+				formDraft: { ...appState.formDrafts.storage },
 				activeForm: appState.activeForm,
 			},
 		});
 		resetFormState();
 	}
-
-	// --- Effects ---
-	$effect(() => {
-		appState.emission.oenRate = oenRate;
-		appState.emission.odorControlFactor = odorControlFactor;
-		appState.emission.totalEmission = totalEmission;
-	});
 </script>
 
 <FormWizard
 	steps={storageSteps}
-	bind:formState={appState.emission}
+	bind:formState={appState.formDrafts.storage}
 	{oenRate}
 	{odorControlFactor}
 	{totalEmission}

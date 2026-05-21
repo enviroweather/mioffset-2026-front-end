@@ -1,15 +1,23 @@
 import {
 	DEFAULT_LOCATION,
 	DEFAULT_EMISSION as DEFAULT_EMISSION,
-	LATLNG_PRECISION,
-	DEFAULT_LAT,
-	DEFAULT_LNG,
 } from "./defaultValues.svelte.js";
+import { fetchResults } from "$lib/api/api.js";
+
+const DEFAULT_DRAFTS = {
+	animal: { ...DEFAULT_EMISSION },
+	storage: { ...DEFAULT_EMISSION },
+	manual: { manualEmission: null },
+};
 
 // --- State ---
 export const appState = $state({
 	location: { ...DEFAULT_LOCATION },
-	emission: { ...DEFAULT_EMISSION },
+	formDrafts: {
+		animal: { ...DEFAULT_EMISSION },
+		storage: { ...DEFAULT_EMISSION },
+		manual: { manualEmission: null },
+	},
 	geoJSONData: {},
 	activeForm: "animal",
 	mapIsUpToDate: false,
@@ -18,43 +26,15 @@ export const appState = $state({
 export const entries = $state([]);
 // --- Actions ---
 export function resetFormState() {
-	Object.assign(appState.emission, DEFAULT_EMISSION);
+	Object.assign(appState.formDrafts[appState.activeForm], DEFAULT_DRAFTS[appState.activeForm]);
 }
 
 // sample function that will call our API to get the shape file
 export async function representResults() {
-	let output = await fetchData();
+	const output = await fetchResults();
+	appState.geoJSONData = output;
 	// TODO: Temp code to snap the location to the test geoJSON
-	appState.location.lat = output.inputs.lat
-	appState.location.lng = DEFAULT_LNG
+	appState.location.lat = output.inputs.lat;
+	appState.location.lng = output.inputs.lng;
 	appState.mapIsUpToDate = true;
-
-	// if (verifyState(output.inputs.lat, output.inputs.lon, output.inputs.oef)) {
-	// 	appState.mapIsUpToDate = true;
-	// } else {
-	// 	console.error("Failed to match API data to local setup, try again");
-	// }
-}
-
-async function fetchData(url = "example_fod_output.json") {
-	// TODO: call API here, check that our current state (lat, lng, oef) matches result
-	const res = await fetch(url);
-	if (!res.ok)
-		throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
-	const data = await res.json();
-
-	appState.geoJSONData = data;
-	return data;
-}
-
-/*
- * Verifies that the local state and server geojson match
- */
-function verifyState(lat, lng, oef) {
-	let precision = LATLNG_PRECISION;
-	return (
-		appState.location.lat.toFixed(precision) === lat.toFixed(precision) &&
-		appState.location.lng.toFixed(precision) === lng.toFixed(precision) &&
-		appState.emission.totalEmission === oef
-	);
 }

@@ -19,15 +19,10 @@
 
 	function restoreEntry(entryData, index) {
 		Object.assign(appState.location, entryData.snapshot.location);
-		Object.assign(appState.emission, entryData.snapshot.emission);
+		Object.assign(appState.formDrafts[entryData.snapshot.activeForm], entryData.snapshot.formDraft);
 		appState.activeForm = entryData.snapshot.activeForm;
 		entries.splice(index, 1);
 	}
-
-	// --- Effects ---
-	$effect(() => {
-		appState.emission.totalEmission = totalOEF;
-	});
 </script>
 
 <section class="entries-section">

@@ -13,7 +13,7 @@
 
 	// --- Props & State ---
 	let { onLocationSelect = () => {} } = $props();
-	let currentSpecies = $derived(appState.emission.species || "default");
+	let currentSpecies = $derived(appState.formDrafts.animal.species || "default");
 	let L = $state.raw(null);
 	let mapContainer = $state(null);
 	let map = $state.raw(null);

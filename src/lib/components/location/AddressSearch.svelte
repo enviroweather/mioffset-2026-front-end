@@ -1,6 +1,7 @@
 <script>
 	// --- Imports ---
 	import { appState } from "$lib/stores/appState.svelte.js";
+	import { DEFAULT_LAT, DEFAULT_LNG } from "$lib/stores/defaultValues.svelte.js";
 	// --- Props ---
 	let { handleSubmit } = $props();
 

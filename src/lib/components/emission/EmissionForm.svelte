@@ -1,9 +1,8 @@
 <script>
 	import OdorForm from "./OdorForm.svelte";
 	import StorageForm from "./StorageForm.svelte";
-	import { resetFormState, appState } from "$lib/stores/appState.svelte.js";
+	import { appState } from "$lib/stores/appState.svelte.js";
 	import ManualForm from "./ManualForm.svelte";
-
 
 	const subtitles = {
 		animal: "Enter details about animal units and waste storage",
@@ -13,7 +12,6 @@
 
 	function switchForm(form) {
 		if (form === appState.activeForm) return;
-		resetFormState();
 		appState.activeForm = form;
 	}
 </script>
