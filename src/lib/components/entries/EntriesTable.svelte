@@ -17,8 +17,10 @@
 		entries.reduce((sum, e) => sum + (e.odor.totalEmission ?? 0), 0),
 	);
 
-	function restoreEntry(odorData, index) {
-		appState.emission = odorData;
+	function restoreEntry(entryData, index) {
+		Object.assign(appState.location, entryData.snapshot.location);
+		Object.assign(appState.emission, entryData.snapshot.emission);
+		appState.activeForm = entryData.snapshot.activeForm;
 		entries.splice(index, 1);
 	}
 
@@ -58,7 +60,7 @@
 			</thead>
 			<tbody>
 				{#each entries as entry, i}
-					<tr onclick={() => restoreEntry(entry.odor, i)}>
+					<tr onclick={() => restoreEntry(entry, i)}>
 						<td class="entry-num">{i + 1}</td>
 						<td>{entry.odor.species || "-"}</td>
 						<td>{entry.odor.animalType || "-"}</td>

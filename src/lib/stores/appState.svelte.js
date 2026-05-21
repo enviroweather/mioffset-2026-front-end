@@ -11,6 +11,7 @@ export const appState = $state({
 	location: { ...DEFAULT_LOCATION },
 	emission: { ...DEFAULT_EMISSION },
 	geoJSONData: {},
+	activeForm: "animal",
 	mapIsUpToDate: false,
 });
 

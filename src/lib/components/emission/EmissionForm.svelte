@@ -1,10 +1,9 @@
 <script>
 	import OdorForm from "./OdorForm.svelte";
 	import StorageForm from "./StorageForm.svelte";
-	import { resetFormState } from "$lib/stores/appState.svelte.js";
+	import { resetFormState, appState } from "$lib/stores/appState.svelte.js";
 	import ManualForm from "./ManualForm.svelte";
 
-	let activeForm = $state("animal");
 
 	const subtitles = {
 		animal: "Enter details about animal units and waste storage",
@@ -13,9 +12,9 @@
 	};
 
 	function switchForm(form) {
-		if (form === activeForm) return;
+		if (form === appState.activeForm) return;
 		resetFormState();
-		activeForm = form;
+		appState.activeForm = form;
 	}
 </script>
 
@@ -27,38 +26,38 @@
 				<div class="form-tabs">
 					<button
 						class="tab"
-						class:active={activeForm === "animal"}
+						class:active={appState.activeForm === "animal"}
 						onclick={() => switchForm("animal")}
 					>
 						Animal
 					</button>
 					<button
 						class="tab"
-						class:active={activeForm === "storage"}
+						class:active={appState.activeForm === "storage"}
 						onclick={() => switchForm("storage")}
 					>
 						Storage
 					</button>
 					<button
 						class="tab"
-						class:active={activeForm === "manual"}
+						class:active={appState.activeForm === "manual"}
 						onclick={() => switchForm("manual")}
 					>
 						Manual
 					</button>
 				</div>
 			</div>
-			<p>{subtitles[activeForm]}</p>
+			<p>{subtitles[appState.activeForm]}</p>
 		</div>
 	</div>
 
-	{#if activeForm === "animal"}
+	{#if appState.activeForm === "animal"}
 		<OdorForm />
 	{/if}
-	{#if activeForm === "storage"}
+	{#if appState.activeForm === "storage"}
 		<StorageForm />
 	{/if}
-	{#if activeForm === "manual"}
+	{#if appState.activeForm === "manual"}
 		<ManualForm />
 	{/if}
 </div>

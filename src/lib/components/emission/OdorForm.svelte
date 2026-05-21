@@ -130,6 +130,11 @@
 				lng: appState.location.lng,
 				address: appState.location.address,
 			},
+			snapshot: {
+				location: { ...appState.location },
+				emission: { ...appState.emission },
+				activeForm: appState.activeForm,
+			},
 		});
 		resetFormState();
 	}
