@@ -1,0 +1,269 @@
+<script>
+	import { onMount } from "svelte";
+	import MapView from "$lib/components/location/MapView.svelte";
+	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
+	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
+	import {
+		appState,
+		entries,
+		representResults,
+	} from "$lib/stores/appState.svelte.js";
+	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
+
+	// MapView's stale effect resets mapIsUpToDate on mount, so re-assert it if a
+	// footprint was already generated before navigating to this page.
+	onMount(() => {
+		if (appState.geoJSONData?.outputs) {
+			representResults();
+		}
+	});
+
+	let today = new Date().toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+</script>
+
+<div class="print-page">
+	<!-- Screen-only controls -->
+	<div class="screen-only toolbar">
+		<button class="print-btn" onclick={() => window.print()}
+			>Print / Save as PDF</button
+		>
+	</div>
+
+	<!-- Report Header -->
+	<header class="report-header">
+		<div class="report-title">
+			<h1>MI OFFSET</h1>
+			<p class="report-subtitle">Odor Footprint Report</p>
+		</div>
+		<div class="report-meta">
+			<div class="meta-row">
+				<span class="meta-label">Date:</span>
+				<span>{today}</span>
+			</div>
+			<div class="meta-row">
+				<span class="meta-label">Location:</span>
+				<span>
+					{Number(appState.location.lat).toFixed(LATLNG_PRECISION)}°N,
+					{Number(appState.location.lng).toFixed(LATLNG_PRECISION)}°W
+				</span>
+			</div>
+			<div class="meta-row">
+				<span class="meta-label">Address:</span>
+				<span>
+					{#if appState.location.address === undefined}
+						{appState.location.address}
+					{:else}
+						-
+					{/if}
+				</span>
+			</div>
+			<div class="meta-row">
+				<span class="meta-label">Entries:</span>
+				<span>{entries.length}</span>
+			</div>
+		</div>
+	</header>
+
+	<!-- Entries Table -->
+	<section class="report-section">
+		<EntriesTable />
+	</section>
+
+	<!-- Map -->
+	<section class="report-section map-section">
+		<h2 class="section-heading">Location Map</h2>
+		<div class="map-wrapper">
+			<MapView enableNav={false} focusOnMount={true} interactive={false} />
+		</div>
+	</section>
+
+	<!-- Footprint Table -->
+	<section class="report-section">
+		<FootprintTable />
+	</section>
+
+</div>
+
+<style>
+	.print-page {
+		width: 11in;
+		min-height: 8.5in;
+		margin: 0 auto;
+		padding: 0.5in;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+		background: white;
+	}
+
+	/* Screen-only toolbar */
+	.toolbar {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.print-btn {
+		background-color: var(--color-spartan-green);
+		color: white;
+		border: none;
+		border-radius: 4px;
+		padding: 0.6rem 1.2rem;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		letter-spacing: 0.5px;
+		transition: background-color 0.2s;
+	}
+
+	.print-btn:hover {
+		background-color: #0f2e26;
+	}
+
+	/* Report Header */
+	.report-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		border-bottom: 3px solid var(--color-spartan-green);
+		padding-bottom: 1rem;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+
+	.report-title h1 {
+		margin: 0;
+		font-size: 2rem;
+		color: var(--color-spartan-green);
+		letter-spacing: 1px;
+	}
+
+	.report-subtitle {
+		margin: 0.25rem 0 0 0;
+		color: #555;
+		font-size: 0.95rem;
+	}
+
+	.report-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		text-align: right;
+		font-size: 0.9rem;
+		color: #444;
+	}
+
+	.meta-row {
+		display: flex;
+		gap: 0.5rem;
+		justify-content: flex-end;
+	}
+
+	.meta-label {
+		font-weight: 600;
+		color: #2c3e50;
+	}
+
+	/* Sections */
+	.report-section {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.section-heading {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.1rem;
+		color: #2c3e50;
+		border-bottom: 2px solid #4caf50;
+		padding-bottom: 0.4rem;
+	}
+
+	/* Map */
+	.map-wrapper {
+		height: 450px;
+	}
+
+	/* Expand tables to full width — remove scroll containers on this page */
+	.print-page :global(.table-wrapper),
+	.print-page :global(.table-scroll) {
+		overflow: visible;
+		max-height: none;
+	}
+
+	.print-page :global(.table-wrapper table),
+	.print-page :global(.table-scroll table) {
+		min-width: 0;
+		width: 100%;
+	}
+
+	/* Entries table: allow headers to wrap so 10 columns fit in 7.5in */
+	.print-page :global(.entries-section th) {
+		white-space: normal;
+		font-size: 0.8rem;
+	}
+
+	.print-page :global(.entries-section td) {
+		font-size: 0.8rem;
+	}
+
+	/* Print Styles */
+	@page {
+		size: letter landscape;
+		margin: 0.5in;
+	}
+
+	@media print {
+		.screen-only {
+			display: none;
+		}
+		.print-page {
+			box-shadow: none;
+			gap: 1.2rem;
+		}
+
+		.map-wrapper {
+			height: 380px;
+		}
+
+		/* Hide Leaflet location overlay and controls */
+		:global(.overlay) {
+			display: none !important;
+		}
+
+		:global(.leaflet-control-container) {
+			display: none !important;
+		}
+
+		/* Remove interactive styling from entries table */
+		:global(tbody tr) {
+			cursor: default !important;
+		}
+
+		:global(.remove-cell),
+		:global(.remove-btn),
+		:global(.btn-footprint),
+		:global(.submission-btn) {
+			display: none !important;
+		}
+
+		/* Flatten card shadows */
+		:global(.entries-section),
+		:global(.footprint-table-wrapper) {
+			box-shadow: none !important;
+			border: 1px solid #ddd;
+		}
+
+		/* Prevent section breaks mid-table */
+		.report-section {
+			break-inside: avoid;
+		}
+
+		.map-section {
+			break-after: avoid;
+		}
+	}
+</style>
