@@ -7,7 +7,7 @@ MI Offset is a web application that calculates how far odor will travel based on
 - [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/) interactive map - tiles
 - [TomTom Search API](https://developer.tomtom.com/) - address geocoding
 - [Vercel](https://vercel.com/pricing)
-- TypeScript, Vite
+- Javascript, Vite
 
 **Deployment:** Uses the native `adapter-auto` with Vercel. The app contains server-side routes, so it requires Vercel's serverless setup - in its current state it cannot be hosted on a purely static file host (like github pages).
 
