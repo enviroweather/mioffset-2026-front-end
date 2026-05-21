@@ -1,3 +1,4 @@
+import { tick } from "svelte";
 import {
 	DEFAULT_LOCATION,
 	DEFAULT_EMISSION as DEFAULT_EMISSION,
@@ -35,6 +36,7 @@ export async function representResults() {
 	appState.geoJSONData = output;
 	// TODO: Temp code to snap the location to the test geoJSON
 	appState.location.lat = output.inputs.lat;
-	appState.location.lng = output.inputs.lng;
+	appState.location.lng = output.inputs.lon;
+	await tick(); // let these changes take place first, then mark map fresh
 	appState.mapIsUpToDate = true;
 }
