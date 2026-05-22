@@ -113,6 +113,7 @@
 		if (!geoJSONLayer) return;
 		map.removeLayer(geoJSONLayer);
 		geoJSONLayer = null;
+		appState.geoJSONData = null
 	}
 
 	// --- Marker ---
