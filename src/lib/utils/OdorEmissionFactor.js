@@ -1,7 +1,7 @@
 // E = (oenRate * odorControlFactor * area) / 10000
 // Equation taken from legacy code
 // area in sq ft, odor control factor is transmission fraction (1.0 for no technology)
-export function CalculateOdorControlFactor(oenRate, odorControlFactor, area) {
+export function CalculateTotalEmission(oenRate, odorControlFactor, area) {
 	// Undefined Check
 	if (
 		oenRate == null ||

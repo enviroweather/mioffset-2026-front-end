@@ -25,7 +25,7 @@ export const DEFAULT_LOCATION = {
 	mode: "address",
 };
 
-// --- Default Odor ---
+// --- Default Emission ---
 export const DEFAULT_EMISSION = {
 	species: "",
 	animalType: "",

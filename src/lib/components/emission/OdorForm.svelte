@@ -6,7 +6,7 @@
 		entries,
 		resetFormState,
 	} from "$lib/stores/appState.svelte.js";
-	import { CalculateOdorControlFactor } from "$lib/utils/OdorEmissionFactor.js";
+	import { CalculateTotalEmission } from "$lib/utils/OdorEmissionFactor.js";
 	import FormWizard from "../common/FormWizard.svelte";
 
 	// --- Dropdown Options ---
@@ -44,11 +44,7 @@
 	);
 
 	let totalEmission = $derived(
-		CalculateOdorControlFactor(
-			oenRate,
-			odorControlFactor,
-			appState.formDrafts.animal.area,
-		),
+		CalculateTotalEmission(oenRate, odorControlFactor, appState.formDrafts.animal.area),
 	);
 	// --- Form Step Config ---
 	const odorSteps = $derived([
@@ -125,6 +121,7 @@
 				odorControlFactor: odorControlFactor,
 				totalEmission: totalEmission,
 			},
+			type: "animal",
 			location: {
 				lat: appState.location.lat,
 				lng: appState.location.lng,

@@ -8,7 +8,7 @@
 		entries,
 		resetFormState,
 	} from "$lib/stores/appState.svelte.js";
-	import { CalculateOdorControlFactor } from "$lib/utils/OdorEmissionFactor.js";
+	import { CalculateTotalEmission } from "$lib/utils/OdorEmissionFactor.js";
 
 	let technologies = $derived(Object.keys(animalData.TECH || {}));
 
@@ -26,11 +26,7 @@
 	);
 
 	let totalEmission = $derived(
-		CalculateOdorControlFactor(
-			oenRate,
-			odorControlFactor,
-			appState.formDrafts.storage.area,
-		),
+		CalculateTotalEmission(oenRate, odorControlFactor, appState.formDrafts.storage.area),
 	);
 
 	// --- Form Step Config ---
@@ -73,7 +69,7 @@
 	// --- Submit Handler ---
 	function handleStorageSubmit(formData) {
 		entries.push({
-			odor: {
+			storage: {
 				storageType: formData.storageType,
 				technology: formData.technology,
 				area: formData.area,
@@ -81,6 +77,7 @@
 				odorControlFactor: odorControlFactor,
 				totalEmission: totalEmission,
 			},
+			type: "storage",
 			location: {
 				lat: appState.location.lat,
 				lng: appState.location.lng,
