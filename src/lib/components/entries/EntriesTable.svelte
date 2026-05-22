@@ -50,7 +50,7 @@
 	<div class="table-wrapper">
 		<table>
 			<thead>
-				<tr disabled={interactive}>
+				<tr>
 					<th>#</th>
 					<th>Species</th>
 					<th>Animal Type</th>
@@ -64,7 +64,7 @@
 					<th></th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody class:non-interactive={!interactive}>
 				{#each entries as entry, i}
 					{@const d = emissionData(entry)}
 					<tr onclick={() => restoreEntry(entry, i)}>
@@ -203,11 +203,11 @@
 		color: #333;
 	}
 
-	tbody tr:not(.total-row):disabled {
+	tbody:not(.non-interactive) tr:not(.total-row) {
 		cursor: pointer;
 	}
 
-	tbody tr:hover:not(.total-row):disabled {
+	tbody:not(.non-interactive) tr:hover:not(.total-row) {
 		background-color: #f9fffe;
 	}
 
@@ -243,7 +243,7 @@
 			background 0.2s;
 	}
 
-	.remove-btn:hover(:disabled) {
+	.remove-btn:hover {
 		color: #e74c3c;
 		background: #fdf0ee;
 	}
