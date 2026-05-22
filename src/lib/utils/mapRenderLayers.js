@@ -36,8 +36,8 @@ export async function renderGEOJSON(map) {
 		l.on("mouseout", () => l.setStyle({ weight: lineWeight }));
 	}); // makes the borders super thin and represent better bounds upon zooming out
 
-	// centers the kml bounds on the map view
-	const bounds = geoJSONLayer.getBounds();
-	map.fitBounds(bounds);
+	// centers the json bounds on the map view, interrupting any in-progress animation
+	map.stop();
+	map.fitBounds(geoJSONLayer.getBounds());
 	return geoJSONLayer;
 }

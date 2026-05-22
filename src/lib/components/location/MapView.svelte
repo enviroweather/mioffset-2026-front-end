@@ -31,7 +31,6 @@
 	let marker;
 	let kmlLayer;
 	let geoJSONLayer;
-	let navigating = false;
 	let initialized = false;
 	let staleEffectMounted = false;
 	let geoJSONInFlight = false;
@@ -121,15 +120,11 @@
 	}
 
 	function navigateToLocation(lat, lng) {
-		if (navigating) return;
 		// untrack: reads zoom without creating an effect dependency - changes in zoom shouldn't run the effect
 		let zoom = untrack(() => appState.location.zoom);
-		if (zoom === MIN_ZOOM) {
-			navigating = true;
+		map.stop();
+		if (zoom <= MIN_ZOOM) {
 			map.flyTo({ lat, lng }, LANDMARK_ZOOM, { duration: 1.5 });
-			map.once("moveend", () => {
-				navigating = false;
-			});
 		} else {
 			map.panTo({ lat, lng });
 		}
