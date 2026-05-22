@@ -66,7 +66,7 @@
 		map.fitBounds(michiganBounds);
 		appState.location.zoom = map.getZoom(); // sync so first click zooms in
 
-		// Prevent the location overlay from panning/zooming the map underneath it
+		// Prevent the location overlay (address search) from panning/zooming the map underneath it
 		if (geoOverlay) {
 			L.DomEvent.disableClickPropagation(geoOverlay);
 			L.DomEvent.disableScrollPropagation(geoOverlay);
@@ -87,19 +87,6 @@
 		});
 	}
 
-	// --- KML Layer ---
-
-	async function showKMLLayer() {
-		clearKMLLayer();
-		kmlLayer = await renderKML(map, "/test_kml_file.kml");
-	}
-
-	function clearKMLLayer() {
-		if (!kmlLayer) return;
-		map.removeLayer(kmlLayer);
-		kmlLayer = null;
-	}
-
 	// --- GEOJSON Layer ---
 	async function showGeoJSONLayer() {
 		if (geoJSONInFlight) return;
@@ -113,7 +100,7 @@
 		if (!geoJSONLayer) return;
 		map.removeLayer(geoJSONLayer);
 		geoJSONLayer = null;
-		appState.geoJSONData = null
+		appState.geoJSONData = null;
 	}
 
 	// --- Marker ---
