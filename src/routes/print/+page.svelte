@@ -54,7 +54,7 @@
 			<div class="meta-row">
 				<span class="meta-label">Address:</span>
 				<span>
-					{#if appState.location.address === undefined}
+					{#if appState.location.address !== undefined && appState.location.address !== ""}
 						{appState.location.address}
 					{:else}
 						-
@@ -68,24 +68,25 @@
 		</div>
 	</header>
 
-	<!-- Entries Table -->
-	<section class="report-section">
-		<EntriesTable />
-	</section>
+	<section class="report-wrapper">
+		<!-- Entries Table -->
+		<section class="report-section entries-section-wrapper">
+			<EntriesTable interactive={false} />
+		</section>
 
-	<!-- Map -->
-	<section class="report-section map-section">
-		<h2 class="section-heading">Location Map</h2>
-		<div class="map-wrapper">
-			<MapView enableNav={false} focusOnMount={true} interactive={false} />
-		</div>
-	</section>
+		<!-- Map -->
+		<section class="report-section map-section">
+			<h2 class="section-heading">Location Map</h2>
+			<div class="map-wrapper">
+				<MapView enableNav={false} focusOnMount={true} interactive={false} />
+			</div>
+		</section>
 
-	<!-- Footprint Table -->
-	<section class="report-section">
-		<FootprintTable />
+		<!-- Footprint Table -->
+		<section class="report-section footprint-section">
+			<FootprintTable />
+		</section>
 	</section>
-
 </div>
 
 <style>
@@ -99,6 +100,7 @@
 		gap: 1.5rem;
 		box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 		background: white;
+		box-sizing: border-box;
 	}
 
 	/* Screen-only toolbar */
@@ -124,6 +126,12 @@
 		background-color: #0f2e26;
 	}
 
+	.report-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		flex: 1;
+	}
 	/* Report Header */
 	.report-header {
 		display: flex;
@@ -172,6 +180,7 @@
 	.report-section {
 		display: flex;
 		flex-direction: column;
+		min-height: none;
 	}
 
 	.section-heading {
@@ -184,7 +193,13 @@
 
 	/* Map */
 	.map-wrapper {
-		height: 450px;
+		height: 700px;
+	}
+
+	/* Override MapView's min-height so the map actually respects the wrapper */
+	.map-wrapper :global(.map) {
+		min-height: 0;
+		height: 100%;
 	}
 
 	/* Expand tables to full width — remove scroll containers on this page */
@@ -192,6 +207,21 @@
 	.print-page :global(.table-scroll) {
 		overflow: visible;
 		max-height: none;
+	}
+
+	/* Footprint section grows to fill remaining report space */
+	.footprint-section {
+		flex: 1;
+	}
+
+	.footprint-section :global(.footprint-table-wrapper) {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.footprint-section :global(.table-scroll) {
+		flex: 1;
 	}
 
 	.print-page :global(.table-wrapper table),
@@ -209,7 +239,9 @@
 	.print-page :global(.entries-section td) {
 		font-size: 0.8rem;
 	}
-
+	.print-page :global(.remove-cell) {
+		display: none;
+	}
 	/* Print Styles */
 	@page {
 		size: letter landscape;
@@ -223,10 +255,6 @@
 		.print-page {
 			box-shadow: none;
 			gap: 1.2rem;
-		}
-
-		.map-wrapper {
-			height: 380px;
 		}
 
 		/* Hide Leaflet location overlay and controls */
@@ -243,7 +271,6 @@
 			cursor: default !important;
 		}
 
-		:global(.remove-cell),
 		:global(.remove-btn),
 		:global(.btn-footprint),
 		:global(.submission-btn) {
@@ -257,9 +284,18 @@
 			border: 1px solid #ddd;
 		}
 
-		/* Prevent section breaks mid-table */
-		.report-section {
+		/* Repeat table headers when a table breaks across pages */
+		.print-page :global(thead) {
+			display: table-header-group;
+		}
+
+		.print-page :global(tr) {
 			break-inside: avoid;
+		}
+
+		/* Prevent section breaks mid-table */
+		.entries-section-wrapper {
+			break-after: page;
 		}
 
 		.map-section {

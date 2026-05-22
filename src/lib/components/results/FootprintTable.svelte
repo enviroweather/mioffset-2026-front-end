@@ -70,6 +70,7 @@
 	table {
 		width: 100%;
 		border-collapse: collapse;
+		text-align: left;
 		font-size: 0.875rem;
 	}
 
@@ -81,7 +82,6 @@
 	}
 
 	th {
-		text-align: left;
 		padding: 0.5rem 0.75rem;
 		font-weight: 600;
 		color: #2c3e50;
@@ -91,6 +91,7 @@
 
 	td {
 		padding: 0.3rem 0.75rem;
+		text-align: left;
 		border-bottom: 1px solid #f0f0f0;
 		color: #444;
 	}
@@ -99,6 +100,7 @@
 		font-weight: 600;
 		background-color: #f9fffe;
 		border-top: 1px solid #e0f0e0;
+		text-align: left;
 	}
 
 	.dir {
@@ -109,7 +111,11 @@
 
 	.numeric {
 		font-variant-numeric: tabular-nums;
-		text-align: right;
 	}
 
+	@media print{
+		.footprint-table-wrapper{
+			print-color-adjust: exact;
+		}
+	}
 </style>

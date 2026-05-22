@@ -8,6 +8,11 @@
 		Home
 	</a>
 	<a
+		href="/print"
+		class="nav-link"
+		class:active={$page.url.pathname === "/print"}>Print</a
+	>
+	<a
 		href="/about"
 		class="nav-link"
 		class:active={$page.url.pathname === "/about"}

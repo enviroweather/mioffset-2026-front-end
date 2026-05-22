@@ -6,8 +6,21 @@
 		representResults,
 	} from "$lib/stores/appState.svelte.js";
 
+	let { interactive = true } = $props();
 	// --- Actions ---
+	function restoreEntry(entryData, index) {
+		if (!interactive) return;
+		Object.assign(appState.location, entryData.snapshot.location);
+		Object.assign(
+			appState.formDrafts[entryData.snapshot.activeForm],
+			entryData.snapshot.formDraft,
+		);
+		appState.activeForm = entryData.snapshot.activeForm;
+		entries.splice(index, 1);
+	}
+
 	function removeEntry(e, i) {
+		if (!interactive) return;
 		e.stopPropagation(); // prevent row's "restoreEntry" onclick from also firing
 		entries.splice(i, 1);
 	}
@@ -16,13 +29,6 @@
 	let totalOEF = $derived(
 		entries.reduce((sum, e) => sum + (e.odor.totalEmission ?? 0), 0),
 	);
-
-	function restoreEntry(entryData, index) {
-		Object.assign(appState.location, entryData.snapshot.location);
-		Object.assign(appState.formDrafts[entryData.snapshot.activeForm], entryData.snapshot.formDraft);
-		appState.activeForm = entryData.snapshot.activeForm;
-		entries.splice(index, 1);
-	}
 </script>
 
 <section class="entries-section">
@@ -39,7 +45,7 @@
 	<div class="table-wrapper">
 		<table>
 			<thead>
-				<tr>
+				<tr disabled={interactive}>
 					<th>#</th>
 					<th>Species</th>
 					<th>Animal Type</th>
@@ -92,8 +98,8 @@
 				<tr class="total-row">
 					<td>
 						<div class="submission-btn">
-							<button class="btn-results" onclick={representResults}
-								>Show Results</button
+							<button class="btn-footprint" onclick={representResults}
+								>Show Footprint</button
 							>
 						</div>
 					</td>
@@ -149,7 +155,7 @@
 		margin-top: 0.5rem;
 		min-width: 170px;
 	}
-	.btn-results {
+	.btn-footprint {
 		padding: 0.5rem 1rem;
 		border: none;
 		border-radius: 4px;
@@ -162,12 +168,12 @@
 		letter-spacing: 0.5px;
 		transition: all 0.3s ease;
 	}
-	.btn-results:hover {
+	.btn-footprint:hover {
 		background-color: #008934;
 		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 		transform: scaleX(1.03);
 	}
-	.btn-results:active {
+	.btn-footprint:active {
 		background-color: #008934;
 		transform: translateY(1px);
 	}
@@ -192,7 +198,6 @@
 		padding: 0.6rem 0.75rem;
 		font-weight: 600;
 		color: #2c3e50;
-		white-space: nowrap;
 		border-bottom: 2px solid #ddd;
 	}
 
@@ -202,11 +207,11 @@
 		color: #333;
 	}
 
-	tbody tr:not(.total-row) {
+	tbody tr:not(.total-row):disabled {
 		cursor: pointer;
 	}
 
-	tbody tr:hover:not(.total-row) {
+	tbody tr:hover:not(.total-row):disabled {
 		background-color: #f9fffe;
 	}
 
@@ -242,7 +247,7 @@
 			background 0.2s;
 	}
 
-	.remove-btn:hover {
+	.remove-btn:hover(:disabled) {
 		color: #e74c3c;
 		background: #fdf0ee;
 	}

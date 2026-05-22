@@ -7,7 +7,7 @@ export const mapIcons = $state({
 		iconAnchor: [15, 40],
 	},
 	"default-fresh": {
-		iconUrl: "marker-blue.svg",
+		iconUrl: "invisible.svg",
 		iconSize: [30, 40],
 		iconAnchor: [15, 40],
 	},

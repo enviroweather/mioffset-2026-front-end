@@ -3,6 +3,8 @@
 	import MapView from "$lib/components/location/MapView.svelte";
 	import EmissionForm from "$lib/components/emission/EmissionForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
+	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
+	import { appState } from "$lib/stores/appState.svelte.js";
 </script>
 
 <div class="page-container">
@@ -15,6 +17,9 @@
 
 	<section class="section location-wrapper">
 		<MapView />
+		{#if appState.mapIsUpToDate}
+		<FootprintTable />
+		{/if}
 	</section>
 </div>
 
@@ -42,6 +47,7 @@
 	/* Section Wrappers */
 	.entries-wrapper {
 		grid-area: entries;
+		padding: 1rem;
 	}
 	.odor-wrapper {
 		grid-area: odor;
@@ -65,4 +71,5 @@
 			min-width: 0;
 		}
 	}
+
 </style>

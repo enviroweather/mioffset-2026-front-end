@@ -12,21 +12,29 @@
 	import { renderGEOJSON } from "$lib/utils/mapRenderLayers.js";
 
 	// --- Props & State ---
-	let { onLocationSelect = () => {} } = $props();
+	let {
+		onLocationSelect = () => {},
+		enableNav = true,
+		focusOnMount = false,
+		interactive = true,
+	} = $props();
+
 	let currentSpecies = $derived(
 		appState.formDrafts.animal.species || "default",
 	);
 	let L = $state.raw(null);
 	let mapContainer = $state(null);
 	let map = $state.raw(null);
+	let geoOverlay = $state(null);
 
 	// Non-reactive - managed manually to avoid effect loops
 	let marker;
-	let overlayEl;
 	let kmlLayer;
 	let geoJSONLayer;
 	let navigating = false;
 	let initialized = false;
+	let staleEffectMounted = false;
+	let geoJSONInFlight = false;
 
 	// --- Lifecycle ---
 	onMount(async () => {
@@ -43,12 +51,14 @@
 			L.latLng(41.55, -90.5),
 			L.latLng(48.3, -82.4),
 		);
+
 		map = L.map(mapContainer, {
 			minZoom: MIN_ZOOM,
 			maxZoom: MAX_ZOOM,
 			maxBounds: michiganBounds,
 			maxBoundsViscosity: 1.0, // 1.0 = fully rigid boundary, no rubber-band when panning to the edge
 		});
+
 		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 			attribution:
 				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -57,11 +67,15 @@
 		appState.location.zoom = map.getZoom(); // sync so first click zooms in
 
 		// Prevent the location overlay from panning/zooming the map underneath it
-		L.DomEvent.disableClickPropagation(overlayEl);
-		L.DomEvent.disableScrollPropagation(overlayEl);
+		if (geoOverlay) {
+			L.DomEvent.disableClickPropagation(geoOverlay);
+			L.DomEvent.disableScrollPropagation(geoOverlay);
+		}
 	}
 
 	function registerMapEvents() {
+		if (!interactive) return;
+
 		map.on("click", (e) => {
 			const { lat, lng } = e.latlng;
 			appState.location.lat = lat;
@@ -88,8 +102,11 @@
 
 	// --- GEOJSON Layer ---
 	async function showGeoJSONLayer() {
+		if (geoJSONInFlight) return;
+		geoJSONInFlight = true;
 		clearGeoJSONLayer();
-		geoJSONLayer = await renderGEOJSON(map, "/example_fod_geojson.json");
+		geoJSONLayer = await renderGEOJSON(map);
+		geoJSONInFlight = false;
 	}
 
 	function clearGeoJSONLayer() {
@@ -140,19 +157,24 @@
 		return () => observer.disconnect();
 	});
 
-	// Show/hide KML layer based on whether results are up to date
+	// Show/hide GeoJSON layer based on whether results are up to date
 	$effect(() => {
+		if (!map) return;
 		if (appState.mapIsUpToDate) {
 			showGeoJSONLayer();
 		} else clearGeoJSONLayer();
 	});
 
 	// Mark results stale whenever entries or the selected location change
+	// Skip the initial run so navigating back doesn't wipe a valid mapIsUpToDate
 	$effect(() => {
-		// touch these to subscribe - Svelte tracks reads inside $effect
 		void entries.length;
 		void appState.location.lat;
 		void appState.location.lng;
+		if (!staleEffectMounted) {
+			staleEffectMounted = true;
+			return;
+		}
 		appState.mapIsUpToDate = false;
 	});
 
@@ -162,9 +184,10 @@
 		const { lat, lng } = appState.location;
 		placeOrUpdateMarker(lat, lng, resolveMarkerIcon());
 
-		// skip navigation on first placement - marker was just set
+		// skip navigation on first placement unless focusOnMount is set
 		if (!initialized) {
 			initialized = true;
+			if (focusOnMount) navigateToLocation(lat, lng);
 			return;
 		}
 		navigateToLocation(lat, lng);
@@ -174,9 +197,11 @@
 <!-- Map Container -->
 <div bind:this={mapContainer} class="map">
 	<!-- Location Overlay -->
-	<div class="overlay" bind:this={overlayEl}>
-		<LocationSelection />
-	</div>
+	{#if enableNav}
+		<div class="overlay" bind:this={geoOverlay}>
+			<LocationSelection />
+		</div>
+	{/if}
 </div>
 
 <style>
