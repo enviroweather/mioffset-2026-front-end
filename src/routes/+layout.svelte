@@ -8,7 +8,6 @@
 	injectAnalytics({ mode: dev ? "development" : "production" });
 
 	let { children } = $props();
-
 </script>
 
 <div class="app">
@@ -143,6 +142,14 @@
 
 		.app-footer {
 			padding: 1.5rem 1rem;
+		}
+	}
+	@media print {
+		.app-header {
+			display: none;
+		}
+		.app-footer {
+			display: none;
 		}
 	}
 </style>

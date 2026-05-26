@@ -26,14 +26,13 @@
 	let L = $state.raw(null);
 	let mapContainer = $state(null);
 	let map = $state.raw(null);
-	let geoOverlay = $state(null);
+	let locOverlay = $state(null);
 
 	// Non-reactive - managed manually to avoid effect loops
 	let marker;
 	let geoJSONLayer;
 	let initialized = false;
-	let mapEffectStale = false;
-	let geoJSONInFlight = false;
+	let mapEffectBehind = false;
 
 	// --- Lifecycle ---
 	onMount(async () => {
@@ -66,9 +65,9 @@
 		appState.location.zoom = map.getZoom(); // sync so first click zooms in
 
 		// Prevent the location overlay (address search) from panning/zooming the map underneath it
-		if (geoOverlay) {
-			L.DomEvent.disableClickPropagation(geoOverlay);
-			L.DomEvent.disableScrollPropagation(geoOverlay);
+		if (locOverlay) {
+			L.DomEvent.disableClickPropagation(locOverlay);
+			L.DomEvent.disableScrollPropagation(locOverlay);
 		}
 	}
 
@@ -89,11 +88,8 @@
 
 	// --- GEOJSON Layer ---
 	async function showGeoJSONLayer() {
-		if (geoJSONInFlight) return;
-		geoJSONInFlight = true;
 		clearGeoJSONLayer();
 		geoJSONLayer = await renderGEOJSON(map, interactive);
-		geoJSONInFlight = false;
 	}
 
 	function clearGeoJSONLayer() {
@@ -101,7 +97,6 @@
 		geoJSONLayer._legend?.remove();
 		map.removeLayer(geoJSONLayer);
 		geoJSONLayer = null;
-		appState.geoJSONData = null;
 	}
 
 	// --- Marker ---
@@ -161,8 +156,8 @@
 		void entries.length;
 		void appState.location.lat;
 		void appState.location.lng;
-		if (!mapEffectStale) {
-			mapEffectStale = true;
+		if (!mapEffectBehind) {
+			mapEffectBehind = true;
 			return;
 		}
 		appState.mapIsUpToDate = false;
@@ -193,7 +188,7 @@
 <div bind:this={mapContainer} class="map">
 	<!-- Location Overlay -->
 	{#if enableNav}
-		<div class="overlay" bind:this={geoOverlay}>
+		<div class="overlay" bind:this={locOverlay}>
 			<LocationSelection />
 		</div>
 	{/if}
