@@ -18,6 +18,11 @@
 		}
 	});
 
+	function toggleMarker(lat, lng) {
+		console.log({ lat, lng });
+		debugger;
+	}
+
 	let today = new Date().toLocaleDateString("en-US", {
 		year: "numeric",
 		month: "long",
@@ -78,7 +83,12 @@
 		<section class="report-section map-section">
 			<h2 class="section-heading">Location Map</h2>
 			<div class="map-wrapper">
-				<MapView enableNav={false} focusOnMount={true} interactive={false} />
+				<MapView
+					onLocationSelect={toggleMarker}
+					enableNav={false}
+					focusOnMount={true}
+					interactive={false}
+				/>
 			</div>
 		</section>
 
@@ -236,6 +246,31 @@
 		font-size: 0.8rem;
 	}
 
+	/* CSS for the map legend */
+	:global(.geojson-legend) {
+		background: white;
+		padding: 0.5rem 0.75rem;
+		border-radius: 6px;
+		box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+		font-size: 0.85rem;
+		line-height: 1.6;
+		color: #333;
+	}
+
+	:global(.legend-row) {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	:global(.legend-swatch) {
+		display: inline-block;
+		width: 14px;
+		height: 14px;
+		border-radius: 2px;
+		flex-shrink: 0;
+	}
+
 	.print-page :global(.entries-section td) {
 		font-size: 0.8rem;
 	}
@@ -262,7 +297,8 @@
 			display: none !important;
 		}
 
-		:global(.leaflet-control-container) {
+		:global(.leaflet-top),
+		:global(.leaflet-bottom.leaflet-right) {
 			display: none !important;
 		}
 

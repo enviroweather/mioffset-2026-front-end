@@ -30,6 +30,7 @@
 			const results = data.results || [];
 
 			if (results.length > 0) {
+				appState.location.fly = true;
 				appState.location.lat = parseFloat(results[0].position.lat);
 				appState.location.lng = parseFloat(results[0].position.lon);
 			} else {

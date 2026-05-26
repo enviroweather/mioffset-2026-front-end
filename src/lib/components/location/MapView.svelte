@@ -32,7 +32,7 @@
 	let kmlLayer;
 	let geoJSONLayer;
 	let initialized = false;
-	let staleEffectMounted = false;
+	let mapEffectStale = false;
 	let geoJSONInFlight = false;
 
 	// --- Lifecycle ---
@@ -77,6 +77,7 @@
 
 		map.on("click", (e) => {
 			const { lat, lng } = e.latlng;
+			appState.location.fly = true;
 			appState.location.lat = lat;
 			appState.location.lng = lng;
 			onLocationSelect({ lat, lng });
@@ -91,12 +92,13 @@
 		if (geoJSONInFlight) return;
 		geoJSONInFlight = true;
 		clearGeoJSONLayer();
-		geoJSONLayer = await renderGEOJSON(map);
+		geoJSONLayer = await renderGEOJSON(map, interactive);
 		geoJSONInFlight = false;
 	}
 
 	function clearGeoJSONLayer() {
 		if (!geoJSONLayer) return;
+		geoJSONLayer._legend?.remove();
 		map.removeLayer(geoJSONLayer);
 		geoJSONLayer = null;
 		appState.geoJSONData = null;
@@ -119,14 +121,19 @@
 		}
 	}
 
-	function navigateToLocation(lat, lng) {
-		// untrack: reads zoom without creating an effect dependency - changes in zoom shouldn't run the effect
-		let zoom = untrack(() => appState.location.zoom);
+	function navigateToLocation(lat, lng, fly) {
+		// untrack: reads zoom without creating an effect dependency
+		const zoom = untrack(() => appState.location.zoom);
+		const zoomedOut = zoom <= MIN_ZOOM;
 		map.stop();
-		if (zoom <= MIN_ZOOM) {
-			map.flyTo({ lat, lng }, LANDMARK_ZOOM, { duration: 1.5 });
+		if (fly) {
+			zoomedOut
+				? map.flyTo([lat, lng], LANDMARK_ZOOM, { duration: 1.5 })
+				: map.panTo([lat, lng]);
 		} else {
-			map.panTo({ lat, lng });
+			map.setView([lat, lng], zoomedOut ? LANDMARK_ZOOM : zoom, {
+				animate: false,
+			});
 		}
 	}
 
@@ -154,8 +161,8 @@
 		void entries.length;
 		void appState.location.lat;
 		void appState.location.lng;
-		if (!staleEffectMounted) {
-			staleEffectMounted = true;
+		if (!mapEffectStale) {
+			mapEffectStale = true;
 			return;
 		}
 		appState.mapIsUpToDate = false;
@@ -165,15 +172,20 @@
 	$effect(() => {
 		if (!L || !map) return;
 		const { lat, lng } = appState.location;
+		// Read and immediately clear the fly flag without creating a dependency on it
+		const fly = untrack(() => appState.location.fly);
+		untrack(() => {
+			appState.location.fly = false;
+		});
 		placeOrUpdateMarker(lat, lng, resolveMarkerIcon());
 
 		// skip navigation on first placement unless focusOnMount is set
 		if (!initialized) {
 			initialized = true;
-			if (focusOnMount) navigateToLocation(lat, lng);
+			if (focusOnMount) navigateToLocation(lat, lng, false);
 			return;
 		}
-		navigateToLocation(lat, lng);
+		navigateToLocation(lat, lng, fly);
 	});
 </script>
 

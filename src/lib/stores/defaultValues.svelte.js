@@ -23,6 +23,7 @@ export const DEFAULT_LOCATION = {
 	zoom: MIN_ZOOM,
 	address: "",
 	mode: "address",
+	fly: false,
 };
 
 // --- Default Emission ---
