@@ -20,8 +20,9 @@
 	} = $props();
 
 	let currentSpecies = $derived(
-		appState.formDrafts.animal.species || "default",
+		appState.formDrafts.animal.species || entries?.[0]?.animal?.species || "default",
 	);
+
 	let L = $state.raw(null);
 	let mapContainer = $state(null);
 	let map = $state.raw(null);
@@ -107,7 +108,7 @@
 
 	function resolveMarkerIcon() {
 		const mapFresh = appState.mapIsUpToDate ? "default-fresh" : "default";
-		const key = currentSpecies !== "default" ? currentSpecies : mapFresh;
+		const key = currentSpecies !== "default" && !appState.mapIsUpToDate ? currentSpecies : mapFresh;
 		return L.icon(mapIcons[key] ?? mapIcons["default"]);
 	}
 

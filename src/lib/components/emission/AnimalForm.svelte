@@ -111,7 +111,7 @@
 	// --- Submit Handler ---
 	function handleOdorSubmit(formData) {
 		entries.push({
-			odor: {
+			animal: {
 				species: formData.species,
 				animalType: formData.animalType,
 				housingType: formData.housingType,

@@ -1,5 +1,5 @@
 <script>
-	import OdorForm from "./OdorForm.svelte";
+	import AnimalForm from "./AnimalForm.svelte";
 	import StorageForm from "./StorageForm.svelte";
 	import { appState } from "$lib/stores/appState.svelte.js";
 	import ManualForm from "./ManualForm.svelte";
@@ -50,7 +50,7 @@
 	</div>
 
 	{#if appState.activeForm === "animal"}
-		<OdorForm />
+		<AnimalForm />
 	{/if}
 	{#if appState.activeForm === "storage"}
 		<StorageForm />

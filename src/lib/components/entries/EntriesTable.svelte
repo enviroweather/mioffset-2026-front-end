@@ -27,7 +27,7 @@
 
 	// --- Helpers ---
 	function emissionData(entry) {
-		return entry.type === "storage" ? entry.storage : entry.odor;
+		return entry.type === "storage" ? entry.storage : entry.animal;
 	}
 
 	// --- Derived ---

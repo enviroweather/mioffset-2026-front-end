@@ -34,7 +34,7 @@ export function resetFormState() {
 export async function representResults() {
 	const output = await fetchResults();
 	appState.geoJSONData = output;
-	// TODO: Temp code to snap the location to the test geoJSON
+	// TODO: REMOVE, temp code to snap the location to the test geoJSON
 	appState.location.lat = output.inputs.lat;
 	appState.location.lng = output.inputs.lon;
 	await tick(); // let these changes take place first, then mark map fresh
