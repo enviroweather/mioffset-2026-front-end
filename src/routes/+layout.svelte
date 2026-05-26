@@ -8,6 +8,7 @@
 	injectAnalytics({ mode: dev ? "development" : "production" });
 
 	let { children } = $props();
+
 </script>
 
 <div class="app">

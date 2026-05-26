@@ -29,7 +29,6 @@
 
 	// Non-reactive - managed manually to avoid effect loops
 	let marker;
-	let kmlLayer;
 	let geoJSONLayer;
 	let initialized = false;
 	let mapEffectStale = false;
@@ -107,8 +106,8 @@
 	// --- Marker ---
 
 	function resolveMarkerIcon() {
-		const freshness = appState.mapIsUpToDate ? "default-fresh" : "default";
-		const key = currentSpecies !== "default" ? currentSpecies : freshness;
+		const mapFresh = appState.mapIsUpToDate ? "default-fresh" : "default";
+		const key = currentSpecies !== "default" ? currentSpecies : mapFresh;
 		return L.icon(mapIcons[key] ?? mapIcons["default"]);
 	}
 
