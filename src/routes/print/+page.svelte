@@ -66,10 +66,6 @@
 					{/if}
 				</span>
 			</div>
-			<div class="meta-row">
-				<span class="meta-label">Entries:</span>
-				<span>{entries.length}</span>
-			</div>
 		</div>
 	</header>
 
