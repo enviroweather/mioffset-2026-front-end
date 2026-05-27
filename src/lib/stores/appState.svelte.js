@@ -22,16 +22,21 @@ export const appState = $state({
 	geoJSONData: {},
 	activeForm: "animal",
 	mapIsUpToDate: false,
+	mapLoading: false,
 });
 
 export const entries = $state([]);
 // --- Actions ---
 export function resetFormState() {
-	Object.assign(appState.formDrafts[appState.activeForm], DEFAULT_DRAFTS[appState.activeForm]);
+	Object.assign(
+		appState.formDrafts[appState.activeForm],
+		DEFAULT_DRAFTS[appState.activeForm],
+	);
 }
 
 // sample function that will call our API to get the shape file
 export async function representResults() {
+	appState.mapLoading = true;
 	const output = await fetchResults();
 	appState.geoJSONData = output;
 	// TODO: REMOVE, temp code to snap the location to the test geoJSON

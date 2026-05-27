@@ -21,15 +21,16 @@
 	} = $props();
 
 	let currentSpecies = $derived(
-		appState.formDrafts.animal.species || entries?.[0]?.animal?.species || "default",
+		appState.formDrafts.animal.species ||
+			entries?.[0]?.animal?.species ||
+			"default",
 	);
 
 	let L = $state.raw(null);
 	let mapContainer = $state(null);
 	let map = $state.raw(null);
 	let locOverlay = $state(null);
-	let footprintLoading = $state(false);
-
+	let footprintLoading = $derived(appState.mapLoading);
 	// Non-reactive - managed manually to avoid effect loops
 	let marker;
 	let geoJSONLayer;
@@ -98,10 +99,9 @@
 
 	// --- GEOJSON Layer ---
 	async function showGeoJSONLayer() {
-		footprintLoading = true;
 		clearGeoJSONLayer();
 		geoJSONLayer = await renderGEOJSON(map, interactive);
-		footprintLoading = false;
+		appState.mapLoading = false;
 	}
 
 	function clearGeoJSONLayer() {
@@ -115,7 +115,10 @@
 
 	function resolveMarkerIcon() {
 		const mapFresh = appState.mapIsUpToDate ? "default-fresh" : "default";
-		const key = currentSpecies !== "default" && !appState.mapIsUpToDate ? currentSpecies : mapFresh;
+		const key =
+			currentSpecies !== "default" && !appState.mapIsUpToDate
+				? currentSpecies
+				: mapFresh;
 		return L.icon(mapIcons[key] ?? mapIcons["default"]);
 	}
 
@@ -198,7 +201,11 @@
 
 <!-- Map Container -->
 <div class="map-wrapper">
-	<div bind:this={mapContainer} class="map" class:blurred={footprintLoading || appState.location.searching}>
+	<div
+		bind:this={mapContainer}
+		class="map"
+		class:blurred={footprintLoading || appState.location.searching}
+	>
 		<!-- Location Overlay -->
 		{#if enableNav}
 			<div class="overlay" bind:this={locOverlay}>
