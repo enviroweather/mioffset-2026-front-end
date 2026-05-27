@@ -4,6 +4,7 @@
 	import EmissionForm from "$lib/components/emission/EmissionForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
+	import LoadingIcon from "$lib/components/common/LoadingIcon.svelte";
 	import { appState } from "$lib/stores/appState.svelte.js";
 </script>
 

@@ -4,11 +4,11 @@ import { appState } from "$lib/stores/appState.svelte.js";
  * Fetches the geoJSON from mapLayer file
  * Returns the GeoJSON layer so the caller can remove it later.
  */
-export async function renderGEOJSON(map, showLegend=true) {
+export async function renderGEOJSON(map, showLegend = true) {
 	if (!map) {
-		console.error("Cannot render GeoJSON, map is undefined");
 		return;
 	}
+	await new Promise((resolve) => setTimeout(resolve, 2000));
 
 	const lineWeight = 2;
 	// tailwind RGB values
@@ -32,13 +32,12 @@ export async function renderGEOJSON(map, showLegend=true) {
 		if (!l.setStyle) return;
 		const color = colors.pop();
 		l.setStyle({ weight: lineWeight, color });
-		if (!showLegend && name)
-			legendEntries.push({ color, name, oef });
+		if (!showLegend && name) legendEntries.push({ color, name, oef });
 
 		l.on("mouseover", () => l.setStyle({ weight: lineWeight + 2 }));
 		l.on("mouseout", () => l.setStyle({ weight: lineWeight }));
 	});
-	
+
 	if (legendEntries.length > 0)
 		geoJSONLayer._legend = createLegend(map, legendEntries);
 

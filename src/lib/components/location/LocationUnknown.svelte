@@ -16,7 +16,7 @@
 {#if visible}
 	<div class="error-wrapper">
 		<button class="hide-error" onclick={handleClose}><b>X</b></button>
-		<span class="error-message">Address not found. Please try again</span>
+		<span class="error-message">Address is invalid. Try again</span>
 	</div>
 {/if}
 

@@ -10,6 +10,7 @@
 	} from "$lib/stores/defaultValues.svelte.js";
 	import LocationSelection from "./LocationSelection.svelte";
 	import { renderGEOJSON } from "$lib/utils/mapRenderLayers.js";
+	import LoadingIcon from "../common/LoadingIcon.svelte";
 
 	// --- Props & State ---
 	let {
@@ -27,6 +28,7 @@
 	let mapContainer = $state(null);
 	let map = $state.raw(null);
 	let locOverlay = $state(null);
+	let footprintLoading = $state(false);
 
 	// Non-reactive - managed manually to avoid effect loops
 	let marker;
@@ -35,9 +37,17 @@
 	let mapEffectBehind = false;
 
 	// --- Lifecycle ---
+	function preloadImages() {
+		Object.values(mapIcons).forEach(({ iconUrl }) => {
+			const img = new Image();
+			img.src = iconUrl;
+		});
+	}
+
 	onMount(async () => {
 		L = (await import("leaflet")).default;
 		await import("leaflet/dist/leaflet.css");
+		preloadImages();
 		initMap();
 		registerMapEvents();
 	});
@@ -88,8 +98,10 @@
 
 	// --- GEOJSON Layer ---
 	async function showGeoJSONLayer() {
+		footprintLoading = true;
 		clearGeoJSONLayer();
 		geoJSONLayer = await renderGEOJSON(map, interactive);
+		footprintLoading = false;
 	}
 
 	function clearGeoJSONLayer() {
@@ -185,26 +197,53 @@
 </script>
 
 <!-- Map Container -->
-<div bind:this={mapContainer} class="map">
-	<!-- Location Overlay -->
-	{#if enableNav}
-		<div class="overlay" bind:this={locOverlay}>
-			<LocationSelection />
+<div class="map-wrapper">
+	<div bind:this={mapContainer} class="map" class:blurred={footprintLoading || appState.location.searching}>
+		<!-- Location Overlay -->
+		{#if enableNav}
+			<div class="overlay" bind:this={locOverlay}>
+				<LocationSelection />
+			</div>
+		{/if}
+	</div>
+
+	{#if footprintLoading || appState.location.searching}
+		<div class="loading-overlay">
+			<LoadingIcon />
 		</div>
 	{/if}
 </div>
 
 <style>
 	/* Map Container */
-	.map {
+	.map-wrapper {
+		position: relative;
 		width: 100%;
 		min-height: 700px;
+		height: 100%;
+	}
+
+	.map {
+		width: 100%;
 		height: 100%;
 		position: relative;
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		transition: filter 0.5s ease;
 	}
 
+	.map.blurred {
+		filter: blur(4px);
+		pointer-events: none;
+	}
+
+	.loading-overlay {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 1001;
+	}
 	/* Location Overlay */
 	.overlay {
 		position: absolute;

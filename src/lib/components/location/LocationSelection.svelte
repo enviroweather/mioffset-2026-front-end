@@ -17,6 +17,7 @@
 	async function handleSubmit(e) {
 		e.preventDefault();
 		noResults = false;
+		appState.location.searching = true;
 		try {
 			const res = await fetch(
 				`/api/geocode?query=${encodeURIComponent(appState.location.address)}`,
@@ -28,17 +29,19 @@
 
 			const data = await res.json();
 			const results = data.results || [];
-
-			if (results.length > 0) {
+			if (results.length > 0 || results.address.countrySubdivisionName === "Michigan") {
 				appState.location.fly = true;
 				appState.location.lat = parseFloat(results[0].position.lat);
 				appState.location.lng = parseFloat(results[0].position.lon);
+				appState.location.address = results[0].address.freeformAddress ?? appState.location.address;
 			} else {
 				noResults = true;
 			}
 		} catch (error) {
 			console.error("Geocoding error:", error);
 			noResults = true;
+		} finally {
+			appState.location.searching = false;
 		}
 	}
 
