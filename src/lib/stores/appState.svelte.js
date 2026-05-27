@@ -36,6 +36,10 @@ export function resetFormState() {
 
 // sample function that will call our API to get the shape file
 export async function representResults() {
+	// if nothing has changed then don't request
+	if(appState.mapIsUpToDate){
+		return;
+	}
 	appState.mapLoading = true;
 	const output = await fetchResults();
 	appState.geoJSONData = output;

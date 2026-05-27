@@ -8,7 +8,7 @@ export async function renderGEOJSON(map, showLegend = true) {
 	if (!map) {
 		return;
 	}
-	await new Promise((resolve) => setTimeout(resolve, 2000));
+	await new Promise((resolve) => setTimeout(resolve, 1000));
 
 	const lineWeight = 2;
 	// tailwind RGB values
@@ -25,7 +25,6 @@ export async function renderGEOJSON(map, showLegend = true) {
 	geoJSONLayer.eachLayer((l) => {
 		const name = l.feature?.properties?.name ?? null;
 		const oef = l.feature?.properties?.odor_emission_factor ?? "";
-
 		if (name)
 			l.bindTooltip(name + " " + oef, { sticky: true, direction: "top" });
 
