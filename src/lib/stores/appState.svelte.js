@@ -34,18 +34,25 @@ export function resetFormState() {
 	);
 }
 
-// sample function that will call our API to get the shape file
 export async function representResults() {
-	// if nothing has changed then don't request
-	if(appState.mapIsUpToDate){
+	if (appState.mapIsUpToDate) {
 		return;
 	}
 	appState.mapLoading = true;
-	const output = await fetchResults();
-	appState.geoJSONData = output;
-	// TODO: REMOVE, temp code to snap the location to the test geoJSON
-	appState.location.lat = output.inputs.lat;
-	appState.location.lng = output.inputs.lon;
-	await tick(); // let these changes take place first, then mark map fresh
-	appState.mapIsUpToDate = true;
+	try {
+		const totalEmission = entries.reduce((sum, e) => {
+			const data = e.type === "storage" ? e.storage : e.animal;
+			return sum + (data?.totalEmission ?? 0);
+		}, 0);
+		const output = await fetchResults(
+			appState.location.lat,
+			appState.location.lng,
+			totalEmission,
+		);
+		appState.geoJSONData = output;
+		await tick();
+		appState.mapIsUpToDate = true;
+	} finally {
+		appState.mapLoading = false;
+	}
 }
