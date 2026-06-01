@@ -14,8 +14,8 @@
 	<!-- Header -->
 	<header class="app-header">
 		<div class="header-content">
-			<h1 class="logo">DRAFT VERSION - Michigan OFFSet</h1>
-			<p class="tagline">Odor From Feedlots Setback Estimation Tool</p>
+			<h1 class="logo"> Michigan Offset Odor Plume Model DRAFT</h1>
+			<p class="tagline">In-progress web application. Results may be inaccurate and not to be used for decision making.</p>
 		</div>
 		<Navigation />
 	</header>
