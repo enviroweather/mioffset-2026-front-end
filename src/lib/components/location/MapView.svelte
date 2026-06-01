@@ -162,7 +162,7 @@
 		if (!map) return;
 		if (appState.mapIsUpToDate) {
 			showGeoJSONLayer();
-		} else clearGeoJSONLayer();
+		}
 	});
 
 	// Mark results stale whenever entries or the selected location change

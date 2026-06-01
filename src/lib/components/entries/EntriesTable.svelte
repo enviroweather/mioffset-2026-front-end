@@ -44,6 +44,11 @@
 			<span class="entry-count"
 				>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span
 			>
+			<div class="submission-btn">
+				<button class="btn-footprint" onclick={representResults}
+					>Show Footprint</button
+				>
+			</div>
 		</div>
 	</div>
 	<!-- Data Table -->
@@ -92,13 +97,7 @@
 					</tr>
 				{/each}
 				<tr class="total-row">
-					<td>
-						<div class="submission-btn">
-							<button class="btn-footprint" onclick={representResults}
-								>Show Footprint</button
-							>
-						</div>
-					</td>
+					<td> </td>
 					<td colspan="8"></td>
 					<td class="numeric total-value">{totalOEF.toFixed(2)}</td>
 					<td></td>
@@ -131,6 +130,7 @@
 	.header-left {
 		display: flex;
 		align-items: baseline;
+		width: 100%;
 		gap: 0.75rem;
 	}
 
@@ -148,7 +148,8 @@
 	/* Submit Button */
 	.submission-btn {
 		display: flex;
-		margin-top: 0.5rem;
+		/* margin-top: 0.5rem; */
+		margin-left: auto;
 		min-width: 170px;
 	}
 	.btn-footprint {

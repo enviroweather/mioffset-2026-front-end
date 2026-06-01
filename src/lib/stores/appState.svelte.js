@@ -3,7 +3,7 @@ import {
 	DEFAULT_LOCATION,
 	DEFAULT_EMISSION as DEFAULT_EMISSION,
 } from "./defaultValues.svelte.js";
-import { fetchResults } from "$lib/api/api.js";
+import { fetchResults } from "$lib/api/fetchGeoJSON.js";
 
 const DEFAULT_DRAFTS = {
 	animal: { ...DEFAULT_EMISSION },
@@ -44,6 +44,7 @@ export async function representResults() {
 			const data = e.type === "storage" ? e.storage : e.animal;
 			return sum + (data?.totalEmission ?? 0);
 		}, 0);
+		
 		const output = await fetchResults(
 			appState.location.lat,
 			appState.location.lng,

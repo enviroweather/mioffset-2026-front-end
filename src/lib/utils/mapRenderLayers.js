@@ -8,7 +8,7 @@ export async function renderGEOJSON(map, showLegend = true) {
 	if (!map) {
 		return;
 	}
-	await new Promise((resolve) => setTimeout(resolve, 1000));
+	// await new Promise((resolve) => setTimeout(resolve, 1000));
 
 	const lineWeight = 2;
 	// tailwind RGB values

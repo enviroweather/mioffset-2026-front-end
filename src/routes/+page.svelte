@@ -9,19 +9,19 @@
 </script>
 
 <div class="page-container">
-	<div class="entries-wrapper">
-		<EntriesTable />
-	</div>
 	<section class="section odor-wrapper">
 		<EmissionForm />
 	</section>
-
+	
 	<section class="section location-wrapper">
 		<MapView />
 		{#if appState.mapIsUpToDate}
 		<FootprintTable />
 		{/if}
 	</section>
+	<div class="entries-wrapper">
+		<EntriesTable />
+	</div>
 </div>
 
 <style>
@@ -34,8 +34,8 @@
 		display: grid;
 		grid-template-columns: 0.5fr 1fr;
 		grid-template-areas:
-			"entries entries"
-			"odor    map";
+			"odor    map"
+			"entries entries";
 		gap: 0rem;
 	}
 

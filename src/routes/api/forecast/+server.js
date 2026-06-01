@@ -39,7 +39,6 @@ export async function GET({ url }) {
 			const res = await fetch(`${awsURL}?${params}`, {
 				headers: { "User-Agent": "Enviroweather/1.0" },
 			});
-			console.log(res)
 			if (res.ok) {
 				const data = await res.json();
 				return json(data);
