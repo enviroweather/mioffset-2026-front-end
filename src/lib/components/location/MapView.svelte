@@ -90,6 +90,7 @@
 			appState.location.fly = true;
 			appState.location.lat = lat;
 			appState.location.lng = lng;
+			appState.location.address = "";
 			onLocationSelect({ lat, lng });
 		});
 		map.on("zoom", () => {

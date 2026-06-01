@@ -20,7 +20,7 @@
 			<input
 				id="address"
 				name="address"
-				placeholder="673 Auditorium Rd, East Lansing, MI 48824"
+				placeholder=""
 				bind:value={appState.location.address}
 			/>
 		</div>
