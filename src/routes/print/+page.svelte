@@ -41,7 +41,7 @@
 	<!-- Report Header -->
 	<header class="report-header">
 		<div class="report-title">
-			<h1>MI OFFSET</h1>
+			<h1>Michigan OFFSet</h1>
 			<p class="report-subtitle">Odor Footprint Report</p>
 		</div>
 		<div class="report-meta">
@@ -208,7 +208,7 @@
 		height: 100%;
 	}
 
-	/* Expand tables to full width — remove scroll containers on this page */
+	/* Expand tables to full width - remove scroll containers on this page */
 	.print-page :global(.table-wrapper),
 	.print-page :global(.table-scroll) {
 		overflow: visible;

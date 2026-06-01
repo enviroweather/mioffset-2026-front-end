@@ -14,8 +14,8 @@
 	<!-- Header -->
 	<header class="app-header">
 		<div class="header-content">
-			<h1 class="logo">MI OFFSET</h1>
-			<p class="tagline">Weather for IPM Decisions in Michigan</p>
+			<h1 class="logo">DRAFT VERSION - Michigan OFFSet</h1>
+			<p class="tagline">Odor From Feedlots Setback Estimation Tool</p>
 		</div>
 		<Navigation />
 	</header>
@@ -27,7 +27,7 @@
 
 	<!-- Footer -->
 	<footer class="app-footer">
-		<p>&copy; 2026 MI OFFSET. All rights reserved.</p>
+		<p>&copy; 2026 Michigan OFFSet. All rights reserved.</p>
 		<p>
 			<a href="https://enviroweather.msu.edu">Enviroweather</a> | Michigan State
 			University

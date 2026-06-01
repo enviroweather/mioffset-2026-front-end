@@ -1,7 +1,7 @@
 <!-- Intro & Description -->
 <div class="about-container">
 	<div class="hero">
-		<h1>MI OFFSET 2026</h1>
+		<h1>Michigan OFFSet 2026</h1>
 		<p class="subtitle">
 			A tool for evaluating odor setback distance to minimize odor nuisance complaints.
 		</p>
