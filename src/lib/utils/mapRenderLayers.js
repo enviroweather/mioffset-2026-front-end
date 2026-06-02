@@ -4,14 +4,14 @@ import { appState } from "$lib/stores/appState.svelte.js";
  * Fetches the geoJSON from mapLayer file
  * Returns the GeoJSON layer so the caller can remove it later.
  */
-export async function renderGEOJSON(map, showLegend = true) {
+export async function renderGEOJSON(map, interactive = true) {
 	if (!map) {
 		return;
 	}
-	// await new Promise((resolve) => setTimeout(resolve, 1000));
 
 	const lineWeight = 2;
-	// tailwind RGB values
+	// Tailwind RGB values. pop() assigns from the end, so contours receive colors in order:
+	// GREEN (innermost/highest concentration) -> BLUE -> RED (outermost/lowest concentration).
 	const RED = "#ef4444";
 	const GREEN = "#22c55e";
 	const BLUE = "#3b82f6";
@@ -31,13 +31,15 @@ export async function renderGEOJSON(map, showLegend = true) {
 		if (!l.setStyle) return;
 		const color = colors.pop();
 		l.setStyle({ weight: lineWeight, color });
-		if (!showLegend && name) legendEntries.push({ color, name, oef });
+		if (interactive && name) legendEntries.push({ color, name, oef });
 
 		l.on("mouseover", () => l.setStyle({ weight: lineWeight + 2 }));
 		l.on("mouseout", () => l.setStyle({ weight: lineWeight }));
 	});
 
 	if (legendEntries.length > 0)
+		// _legend is stored on the layer so clearGeoJSONLayer() in MapView can call
+		// _legend.remove() before replacing the layer, preventing duplicate legends.
 		geoJSONLayer._legend = createLegend(map, legendEntries);
 
 	// centers the json bounds on the map view, interrupting any in-progress animation

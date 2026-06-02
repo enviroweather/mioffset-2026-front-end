@@ -1,21 +1,21 @@
 <script>
 	// --- Imports ---
-	import { page } from "$app/stores";
+	import { page } from "$app/state";
 </script>
 
 <div class="nav-content">
-	<a href="/" class="nav-link" class:active={$page.url.pathname === "/"}>
+	<a href="/" class="nav-link" class:active={page.url.pathname === "/"}>
 		Home
 	</a>
 	<a
 		href="/print"
 		class="nav-link"
-		class:active={$page.url.pathname === "/print"}>Print</a
+		class:active={page.url.pathname === "/print"}>Print</a
 	>
 	<a
 		href="/about"
 		class="nav-link"
-		class:active={$page.url.pathname === "/about"}
+		class:active={page.url.pathname === "/about"}
 	>
 		About
 	</a>
