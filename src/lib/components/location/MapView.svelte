@@ -26,12 +26,15 @@
 			"default",
 	);
 
+	// $state.raw rather than $state: Leaflet objects are large and can break the library
+	// raw still signals effects when the top-level variables are reassigned.
 	let L = $state.raw(null);
 	let mapContainer = $state(null);
 	let map = $state.raw(null);
 	let locOverlay = $state(null);
 	let footprintLoading = $derived(appState.mapLoading);
-	// Non-reactive - managed manually to avoid effect loops
+	// Plain booleans, deliberately NOT $state - mutating them must not re-trigger the effects
+	// that read them.
 	let marker;
 	let geoJSONLayer;
 	let initialized = false;
@@ -166,12 +169,15 @@
 		}
 	});
 
-	// Mark results stale whenever entries or the selected location change
-	// Skip the initial run so navigating back doesn't wipe a valid mapIsUpToDate
+	// Mark results stale whenever entries or the selected location change.
 	$effect(() => {
+		// `void expr` is the Svelte 5 idiom for "track this as a dependency without using the value."
 		void entries.length;
 		void appState.location.lat;
 		void appState.location.lng;
+		// Skip the initial run: on first mount these dependencies haven't changed, so there's nothing
+		// to stale. Without the skip a footprint already loaded would be
+		// immediately invalidated the moment the component mounts.
 		if (!mapEffectBehind) {
 			mapEffectBehind = true;
 			return;
@@ -183,7 +189,9 @@
 	$effect(() => {
 		if (!L || !map) return;
 		const { lat, lng } = appState.location;
-		// Read and immediately clear the fly flag without creating a dependency on it
+		// fly is read and cleared via untrack so this effect doesn't depend on it.
+		// If fly were read normally, clearing fly = false here would re-trigger this
+		// same effect in a loop.
 		const fly = untrack(() => appState.location.fly);
 		untrack(() => {
 			appState.location.fly = false;

@@ -7,9 +7,12 @@ export function CalculateTotalEmission(oenRate, odorControlFactor, area) {
 		oenRate == null ||
 		odorControlFactor == null ||
 		area == null ||
-		area === ""
+		area === "" // area comes from <input type="number"> and arrives as "" before the user types;
+		            // other params come from dropdowns and arrive as null
 	)
 		return null;
 
+	// Number(area) coerces the string input value to a number;
+	// the checks above guarantee it is non-null and non-empty here.
 	return (oenRate * odorControlFactor * Number(area)) / 10000;
 }

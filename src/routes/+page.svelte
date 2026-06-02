@@ -1,20 +1,54 @@
 <script>
 	// --- Imports ---
+	import { onMount } from "svelte";
 	import MapView from "$lib/components/location/MapView.svelte";
 	import EmissionForm from "$lib/components/emission/EmissionForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
-	import LoadingIcon from "$lib/components/common/LoadingIcon.svelte";
-	import { appState } from "$lib/stores/appState.svelte.js";
+	import { appState, entries, loadFromPermalink } from "$lib/stores/appState.svelte.js";
+
+	// Parsed here (not in onMount) so appState.location.lat/lng are set and focusOnMount
+	// is correct before MapView mounts. Moving this into onMount would cause MapView to
+	// render at default coordinates first, then jump to the permalink location.
+	const _p = new URLSearchParams(window.location.search);
+	const _lat = parseFloat(_p.get("lat"));
+	const _lon = parseFloat(_p.get("lon"));
+	const _odorIndex = parseFloat(_p.get("odor_index"));
+	const permalink = (!isNaN(_lat) && !isNaN(_lon) && !isNaN(_odorIndex))
+		? { lat: _lat, lon: _lon, odorIndex: _odorIndex }
+		: null;
+	if (permalink) {
+		appState.location.lat = permalink.lat;
+		appState.location.lng = permalink.lon;
+	}
+
+	// Deferred to onMount because fetchResults uses a relative URL (/api/forecast)
+	// that requires the SvelteKit runtime to be active.
+	onMount(async () => {
+		if (permalink) {
+			await loadFromPermalink(permalink.lat, permalink.lon, permalink.odorIndex);
+		}
+	});
+
+	// Keep the address bar in sync whenever lat, lon, or odor_index changes.
+	$effect(() => {
+		const { lat, lng } = appState.location;
+		const odorIndex = entries.reduce((sum, e) => {
+			const data = e.type === "storage" ? e.storage : e.animal;
+			return sum + (data?.totalEmission ?? 0);
+		}, 0);
+		const params = new URLSearchParams({ lat, lon: lng, odor_index: odorIndex });
+		window.history.replaceState(null, "", `?${params}`);
+	});
 </script>
 
 <div class="page-container">
 	<section class="section odor-wrapper">
 		<EmissionForm />
 	</section>
-	
+
 	<section class="section location-wrapper">
-		<MapView />
+		<MapView focusOnMount={permalink} />
 		{#if appState.mapIsUpToDate}
 		<FootprintTable />
 		{/if}

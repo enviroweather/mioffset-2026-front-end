@@ -2,7 +2,7 @@
 import { awsURL } from "$env/static/private";
 import { json } from "@sveltejs/kit";
 
-const MAX_RETRIES = 4;
+const MAX_RETRIES = 4; // 4 total attempts (not 4 retries after an initial attempt)
 const RETRY_DELAY = 1000;
 
 // --- GET Handler ---
@@ -44,11 +44,10 @@ export async function GET({ url }) {
 				return json(data);
 			}
 
-			// Server is in a cold start so try again
-			if (res.status === 503 && attempt < MAX_RETRIES) {
+			// 503 = AWS Lambda cold start -> timeout; Try again
+			if (res.status === 503) {
 				await new Promise((resolve) => {
 					setTimeout(resolve, RETRY_DELAY * (attempt + 1));
-					console.log("Attempt at server call failed in a 503 error, trying again");
 				});
 				continue;
 			}

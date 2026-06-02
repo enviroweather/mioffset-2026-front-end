@@ -1,8 +1,9 @@
-# MI Offset – Odor Dispersion Map
+# MI Offset - Odor Dispersion Map
 
 MI Offset is a web application that calculates how far odor will travel based on site details and wind patterns. This repo is the front-end interface. See the About page within the app for more details.
 
 **Tech stack:**
+
 - [SvelteKit 2](https://svelte.dev/docs/kit) + [Svelte 5](https://svelte.dev) (runes mode)
 - [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/) interactive map - tiles
 - [TomTom Search API](https://developer.tomtom.com/) - address geocoding
@@ -95,8 +96,8 @@ vercel deploy
 
 This project relies on services with free tier usage limits:
 
-| Service | Free Tier Limit | Details |
-|---|---|---|
-| TomTom Search API | 2,500 daily transactions | [developer.tomtom.com/pricing](https://developer.tomtom.com/pricing) |
+| Service             | Free Tier Limit                                         | Details                                                                       |
+| ------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| TomTom Search API   | 2,500 daily transactions                                | [developer.tomtom.com/pricing](https://developer.tomtom.com/pricing)          |
 | OpenStreetMap Tiles | No key required. Heavy usage violates the usage policy. | [OSM Tile Usage Policy](https://operations.osmfoundation.org/policies/tiles/) |
-| Vercel Hobby Plan | 100 GB bandwidth/month, limited serverless invocations | [vercel.com/pricing](https://vercel.com/pricing) |
+| Vercel Hobby Plan   | 100 GB bandwidth/month, limited serverless invocations  | [vercel.com/pricing](https://vercel.com/pricing)                              |
