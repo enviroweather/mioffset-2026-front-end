@@ -12,7 +12,9 @@
 	// --- Dropdown Options ---
 	let animalTypeOptions = $derived(
 		appState.formDrafts.animal.species
-			? Object.keys(data.SPECIES[appState.formDrafts.animal.species]?.animalTypes || {})
+			? Object.keys(
+					data.SPECIES[appState.formDrafts.animal.species]?.animalTypes || {},
+				)
 			: [],
 	);
 	let housingTypeOptions = $derived(
@@ -33,7 +35,8 @@
 			appState.formDrafts.animal.housingType
 			? (data.SPECIES[appState.formDrafts.animal.species]?.animalTypes[
 					appState.formDrafts.animal.animalType
-				]?.housingType[appState.formDrafts.animal.housingType]?.oen_rate ?? null)
+				]?.housingType[appState.formDrafts.animal.housingType]?.oen_rate ??
+					null)
 			: null,
 	);
 
@@ -44,7 +47,11 @@
 	);
 
 	let totalEmission = $derived(
-		CalculateTotalEmission(oenRate, odorControlFactor, appState.formDrafts.animal.area),
+		CalculateTotalEmission(
+			oenRate,
+			odorControlFactor,
+			appState.formDrafts.animal.area,
+		),
 	);
 	// --- Form Step Config ---
 	const odorSteps = $derived([
@@ -138,7 +145,8 @@
 
 	// --- Effects ---
 	function resetIfInvalid(options, key) {
-		if (!options.includes(appState.formDrafts.animal[key])) appState.formDrafts.animal[key] = "";
+		if (!options.includes(appState.formDrafts.animal[key]))
+			appState.formDrafts.animal[key] = "";
 	}
 
 	// when species/animalType changes, the previously selected child value may no longer be valid

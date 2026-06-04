@@ -25,5 +25,10 @@ export const mapIcons = $state({
 		iconUrl: "poultry.png",
 		iconSize: [77, 70],
 		iconAnchor: [38, 35],
+	},
+	"Storage": {
+		iconUrl: "barn.png",
+		iconSize: [45],
+		iconAnchor: [38, 35],
 	}
 });

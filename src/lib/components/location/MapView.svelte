@@ -20,11 +20,14 @@
 		interactive = true,
 	} = $props();
 
-	let currentSpecies = $derived(
-		appState.formDrafts.animal.species ||
-			entries?.[0]?.animal?.species ||
-			"default",
-	);
+	let currentSpecies = $derived.by(() => {
+		if (appState.activeForm === "animal" && appState.formDrafts.animal.species)
+			return appState.formDrafts.animal.species;
+		if (appState.activeForm === "storage" && appState.formDrafts.storage.storageType)
+			return "Storage";
+		if (entries[0]?.type === "storage") return "Storage";
+		return entries[0]?.animal?.species || "default";
+	});
 
 	// $state.raw rather than $state: Leaflet objects are large and can break the library
 	// raw still signals effects when the top-level variables are reassigned.
