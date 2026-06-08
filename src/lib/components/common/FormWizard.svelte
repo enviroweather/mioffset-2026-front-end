@@ -46,7 +46,6 @@
 				>
 
 				<div class="form-group">
-					<label for={step.key}>{step.label}</label>
 					{#if step.type === "select"}
 						<select
 							id={step.key}
@@ -174,7 +173,6 @@
 	.form-actions {
 		display: flex;
 		gap: 1rem;
-		margin-top: 1rem;
 		justify-content: space-between;
 		align-items: center;
 	}

@@ -4,7 +4,7 @@ import { appState } from "$lib/stores/appState.svelte.js";
  * Fetches the geoJSON from mapLayer file
  * Returns the GeoJSON layer so the caller can remove it later.
  */
-export async function renderGEOJSON(map, interactive = true) {
+export async function renderGEOJSON(map, showLegend = false) {
 	if (!map) {
 		return;
 	}
@@ -31,7 +31,7 @@ export async function renderGEOJSON(map, interactive = true) {
 		if (!l.setStyle) return;
 		const color = colors.pop();
 		l.setStyle({ weight: lineWeight, color });
-		if (interactive && name) legendEntries.push({ color, name, oef });
+		if (showLegend && name) legendEntries.push({ color, name, oef });
 
 		l.on("mouseover", () => l.setStyle({ weight: lineWeight + 2 }));
 		l.on("mouseout", () => l.setStyle({ weight: lineWeight }));

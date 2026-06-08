@@ -18,12 +18,16 @@
 		enableNav = true,
 		focusOnMount = false,
 		interactive = true,
+		showLegend = false,
 	} = $props();
 
 	let currentSpecies = $derived.by(() => {
 		if (appState.activeForm === "animal" && appState.formDrafts.animal.species)
 			return appState.formDrafts.animal.species;
-		if (appState.activeForm === "storage" && appState.formDrafts.storage.storageType)
+		if (
+			appState.activeForm === "storage" &&
+			appState.formDrafts.storage.storageType
+		)
 			return "Storage";
 		if (entries[0]?.type === "storage") return "Storage";
 		return entries[0]?.animal?.species || "default";
@@ -61,6 +65,24 @@
 
 	onDestroy(() => map?.remove());
 
+	async function reverseGeocode() {
+		try {
+			const res = await fetch(
+				`/api/reverseGeocoding?lat=${appState.location.lat}&lng=${appState.location.lng}`,
+			);
+
+			if (!res.ok) {
+				throw new Error(`API call failed with status ${res.status}`);
+			}
+
+			const data = await res.json();
+			if (data.addresses?.[0]) {
+				appState.location.address = data.addresses[0].address.freeformAddress ?? "";
+			}
+		} catch (error) {
+			console.error("Reverse geocoding error:", error);
+		}
+	}
 	function initMap() {
 		const michiganBounds = L.latLngBounds(
 			L.latLng(41.55, -90.5),
@@ -97,7 +119,9 @@
 			appState.location.lat = lat;
 			appState.location.lng = lng;
 			appState.location.address = "";
+			appState.location.markerHidden = false;
 			onLocationSelect({ lat, lng });
+			reverseGeocode();
 		});
 		map.on("zoom", () => {
 			appState.location.zoom = map.getZoom();
@@ -107,7 +131,7 @@
 	// --- GEOJSON Layer ---
 	async function showGeoJSONLayer() {
 		clearGeoJSONLayer();
-		geoJSONLayer = await renderGEOJSON(map, interactive);
+		geoJSONLayer = await renderGEOJSON(map, showLegend);
 		appState.mapLoading = false;
 	}
 
@@ -238,7 +262,7 @@
 	.map-wrapper {
 		position: relative;
 		width: 100%;
-		min-height: 700px;
+		min-height: 621px;
 		height: 100%;
 	}
 

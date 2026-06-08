@@ -25,6 +25,7 @@ export const DEFAULT_LOCATION = {
 	mode: "address",
 	fly: false,
 	searching: false,
+	markerHidden: false,
 };
 
 // --- Default Emission ---

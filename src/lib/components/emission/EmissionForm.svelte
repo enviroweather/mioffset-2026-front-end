@@ -72,7 +72,7 @@
 		display: flex;
 		align-items: flex-start;
 		justify-content: space-between;
-		margin-bottom: 2rem;
+		margin-bottom: 1rem;
 		border-bottom: 2px solid #4caf50;
 		padding-bottom: 1rem;
 	}

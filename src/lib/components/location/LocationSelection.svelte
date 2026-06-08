@@ -34,6 +34,7 @@
 				appState.location.lat = parseFloat(results[0].position.lat);
 				appState.location.lng = parseFloat(results[0].position.lon);
 				appState.location.address = results[0].address.freeformAddress ?? appState.location.address;
+				appState.location.markerHidden = false;
 			} else {
 				noResults = true;
 			}
@@ -47,10 +48,14 @@
 
 	async function handleReset(e) {
 		e.preventDefault();
-		appState.location.lat = DEFAULT_LAT;
-		appState.location.lng = DEFAULT_LNG;
-		appState.location.address = "";
 		noResults = false;
+		appState.location.address = "";
+		if (appState.geoJSONData?.outputs) {
+			appState.location.markerHidden = true;
+		} else {
+			appState.location.lat = DEFAULT_LAT;
+			appState.location.lng = DEFAULT_LNG;
+		}
 	}
 
 	// subscribe to address changes to clear the no-results state

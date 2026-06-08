@@ -15,7 +15,7 @@
 			legend: "Enter OEF",
 			type: "number",
 			min: 0,
-			step: 0.01,
+			step: 1,
 			placeholder: "10",
 			helpText: "Total Odor Emission Factor (OEF) for This Site",
 			required: true,

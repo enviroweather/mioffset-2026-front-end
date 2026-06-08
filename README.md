@@ -31,8 +31,12 @@ MI Offset is a web application that calculates how far odor will travel based on
 
    ```sh
    TOMTOM_API_KEY="your_key_here"
-   baseURL="api.tomtom.com"
+   tomtomURL="api.tomtom.com"
    apiVersion=2
+   TOMTOM_API_KEY="Key Here"
+   awsURL="exampeurl-api.us-east-1.amazon.com/mioffset"
+   ACCESS_PASSPHRASE="Whatever you would like"
+   MI_OFFSET_PASSPHRASE_ENABLED=1
    ```
 
    Never commit `.env` - it is already in `.gitignore`.

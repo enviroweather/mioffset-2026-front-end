@@ -84,6 +84,7 @@
 					enableNav={false}
 					focusOnMount={true}
 					interactive={false}
+					showLegend={true}
 				/>
 			</div>
 		</section>
