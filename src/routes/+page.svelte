@@ -76,7 +76,7 @@
 	/* Grid Layout */
 	.page-container {
 		display: grid;
-		grid-template-columns: 0.5fr 1fr;
+		grid-template-columns: 0.5fr 2fr;
 		grid-template-areas:
 			"odor    map"
 			"entries entries";
@@ -112,7 +112,7 @@
 		}
 		.entries-wrapper,
 		.odor-wrapper,
-		.location-wrapper {
+		.map-wrapper {
 			min-width: 0;
 		}
 	}

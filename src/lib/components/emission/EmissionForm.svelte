@@ -20,7 +20,7 @@
 	<div class="form-header">
 		<div class="header-text">
 			<div class="header-wrapper">
-				<h2>Odor Emission Calculator</h2>
+				<h2>Emission Calculator</h2>
 				<div class="form-tabs">
 					<button
 						class="tab"
@@ -81,6 +81,7 @@
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;
+		gap: 1rem;
 		width: 100%;
 	}
 	.header-text {
@@ -90,6 +91,8 @@
 		margin: 0 0 0.5rem 0;
 		color: #2c3e50;
 		font-size: 1.5rem;
+		white-space: nowrap;
+		overflow: hidden;
 	}
 
 	.header-text p {

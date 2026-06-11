@@ -29,7 +29,7 @@ let flattenedByDataset = $derived(
 );
 let errorMsg = $state("");
 
-// ── GeoJSON builder ───────────────────────────────────────────────────────
+// ── GeoJSON builder (written by copoilet, trust with caution) ────────────
 
 // Each of the 80 model rows corresponds to a bearing at 4.5° increments
 // clockwise from North (row 0 = N = 0°, row 5 = NNE = 22.5°, …).

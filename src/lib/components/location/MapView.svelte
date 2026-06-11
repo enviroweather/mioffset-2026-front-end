@@ -77,7 +77,8 @@
 
 			const data = await res.json();
 			if (data.addresses?.[0]) {
-				appState.location.address = data.addresses[0].address.freeformAddress ?? "";
+				appState.location.address =
+					data.addresses[0].address.freeformAddress ?? "";
 			}
 		} catch (error) {
 			console.error("Reverse geocoding error:", error);
@@ -121,7 +122,6 @@
 			appState.location.address = "";
 			appState.location.markerHidden = false;
 			onLocationSelect({ lat, lng });
-			reverseGeocode();
 		});
 		map.on("zoom", () => {
 			appState.location.zoom = map.getZoom();
@@ -224,7 +224,8 @@
 			appState.location.fly = false;
 		});
 		placeOrUpdateMarker(lat, lng, resolveMarkerIcon());
-
+		reverseGeocode();
+		
 		// skip navigation on first placement unless focusOnMount is set
 		if (!initialized) {
 			initialized = true;
@@ -262,7 +263,7 @@
 	.map-wrapper {
 		position: relative;
 		width: 100%;
-		min-height: 621px;
+		min-height: 590px;
 		height: 100%;
 	}
 
