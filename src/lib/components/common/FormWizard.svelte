@@ -5,7 +5,6 @@
 		formState = $bindable(),
 		oenRate = null,
 		odorControlFactor = null,
-		totalEmission = null,
 		onSubmit = () => {},
 	} = $props();
 

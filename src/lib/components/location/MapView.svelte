@@ -135,7 +135,6 @@
 			appState.location.markerHidden = false;
 
 			onLocationSelect({ lat, lng });
-			reverseGeocode();
 		});
 		map.on("zoom", () => {
 			appState.location.zoom = map.getZoom();
@@ -240,7 +239,8 @@
 			appState.location.fly = false;
 		});
 		placeOrUpdateMarker(lat, lng, resolveMarkerIcon());
-
+		reverseGeocode();
+		
 		// skip navigation on first placement unless focusOnMount is set
 		if (!initialized) {
 			initialized = true;
@@ -278,7 +278,7 @@
 	.map-wrapper {
 		position: relative;
 		width: 100%;
-		min-height: 621px;
+		min-height: 590px;
 		height: 100%;
 	}
 
