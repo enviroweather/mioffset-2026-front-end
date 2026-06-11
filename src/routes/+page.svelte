@@ -6,6 +6,7 @@
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
 	import { appState, entries, loadFromPermalink } from "$lib/stores/appState.svelte.js";
+	import { getAndRun } from "$lib/utils/runModel.svelte.ts";
 
 	// Parsed here (not in onMount) so appState.location.lat/lng are set and focusOnMount
 	// is correct before MapView mounts. Moving this into onMount would cause MapView to
@@ -22,11 +23,10 @@
 		appState.location.lng = permalink.lon;
 	}
 
-	// Deferred to onMount because fetchResults uses a relative URL (/api/forecast)
-	// that requires the SvelteKit runtime to be active.
 	onMount(async () => {
 		if (permalink) {
-			await loadFromPermalink(permalink.lat, permalink.lon, permalink.odorIndex);
+			loadFromPermalink(permalink.lat, permalink.lon, permalink.odorIndex);
+			await getAndRun();
 		}
 	});
 

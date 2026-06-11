@@ -3,18 +3,15 @@
 	import MapView from "$lib/components/location/MapView.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
-	import {
-		appState,
-		entries,
-		representResults,
-	} from "$lib/stores/appState.svelte.js";
+	import { appState, entries } from "$lib/stores/appState.svelte.js";
+	import { getAndRun } from "$lib/utils/runModel.svelte.ts";
 	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
 
 	// MapView's stale effect resets mapIsUpToDate on mount, so re-assert it if a
 	// footprint was already generated before navigating to this page.
 	onMount(() => {
 		if (appState.geoJSONData?.outputs) {
-			representResults();
+			getAndRun();
 		}
 	});
 
