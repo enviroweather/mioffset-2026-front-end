@@ -77,7 +77,8 @@
 
 			const data = await res.json();
 			if (data.addresses?.[0]) {
-				appState.location.address = data.addresses[0].address.freeformAddress ?? "";
+				appState.location.address =
+					data.addresses[0].address.freeformAddress ?? "";
 			}
 		} catch (error) {
 			console.error("Reverse geocoding error:", error);
@@ -85,8 +86,8 @@
 	}
 	function initMap() {
 		const michiganBounds = L.latLngBounds(
-			L.latLng(41.55, -90.5),
-			L.latLng(48.3, -82.4),
+			L.latLng(40.55, -100.5),
+			L.latLng(48.3, -70.4),
 		);
 
 		map = L.map(mapContainer, {
@@ -110,16 +111,29 @@
 		}
 	}
 
+	// Extremely simple function that makes sure the lat lng are inside the michigan box
+	function valid_latlng(lat, lng) {
+		console.log("lat: " + lat);
+		console.log("lng: " + lng)
+		return (
+			(lng >= -.573 && lng <= -82.413) && (lat >= 41.696 && lat <= 46.306)
+		);
+	}
 	function registerMapEvents() {
 		if (!interactive) return;
 
 		map.on("click", (e) => {
 			const { lat, lng } = e.latlng;
+			console.log(valid_latlng(lat, lng));
+			if (!valid_latlng(lat, lng)) {
+				console.error("Clicked is not inside of michigan");
+			}
 			appState.location.fly = true;
 			appState.location.lat = lat;
 			appState.location.lng = lng;
 			appState.location.address = "";
 			appState.location.markerHidden = false;
+
 			onLocationSelect({ lat, lng });
 			reverseGeocode();
 		});
@@ -202,6 +216,7 @@
 		void entries.length;
 		void appState.location.lat;
 		void appState.location.lng;
+
 		// Skip the initial run: on first mount these dependencies haven't changed, so there's nothing
 		// to stale. Without the skip a footprint already loaded would be
 		// immediately invalidated the moment the component mounts.
@@ -216,6 +231,7 @@
 	$effect(() => {
 		if (!L || !map) return;
 		const { lat, lng } = appState.location;
+
 		// fly is read and cleared via untrack so this effect doesn't depend on it.
 		// If fly were read normally, clearing fly = false here would re-trigger this
 		// same effect in a loop.
