@@ -2,15 +2,15 @@
 	// --- Imports ---
 	import { onMount } from "svelte";
 	import MapView from "$lib/components/location/MapView.svelte";
-	import EmissionForm from "$lib/components/emission/EmissionForm.svelte";
+	import EmissionForm from "$lib/components/entries/EmissionForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
 	import {
 		appState,
 		entries,
 		loadFromPermalink,
-	} from "$lib/stores/appState.svelte.js";
-	import { getAndRun } from "$lib/utils/runModel.svelte.ts";
+	} from "$lib/state/appState.svelte.js";
+	import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
 
 	// Parsed here (not in onMount) so appState.location.lat/lng are set and focusOnMount
 	// is correct before MapView mounts. Moving this into onMount would cause MapView to
@@ -18,10 +18,10 @@
 	const _p = new URLSearchParams(window.location.search);
 	const _lat = parseFloat(_p.get("lat"));
 	const _lon = parseFloat(_p.get("lon"));
-	const _odorIndex = parseFloat(_p.get("odor_index"));
+	const _emissionIndex = parseFloat(_p.get("emission_index"));
 	const permalink =
-		!isNaN(_lat) && !isNaN(_lon) && !isNaN(_odorIndex)
-			? { lat: _lat, lon: _lon, odorIndex: _odorIndex }
+		!isNaN(_lat) && !isNaN(_lon) && !isNaN(_emissionIndex)
+			? { lat: _lat, lon: _lon, emissionIndex: _emissionIndex }
 			: null;
 	if (permalink) {
 		appState.location.lat = permalink.lat;
@@ -30,29 +30,29 @@
 
 	onMount(async () => {
 		if (permalink) {
-			loadFromPermalink(permalink.lat, permalink.lon, permalink.odorIndex);
+			loadFromPermalink(permalink.lat, permalink.lon, permalink.emissionIndex);
 			await getAndRun();
 		}
 	});
 
-	// Keep the address bar in sync whenever lat, lon, or odor_index changes.
+	// Keep the address bar in sync whenever lat, lon, or emission_index changes.
 	$effect(() => {
 		const { lat, lng } = appState.location;
-		const odorIndex = entries.reduce((sum, e) => {
+		const emissionIndex = entries.reduce((sum, e) => {
 			const data = e.type === "storage" ? e.storage : e.animal;
 			return sum + (data?.totalEmission ?? 0);
 		}, 0);
 		const params = new URLSearchParams({
 			lat,
 			lon: lng,
-			odor_index: odorIndex,
+			emission_index: emissionIndex,
 		});
 		window.history.replaceState(null, "", `?${params}`);
 	});
 </script>
 
 <div class="page-container">
-	<section class="section odor-wrapper">
+	<section class="section emission-wrapper">
 		<EmissionForm />
 	</section>
 
@@ -78,13 +78,12 @@
 		display: grid;
 		grid-template-columns: 0.5fr 2fr;
 		grid-template-areas:
-			"odor    map"
+			"emission    map"
 			"entries entries";
 		gap: 0rem;
 	}
 
 	.section {
-		display: flex;
 		padding: 1rem;
 	}
 
@@ -95,8 +94,8 @@
 		flex-direction: column;
 		padding: 1rem;
 	}
-	.odor-wrapper {
-		grid-area: odor;
+	.emission-wrapper {
+		grid-area: emission;
 	}
 	.map-wrapper {
 		grid-area: map;
@@ -106,12 +105,12 @@
 		.page-container {
 			grid-template-columns: 1fr;
 			grid-template-areas:
-				"odor"
+				"emission"
 				"entries"
 				"map";
 		}
 		.entries-wrapper,
-		.odor-wrapper,
+		.emission-wrapper,
 		.map-wrapper {
 			min-width: 0;
 		}

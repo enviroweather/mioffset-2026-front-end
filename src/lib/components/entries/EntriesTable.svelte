@@ -1,7 +1,7 @@
 <script>
 	// --- Imports ---
-	import { appState, entries } from "$lib/stores/appState.svelte.js";
-	import { getAndRun } from "$lib/utils/runModel.svelte.ts";
+	import { appState, entries } from "$lib/state/appState.svelte.js";
+	import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
 
 	let { interactive = true } = $props();
 	// --- Actions ---

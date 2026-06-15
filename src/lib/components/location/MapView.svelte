@@ -1,15 +1,16 @@
 <script>
 	// --- Imports ---
 	import { onMount, onDestroy, untrack } from "svelte";
-	import { appState, entries } from "$lib/stores/appState.svelte.js";
-	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
+	import { appState, entries } from "$lib/state/appState.svelte.js";
+	import { mapIcons, resolveMarkerIcon } from "$lib/state/mapIcons.svelte.js";
+	import { reverseGeocode } from "$lib/utils/map/reverseGeocode.js";
 	import {
 		LANDMARK_ZOOM,
 		MAX_ZOOM,
 		MIN_ZOOM,
-	} from "$lib/stores/defaultValues.svelte.js";
+	} from "$lib/state/defaultValues.svelte.js";
 	import LocationSelection from "./LocationSelection.svelte";
-	import { renderGEOJSON } from "$lib/utils/mapRenderLayers.js";
+	import { renderGEOJSON } from "$lib/utils/map/mapRenderLayers.js";
 	import LoadingIcon from "../common/LoadingIcon.svelte";
 
 	// --- Props & State ---
@@ -65,25 +66,6 @@
 
 	onDestroy(() => map?.remove());
 
-	async function reverseGeocode() {
-		try {
-			const res = await fetch(
-				`/api/reverseGeocoding?lat=${appState.location.lat}&lng=${appState.location.lng}`,
-			);
-
-			if (!res.ok) {
-				throw new Error(`API call failed with status ${res.status}`);
-			}
-
-			const data = await res.json();
-			if (data.addresses?.[0]) {
-				appState.location.address =
-					data.addresses[0].address.freeformAddress ?? "";
-			}
-		} catch (error) {
-			console.error("Reverse geocoding error:", error);
-		}
-	}
 	function initMap() {
 		const michiganBounds = L.latLngBounds(
 			L.latLng(40.55, -100.5),
@@ -112,9 +94,9 @@
 	}
 
 	// Extremely simple function that makes sure the lat lng are inside the michigan box
-	function valid_latlng(lat, lng) {
+	function validLatLng(lat, lng) {
 		console.log("lat: " + lat);
-		console.log("lng: " + lng)
+		console.log("lng: " + lng);
 		return (
 			(lng >= -.573 && lng <= -82.413) && (lat >= 41.696 && lat <= 46.306)
 		);
@@ -124,8 +106,8 @@
 
 		map.on("click", (e) => {
 			const { lat, lng } = e.latlng;
-			console.log(valid_latlng(lat, lng));
-			if (!valid_latlng(lat, lng)) {
+			console.log(validLatLng(lat, lng));
+			if (!validLatLng(lat, lng)) {
 				console.error("Clicked is not inside of michigan");
 			}
 			appState.location.fly = true;
@@ -156,15 +138,6 @@
 	}
 
 	// --- Marker ---
-
-	function resolveMarkerIcon() {
-		const mapFresh = appState.mapIsUpToDate ? "default-fresh" : "default";
-		const key =
-			currentSpecies !== "default" && !appState.mapIsUpToDate
-				? currentSpecies
-				: mapFresh;
-		return L.icon(mapIcons[key] ?? mapIcons["default"]);
-	}
 
 	function placeOrUpdateMarker(lat, lng, icon) {
 		if (marker) {
@@ -238,8 +211,10 @@
 		untrack(() => {
 			appState.location.fly = false;
 		});
-		placeOrUpdateMarker(lat, lng, resolveMarkerIcon());
-		reverseGeocode();
+		placeOrUpdateMarker(lat, lng, resolveMarkerIcon(L, currentSpecies, appState.mapIsUpToDate));
+		reverseGeocode(lat, lng).then((address) => {
+			if (address !== null) appState.location.address = address;
+		});
 		
 		// skip navigation on first placement unless focusOnMount is set
 		if (!initialized) {

@@ -329,16 +329,16 @@ export function legacyFodModel(
 	}
 
 	// ── Step 3: Wind-stability class array f[80][3] ───────────────────────────
-	// f[row][0] = class for 5% threshold
+	// f[row][0] = class for 1.5% threshold
 	// f[row][1] = class for 3% threshold
-	// f[row][2] = class for 1.5% threshold
+	// f[row][2] = class for 5% threshold
 	const f: number[][] = Array.from({ length: 80 }, () => [0, 0, 0]);
 
 	for (let d = 0; d < 16; d++) {
 		const fVals: [number, number, number] = [
-			findWindClass(wc[d], 5), // col 0 — 5%
+			findWindClass(wc[d], 1.5), // col 0 — 1.5%
 			findWindClass(wc[d], 3), // col 1 — 3%
-			findWindClass(wc[d], 1.5) // col 2 — 1.5%
+			findWindClass(wc[d], 5) // col 2 — 5%
 		];
 		for (const [start, end] of ROW_RANGES[d]) {
 			for (let row = start; row < end; row++) {
@@ -362,15 +362,18 @@ export function legacyFodModel(
 	}
 
 	// ── Step 5: direction table for human viewing, all rows
-	const setbackTable:SetbackTableRows[] = SETBACK_TABLE_ROW_LABELS.map((label, row) => {
-		return {
-			label, 
-			d5pct: D[row][0],
-			d3pct: D[row][1],
-			d1_5pct: D[row][2]
-		 }
+	// Python: Dtbl=np.copy(D); Dtbl[1:79,:]=D[0:78,:]; Dtbl[0]=D[79,:]
+	// Shifts D right by 1 so N occupies rows 0-2, matching the legacy MI table format.
+	const Dtbl: number[][] = D.map(row => [...row]);
+	for (let i = 1; i < 79; i++) Dtbl[i] = [...D[i - 1]];
+	Dtbl[0] = [...D[79]];
 
-	});
+	const setbackTable: SetbackTableRows[] = SETBACK_TABLE_ROW_LABELS.map((label, row) => ({
+		label,
+		d5pct: Dtbl[row][0],
+		d3pct: Dtbl[row][1],
+		d1_5pct: Dtbl[row][2]
+	}));
 
 	return { D, setbackTable };
 }

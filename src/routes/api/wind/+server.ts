@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { loadFromS3 } from '$lib/utils/fodLocalModel/server/s3Client';
-import { DATASETS, type Dataset, type WindDataRecord } from '$lib/utils/fodLocalModel/windData';
+import { loadFromS3 } from '$lib/utils/model/fodLocalModel/server/s3Client';
+import { DATASETS, type Dataset, type WindDataRecord } from '$lib/utils/model/fodLocalModel/windData';
 
 function pad3(n: number): string {
 	return String(n).padStart(3, '0');

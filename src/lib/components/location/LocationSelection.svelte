@@ -3,11 +3,11 @@
 	import ManualCoords from "$lib/components/location/ManualCoords.svelte";
 	import Address from "$lib/components/location/AddressSearch.svelte";
 	import LocationUnknown from "./LocationUnknown.svelte";
-	import { appState } from "$lib/stores/appState.svelte.js";
+	import { appState } from "$lib/state/appState.svelte.js";
 	import {
 		DEFAULT_LAT,
 		DEFAULT_LNG,
-	} from "$lib/stores/defaultValues.svelte.js";
+	} from "$lib/state/defaultValues.svelte.js";
 	import CollapsibleButton from "../common/CollapsibleButton.svelte";
 
 	// --- State ---

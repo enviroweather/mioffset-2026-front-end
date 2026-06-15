@@ -2,19 +2,19 @@ import { tick } from "svelte";
 import {
 	geodeticDistance,
 	closestGridPoint,
-} from "$lib/utils/fodLocalModel/geo.js";
+} from "$lib/utils/model/fodLocalModel/geo.js";
 
 import {
 	WindData,
 	type WindDataRecord,
-} from "$lib/utils/fodLocalModel/windData";
+} from "$lib/utils/model/fodLocalModel/windData";
 
 import {
 	legacyFodModel,
 	type ModelOutput,
-} from "$lib/utils/fodLocalModel/fodModel";
+} from "$lib/utils/model/fodLocalModel/fodModel";
 
-import { appState, entries } from "$lib/stores/appState.svelte.js";
+import { appState, entries } from "$lib/state/appState.svelte.js";
 
 // ── location (reactive from appState) ─────────────────────────────────────
 let Lat = $derived(appState.location.lat);
@@ -42,15 +42,15 @@ function buildGeoJSONData(
 	E: number,
 ) {
 	const thresholds = [
-		{ col: 2, name: "5% Frequency" },
-		{ col: 1, name: "3% Frequency" },
 		{ col: 0, name: "1.5% Frequency" },
+		{ col: 1, name: "3% Frequency" },
+		{ col: 2, name: "5% Frequency" },
 	];
 
 	const features = thresholds.map(({ col, name }) => {
 		const ring: [number, number][] = ROW_BEARINGS.map((bearing, i) => {
-			const pt = geodeticDistance(lat, lon, result.D[i][col], bearing);
-			return [pt.lon, pt.lat]; // GeoJSON is [lon, lat]
+			const point = geodeticDistance(lat, lon, result.D[i][col], bearing);
+			return [point.lon, point.lat]; // GeoJSON is [lon, lat]
 		});
 		ring.push(ring[0]); // close the polygon
 		return {

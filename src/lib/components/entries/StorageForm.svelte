@@ -7,8 +7,8 @@
 		appState,
 		entries,
 		resetFormState,
-	} from "$lib/stores/appState.svelte.js";
-	import { CalculateTotalEmission } from "$lib/utils/OdorEmissionFactor.js";
+	} from "$lib/state/appState.svelte.js";
+	import { CalculateTotalEmission } from "$lib/utils/model/OdorEmissionFactor.js";
 
 	let technologies = $derived(Object.keys(animalData.TECH || {}));
 

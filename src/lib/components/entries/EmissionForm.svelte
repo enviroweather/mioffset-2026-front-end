@@ -1,7 +1,7 @@
 <script>
 	import AnimalForm from "./AnimalForm.svelte";
 	import StorageForm from "./StorageForm.svelte";
-	import { appState } from "$lib/stores/appState.svelte.js";
+	import { appState } from "$lib/state/appState.svelte.js";
 	import ManualForm from "./ManualForm.svelte";
 
 	const subtitles = {
