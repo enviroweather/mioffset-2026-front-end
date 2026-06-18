@@ -18,15 +18,15 @@ export const appState = $state({
 	activeForm: "animal",
 	mapIsUpToDate: false,
 	mapLoading: false,
+	suppressStale: false,
 });
 
-/** @type {any[]} */
 export const entries = $state([]);
 
 // --- Actions ---
 export function resetFormState() {
-	const form = /** @type {Record<string, any>} */ (appState.formDrafts);
-	const drafts = /** @type {Record<string, any>} */ (DEFAULT_DRAFTS);
+	const form = appState.formDrafts;
+	const drafts = DEFAULT_DRAFTS;
 	Object.assign(form[appState.activeForm], drafts[appState.activeForm]);
 }
 

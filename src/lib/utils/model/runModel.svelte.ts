@@ -71,6 +71,8 @@ function buildGeoJSONData(
 		.join("\n");
 
 	return {
+		sourceLat: lat,
+		sourceLng: lon,
 		outputs: {
 			map: { data: { type: "FeatureCollection", features } },
 			table: { data: `Toward  Distance_in_Miles\n5%  3%  1.5%\n${tableRows}` },
