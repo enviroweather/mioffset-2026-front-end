@@ -5,40 +5,40 @@
 	import EmissionForm from "$lib/components/emission/EmissionForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
-	import { appState, entries, loadFromPermalink } from "$lib/stores/appState.svelte.js";
+	import {
+		appState,
+		entries,
+		loadFromEntriesPermalink,
+	} from "$lib/stores/appState.svelte.js";
+	import { encodeState, decodeState } from "$lib/utils/permalink.js";
 
 	// Parsed here (not in onMount) so appState.location.lat/lng are set and focusOnMount
 	// is correct before MapView mounts. Moving this into onMount would cause MapView to
 	// render at default coordinates first, then jump to the permalink location.
-	const _p = new URLSearchParams(window.location.search);
-	const _lat = parseFloat(_p.get("lat"));
-	const _lon = parseFloat(_p.get("lon"));
-	const _odorIndex = parseFloat(_p.get("odor_index"));
-	const permalink = (!isNaN(_lat) && !isNaN(_lon) && !isNaN(_odorIndex))
-		? { lat: _lat, lon: _lon, odorIndex: _odorIndex }
-		: null;
-	if (permalink) {
-		appState.location.lat = permalink.lat;
-		appState.location.lng = permalink.lon;
+	const decodedState = decodeState(
+		new URLSearchParams(window.location.search).get("d"),
+	);
+
+	if (decodedState) {
+		appState.location.lat = decodedState.location.lat;
+		appState.location.lng = decodedState.location.lng;
 	}
 
 	// Deferred to onMount because fetchResults uses a relative URL (/api/forecast)
 	// that requires the SvelteKit runtime to be active.
 	onMount(async () => {
-		if (permalink) {
-			await loadFromPermalink(permalink.lat, permalink.lon, permalink.odorIndex);
+		if (decodedState) {
+			await loadFromEntriesPermalink(
+				decodedState.entries,
+				decodedState.location,
+			);
 		}
 	});
 
-	// Keep the address bar in sync whenever lat, lon, or odor_index changes.
+	// Keep the address bar in sync with current entries + location.
 	$effect(() => {
-		const { lat, lng } = appState.location;
-		const odorIndex = entries.reduce((sum, e) => {
-			const data = e.type === "storage" ? e.storage : e.animal;
-			return sum + (data?.totalEmission ?? 0);
-		}, 0);
-		const params = new URLSearchParams({ lat, lon: lng, odor_index: odorIndex });
-		window.history.replaceState(null, "", `?${params}`);
+		const encoded = encodeState(entries, appState.location);
+		window.history.replaceState(null, "", `?d=${encoded}`);
 	});
 </script>
 
@@ -48,9 +48,9 @@
 	</section>
 
 	<section class="section location-wrapper">
-		<MapView focusOnMount={permalink} />
+		<MapView focusOnMount={decodedState} />
 		{#if appState.mapIsUpToDate}
-		<FootprintTable />
+			<FootprintTable />
 		{/if}
 	</section>
 	<div class="entries-wrapper">
@@ -106,5 +106,4 @@
 			min-width: 0;
 		}
 	}
-
 </style>

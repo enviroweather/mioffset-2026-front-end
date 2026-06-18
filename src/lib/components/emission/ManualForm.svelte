@@ -25,9 +25,8 @@
 	// --- Submit Handler ---
 	function handleOdorSubmit(formData) {
 		entries.push({
-			animal: {
-				totalEmission: formData.manualEmission,
-			},
+			formType: "manual",
+			totalEmission: formData.manualEmission,
 			location: {
 				lat: appState.location.lat,
 				lng: appState.location.lng,

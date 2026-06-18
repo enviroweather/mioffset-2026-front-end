@@ -25,14 +25,9 @@
 		entries.splice(i, 1);
 	}
 
-	// --- Helpers ---
-	function emissionData(entry) {
-		return entry.type === "storage" ? entry.storage : entry.animal;
-	}
-
 	// --- Derived ---
 	let totalOEF = $derived(
-		entries.reduce((sum, e) => sum + (emissionData(e).totalEmission ?? 0), 0),
+		entries.reduce((sum, e) => sum + (e.totalEmission ?? 0), 0),
 	);
 </script>
 
@@ -71,21 +66,20 @@
 			</thead>
 			<tbody class:non-interactive={!interactive}>
 				{#each entries as entry, i}
-					{@const d = emissionData(entry)}
 					<tr onclick={() => restoreEntry(entry, i)}>
 						<td class="entry-num">{i + 1}</td>
-						<td>{d.species || "-"}</td>
-						<td>{d.animalType || "-"}</td>
-						<td>{d.housingType || "-"}</td>
-						<td>{d.storageType || "-"}</td>
-						<td>{d.technology || "-"}</td>
-						<td>{d.area != null && d.area !== "" ? d.area : "-"}</td>
-						<td class="numeric">{d.oenRate != null ? d.oenRate : "-"}</td>
+						<td>{entry.species || "-"}</td>
+						<td>{entry.animalType || "-"}</td>
+						<td>{entry.housingType || "-"}</td>
+						<td>{entry.storageType || "-"}</td>
+						<td>{entry.technology || "-"}</td>
+						<td>{entry.area != null && entry.area !== "" ? entry.area : "-"}</td>
+						<td class="numeric">{entry.oenRate != null ? entry.oenRate : "-"}</td>
 						<td class="numeric"
-							>{d.odorControlFactor != null ? d.odorControlFactor : "-"}</td
+							>{entry.odorControlFactor != null ? entry.odorControlFactor : "-"}</td
 						>
 						<td class="numeric"
-							>{d.totalEmission != null ? d.totalEmission.toFixed(2) : "-"}</td
+							>{entry.totalEmission != null ? entry.totalEmission.toFixed(2) : "-"}</td
 						>
 						<td class="remove-cell">
 							<button

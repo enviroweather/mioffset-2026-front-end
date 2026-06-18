@@ -11,7 +11,9 @@ export async function handle({ event, resolve }) {
 		const token = event.cookies.get('access_token');
 		// the user is not authorized, redirect to passphrase screen
 		if (token !== passphraseHash(ACCESS_PASSPHRASE)) {
-			throw redirect(302, '/passphrase');
+			// preserve data saved in the link
+			const returnTo = encodeURIComponent(event.url.pathname + event.url.search);
+			throw redirect(302, `/passphrase?returnTo=${returnTo}`);
 		}
 	}
 	return resolve(event);

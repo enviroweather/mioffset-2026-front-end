@@ -118,17 +118,15 @@
 	// --- Submit Handler ---
 	function handleOdorSubmit(formData) {
 		entries.push({
-			animal: {
-				species: formData.species,
-				animalType: formData.animalType,
-				housingType: formData.housingType,
-				technology: formData.technology,
-				area: formData.area,
-				oenRate: oenRate,
-				odorControlFactor: odorControlFactor,
-				totalEmission: totalEmission,
-			},
-			type: "animal",
+			formType: "animal",
+			species: formData.species,
+			animalType: formData.animalType,
+			housingType: formData.housingType,
+			technology: formData.technology,
+			area: formData.area,
+			oenRate: oenRate,
+			odorControlFactor: odorControlFactor,
+			totalEmission: totalEmission,
 			location: {
 				lat: appState.location.lat,
 				lng: appState.location.lng,

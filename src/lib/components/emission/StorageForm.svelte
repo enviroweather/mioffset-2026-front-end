@@ -69,15 +69,13 @@
 	// --- Submit Handler ---
 	function handleStorageSubmit(formData) {
 		entries.push({
-			storage: {
-				storageType: formData.storageType,
-				technology: formData.technology,
-				area: formData.area,
-				oenRate: oenRate,
-				odorControlFactor: odorControlFactor,
-				totalEmission: totalEmission,
-			},
-			type: "storage",
+			formType: "storage",
+			storageType: formData.storageType,
+			technology: formData.technology,
+			area: formData.area,
+			oenRate: oenRate,
+			odorControlFactor: odorControlFactor,
+			totalEmission: totalEmission,
 			location: {
 				lat: appState.location.lat,
 				lng: appState.location.lng,

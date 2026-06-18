@@ -23,6 +23,7 @@ export const appState = $state({
 });
 
 export const entries = $state([]);
+
 // --- Actions ---
 export function resetFormState() {
 	Object.assign(
@@ -39,12 +40,10 @@ export async function representResults() {
 	try {
 		const lat = appState.location.lat;
 		const lng = appState.location.lng;
-		const totalEmission = entries.reduce((sum, e) => {
-			const data = e.type === "storage" ? e.storage : e.animal;
-			return sum + (data?.totalEmission ?? 0);
-		}, 0);
+		const totalEmission = entries.reduce((sum, e) => sum + (e.totalEmission ?? 0), 0);
 
 		const output = await fetchResults(lat, lng, totalEmission);
+		console.log(output);
 		appState.geoJSONData = output;
 		// tick() lets geoJSONData propagate through Svelte's reactivity before
 		// mapIsUpToDate = true fires the MapView effect that calls showGeoJSONLayer().
@@ -56,36 +55,32 @@ export async function representResults() {
 	}
 }
 
-export async function loadFromPermalink(lat, lng, odorIndex) {
-	// entries is module-level state that survives component re-mounts (HMR, soft SvelteKit
-	// navigation). Without this guard, reloading a permalink URL would push a second entry
-	// on top of the first and double the total.
-	const currentTotal = entries.reduce((sum, e) => {
-		const data = e.type === "storage" ? e.storage : e.animal;
-		return sum + (data?.totalEmission ?? 0);
-	}, 0);
+export async function loadFromEntriesPermalink(permalinkEntries, location) {
+	const permalinkTotal = permalinkEntries.reduce((sum, e) => sum + (e.totalEmission ?? 0), 0);
+	const currentTotal = entries.reduce((sum, e) => sum + (e.totalEmission ?? 0), 0);
 
-	if (currentTotal !== odorIndex) {
-		// Entries don't match the URL - reset and add a single manual entry for the permalink value.
+	if (currentTotal !== permalinkTotal) {
 		entries.splice(0, entries.length);
-		entries.push({
-			animal: { totalEmission: odorIndex },
-			location: { lat, lng, address: "" },
-			snapshot: {
-				location: { ...appState.location },
-				formDraft: { manualEmission: odorIndex },
-				activeForm: "manual",
-			},
-		});
+		for (const entry of permalinkEntries) {
+			entries.push(entry);
+		}
 	}
-	// If totals match, existing entries already represent this odorIndex - leave them alone.
-	appState.mapLoading = true;
-	try {
-		const output = await fetchResults(lat, lng, odorIndex);
-		appState.geoJSONData = output;
-		await tick();
-		appState.mapIsUpToDate = true;
-	} finally {
-		appState.mapLoading = false;
+
+	appState.location.lat = location.lat;
+	appState.location.lng = location.lng;
+
+	const totalEmission = entries.reduce((sum, e) => sum + (e.totalEmission ?? 0), 0);
+
+	if (totalEmission > 0) {
+		appState.mapLoading = true;
+		try {
+			const output = await fetchResults(location.lat, location.lng, totalEmission);
+			appState.geoJSONData = output;
+			await tick();
+			appState.mapIsUpToDate = true;
+		} finally {
+			appState.mapLoading = false;
+		}
 	}
 }
+

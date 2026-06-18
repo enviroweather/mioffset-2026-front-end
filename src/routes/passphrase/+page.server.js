@@ -7,14 +7,14 @@ function passphraseHash(passphrase) {
 }
 
 export const actions = {
-	default: async ({ request, cookies }) => {
+	default: async ({ request, cookies, url }) => {
 		const data = await request.formData();
 		const passphrase = data.get('passphrase')?.toString().trim() ?? '';
 
 		if (passphrase !== ACCESS_PASSPHRASE) {
 			return fail(403, { incorrect: true });
 		}
-		
+
 		cookies.set('access_token', passphraseHash(ACCESS_PASSPHRASE), {
 			path: '/',
 			httpOnly: true,
@@ -22,6 +22,7 @@ export const actions = {
 			maxAge: 60 * 60 * 24 * 30 // 30 days
 		});
 
-		throw redirect(302, '/');
+		const returnTo = url.searchParams.get('returnTo') ?? '/';
+		throw redirect(302, returnTo.startsWith('/') ? returnTo : '/');
 	}
 };

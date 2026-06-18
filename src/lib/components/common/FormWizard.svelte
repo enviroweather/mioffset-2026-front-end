@@ -5,7 +5,6 @@
 		formState = $bindable(),
 		oenRate = null,
 		odorControlFactor = null,
-		totalEmission = null,
 		onSubmit = () => {},
 	} = $props();
 
@@ -132,12 +131,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-	}
-
-	label {
-		font-weight: 500;
-		color: #333;
-		font-size: 0.95rem;
 	}
 
 	/* Inputs */
