@@ -106,7 +106,7 @@
 		{
 			key: "area",
 			label: "Area (sq. ft.):",
-			legend: "Enter Area",
+			legend: "Enter Area (no commas)",
 			type: "number",
 			min: 0,
 			step: 0.01,

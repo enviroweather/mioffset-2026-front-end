@@ -15,18 +15,24 @@
 	// --- Emission Calculations ---
 	let oenRate = $derived(
 		appState.formDrafts.storage.storageType
-			? (storageData.STORAGE[appState.formDrafts.storage.storageType]?.oen_rate ?? null)
+			? (storageData.STORAGE[appState.formDrafts.storage.storageType]
+					?.oen_rate ?? null)
 			: null,
 	);
 
 	let odorControlFactor = $derived(
 		appState.formDrafts.storage.technology
-			? animalData.TECH[appState.formDrafts.storage.technology]?.odorControlFactor
+			? animalData.TECH[appState.formDrafts.storage.technology]
+					?.odorControlFactor
 			: null,
 	);
 
 	let totalEmission = $derived(
-		CalculateTotalEmission(oenRate, odorControlFactor, appState.formDrafts.storage.area),
+		CalculateTotalEmission(
+			oenRate,
+			odorControlFactor,
+			appState.formDrafts.storage.area,
+		),
 	);
 
 	// --- Form Step Config ---
@@ -57,7 +63,7 @@
 		{
 			key: "area",
 			label: "Area (sq. ft.):",
-			legend: "Enter Area",
+			legend: "Enter Area (no commas)",
 			type: "number",
 			min: 0,
 			step: 0.01,
