@@ -1,6 +1,6 @@
 import animalData from "$lib/data/animalData.json";
 import storageData from "$lib/data/storageData.json";
-import { CalculateTotalEmission } from "./OdorEmissionFactor.js";
+import { CalculateTotalEmission } from "./model/OdorEmissionFactor.js";
 
 function b64Encode(str) {
 	return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");

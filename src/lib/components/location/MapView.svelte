@@ -1,15 +1,16 @@
 <script>
 	// --- Imports ---
 	import { onMount, onDestroy, untrack } from "svelte";
-	import { appState, entries } from "$lib/stores/appState.svelte.js";
-	import { mapIcons } from "$lib/stores/mapIcons.svelte.js";
+	import { appState, entries } from "$lib/state/appState.svelte.js";
+	import { mapIcons, resolveMarkerIcon } from "$lib/state/mapIcons.svelte.js";
+	import { reverseGeocode } from "$lib/utils/map/reverseGeocode.js";
 	import {
 		LANDMARK_ZOOM,
 		MAX_ZOOM,
 		MIN_ZOOM,
-	} from "$lib/stores/defaultValues.svelte.js";
+	} from "$lib/state/defaultValues.svelte.js";
 	import LocationSelection from "./LocationSelection.svelte";
-	import { renderGEOJSON } from "$lib/utils/mapRenderLayers.js";
+	import { renderGEOJSON } from "$lib/utils/map/mapRenderLayers.js";
 	import LoadingIcon from "../common/LoadingIcon.svelte";
 
 	// --- Props & State ---
@@ -65,28 +66,10 @@
 
 	onDestroy(() => map?.remove());
 
-	async function reverseGeocode() {
-		try {
-			const res = await fetch(
-				`/api/reverseGeocoding?lat=${appState.location.lat}&lng=${appState.location.lng}`,
-			);
-
-			if (!res.ok) {
-				throw new Error(`API call failed with status ${res.status}`);
-			}
-
-			const data = await res.json();
-			if (data.addresses?.[0]) {
-				appState.location.address = data.addresses[0].address.freeformAddress ?? "";
-			}
-		} catch (error) {
-			console.error("Reverse geocoding error:", error);
-		}
-	}
 	function initMap() {
 		const michiganBounds = L.latLngBounds(
-			L.latLng(41.55, -90.5),
-			L.latLng(48.3, -82.4),
+			L.latLng(40.55, -100.5),
+			L.latLng(48.3, -70.4),
 		);
 
 		map = L.map(mapContainer, {
@@ -110,18 +93,30 @@
 		}
 	}
 
+	// Extremely simple function that makes sure the lat lng are inside the michigan box
+	function validLatLng(lat, lng) {
+		console.log("lat: " + lat);
+		console.log("lng: " + lng);
+		return (
+			(lng >= -.573 && lng <= -82.413) && (lat >= 41.696 && lat <= 46.306)
+		);
+	}
 	function registerMapEvents() {
 		if (!interactive) return;
 
 		map.on("click", (e) => {
 			const { lat, lng } = e.latlng;
+			console.log(validLatLng(lat, lng));
+			if (!validLatLng(lat, lng)) {
+				console.error("Clicked is not inside of michigan");
+			}
 			appState.location.fly = true;
 			appState.location.lat = lat;
 			appState.location.lng = lng;
 			appState.location.address = "";
 			appState.location.markerHidden = false;
+
 			onLocationSelect({ lat, lng });
-			reverseGeocode();
 		});
 		map.on("zoom", () => {
 			appState.location.zoom = map.getZoom();
@@ -143,15 +138,6 @@
 	}
 
 	// --- Marker ---
-
-	function resolveMarkerIcon() {
-		const mapFresh = appState.mapIsUpToDate ? "default-fresh" : "default";
-		const key =
-			currentSpecies !== "default" && !appState.mapIsUpToDate
-				? currentSpecies
-				: mapFresh;
-		return L.icon(mapIcons[key] ?? mapIcons["default"]);
-	}
 
 	function placeOrUpdateMarker(lat, lng, icon) {
 		if (marker) {
@@ -202,6 +188,7 @@
 		void entries.length;
 		void appState.location.lat;
 		void appState.location.lng;
+
 		// Skip the initial run: on first mount these dependencies haven't changed, so there's nothing
 		// to stale. Without the skip a footprint already loaded would be
 		// immediately invalidated the moment the component mounts.
@@ -216,6 +203,7 @@
 	$effect(() => {
 		if (!L || !map) return;
 		const { lat, lng } = appState.location;
+
 		// fly is read and cleared via untrack so this effect doesn't depend on it.
 		// If fly were read normally, clearing fly = false here would re-trigger this
 		// same effect in a loop.
@@ -223,8 +211,11 @@
 		untrack(() => {
 			appState.location.fly = false;
 		});
-		placeOrUpdateMarker(lat, lng, resolveMarkerIcon());
-
+		placeOrUpdateMarker(lat, lng, resolveMarkerIcon(L, currentSpecies, appState.mapIsUpToDate));
+		reverseGeocode(lat, lng).then((address) => {
+			if (address !== null) appState.location.address = address;
+		});
+		
 		// skip navigation on first placement unless focusOnMount is set
 		if (!initialized) {
 			initialized = true;
@@ -262,7 +253,7 @@
 	.map-wrapper {
 		position: relative;
 		width: 100%;
-		min-height: 621px;
+		min-height: 590px;
 		height: 100%;
 	}
 

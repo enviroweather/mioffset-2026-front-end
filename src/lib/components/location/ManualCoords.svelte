@@ -1,7 +1,7 @@
 <script>
 	// --- Imports ---
-	import { appState } from "$lib/stores/appState.svelte.js";
-	import { LATLNG_PRECISION } from "$lib/stores/defaultValues.svelte.js";
+	import { appState } from "$lib/state/appState.svelte.js";
+	import { LATLNG_PRECISION } from "$lib/state/defaultValues.svelte.js";
 
 	function parseCoordInput(value) {
 		return value === "" ? null : Number(value);

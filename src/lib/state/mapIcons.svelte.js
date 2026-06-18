@@ -7,7 +7,7 @@ export const mapIcons = $state({
 		iconAnchor: [15, 40],
 	},
 	"default-fresh": {
-		iconUrl: "invisible.svg",
+		iconUrl: "blue-marker.svg",
 		iconSize: [30, 40],
 		iconAnchor: [15, 40],
 	},
@@ -32,3 +32,9 @@ export const mapIcons = $state({
 		iconAnchor: [38, 35],
 	}
 });
+
+export function resolveMarkerIcon(L, species, isUpToDate) {
+	const mapFresh = isUpToDate ? "default-fresh" : "default";
+	const key = species !== "default" && !isUpToDate ? species : mapFresh;
+	return L.icon(mapIcons[key] ?? mapIcons["default"]);
+}

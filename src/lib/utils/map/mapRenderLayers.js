@@ -1,4 +1,4 @@
-import { appState } from "$lib/stores/appState.svelte.js";
+import { appState } from "$lib/state/appState.svelte.js";
 
 /**
  * Fetches the geoJSON from mapLayer file

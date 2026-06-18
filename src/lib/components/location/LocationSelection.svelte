@@ -1,13 +1,14 @@
 <script>
 	// --- Imports ---
+	import { tick } from "svelte";
 	import ManualCoords from "$lib/components/location/ManualCoords.svelte";
 	import Address from "$lib/components/location/AddressSearch.svelte";
 	import LocationUnknown from "./LocationUnknown.svelte";
-	import { appState } from "$lib/stores/appState.svelte.js";
+	import { appState } from "$lib/state/appState.svelte.js";
 	import {
 		DEFAULT_LAT,
 		DEFAULT_LNG,
-	} from "$lib/stores/defaultValues.svelte.js";
+	} from "$lib/state/defaultValues.svelte.js";
 	import CollapsibleButton from "../common/CollapsibleButton.svelte";
 
 	// --- State ---
@@ -51,8 +52,13 @@
 		noResults = false;
 		appState.location.address = "";
 		if (appState.geoJSONData?.outputs) {
-			appState.location.markerHidden = true;
+			appState.location.lat = appState.geoJSONData.sourceLat;
+			appState.location.lng = appState.geoJSONData.sourceLng;
+			appState.location.markerHidden = false;
+			await tick();
+			appState.mapIsUpToDate = true;
 		} else {
+			appState.location.fly = true;
 			appState.location.lat = DEFAULT_LAT;
 			appState.location.lng = DEFAULT_LNG;
 		}

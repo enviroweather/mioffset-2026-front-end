@@ -1,10 +1,7 @@
 <script>
 	// --- Imports ---
-	import {
-		appState,
-		entries,
-		representResults,
-	} from "$lib/stores/appState.svelte.js";
+	import { appState, entries } from "$lib/state/appState.svelte.js";
+	import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
 
 	let { interactive = true } = $props();
 	// --- Actions ---
@@ -40,7 +37,7 @@
 				>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span
 			>
 			<div class="submission-btn">
-				<button class="btn-footprint" onclick={representResults}
+				<button class="btn-footprint" onclick={getAndRun}
 					>Show Footprint</button
 				>
 			</div>

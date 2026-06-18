@@ -2,15 +2,12 @@
 	// --- Imports ---
 	import { onMount } from "svelte";
 	import MapView from "$lib/components/location/MapView.svelte";
-	import EmissionForm from "$lib/components/emission/EmissionForm.svelte";
+	import EmissionForm from "$lib/components/entries/EmissionForm.svelte";
 	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
-	import {
-		appState,
-		entries,
-		loadFromEntriesPermalink,
-	} from "$lib/stores/appState.svelte.js";
+	import { appState, entries } from "$lib/state/appState.svelte.js";
 	import { encodeState, decodeState } from "$lib/utils/permalink.js";
+	import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
 
 	// Parsed here (not in onMount) so appState.location.lat/lng are set and focusOnMount
 	// is correct before MapView mounts. Moving this into onMount would cause MapView to
@@ -24,14 +21,23 @@
 		appState.location.lng = decodedState.location.lng;
 	}
 
-	// Deferred to onMount because fetchResults uses a relative URL (/api/forecast)
-	// that requires the SvelteKit runtime to be active.
 	onMount(async () => {
 		if (decodedState) {
-			await loadFromEntriesPermalink(
-				decodedState.entries,
-				decodedState.location,
+			const permalinkTotal = decodedState.entries.reduce(
+				(sum, e) => sum + (e.totalEmission ?? 0),
+				0,
 			);
+			const currentTotal = entries.reduce(
+				(sum, e) => sum + (e.totalEmission ?? 0),
+				0,
+			);
+			if (currentTotal !== permalinkTotal) {
+				entries.splice(0, entries.length);
+				for (const entry of decodedState.entries) {
+					entries.push(entry);
+				}
+			}
+			await getAndRun();
 		}
 	});
 
@@ -43,18 +49,19 @@
 </script>
 
 <div class="page-container">
-	<section class="section odor-wrapper">
+	<section class="section emission-wrapper">
 		<EmissionForm />
 	</section>
 
-	<section class="section location-wrapper">
+	<section class="section map-wrapper">
 		<MapView focusOnMount={decodedState} />
+	</section>
+
+	<div class="entries-wrapper">
+		<EntriesTable />
 		{#if appState.mapIsUpToDate}
 			<FootprintTable />
 		{/if}
-	</section>
-	<div class="entries-wrapper">
-		<EntriesTable />
 	</div>
 </div>
 
@@ -66,43 +73,42 @@
 	/* Grid Layout */
 	.page-container {
 		display: grid;
-		grid-template-columns: 0.5fr 1fr;
+		grid-template-columns: 0.5fr 2fr;
 		grid-template-areas:
-			"odor    map"
+			"emission    map"
 			"entries entries";
 		gap: 0rem;
 	}
 
 	.section {
-		display: flex;
-		flex-direction: column;
 		padding: 1rem;
 	}
 
 	/* Section Wrappers */
 	.entries-wrapper {
 		grid-area: entries;
+		display: flex;
+		flex-direction: column;
 		padding: 1rem;
 	}
-	.odor-wrapper {
-		grid-area: odor;
+	.emission-wrapper {
+		grid-area: emission;
 	}
-	.location-wrapper {
+	.map-wrapper {
 		grid-area: map;
 	}
-
 	/* Responsive */
 	@media (max-width: 768px) {
 		.page-container {
 			grid-template-columns: 1fr;
 			grid-template-areas:
-				"odor"
+				"emission"
 				"entries"
 				"map";
 		}
 		.entries-wrapper,
-		.odor-wrapper,
-		.location-wrapper {
+		.emission-wrapper,
+		.map-wrapper {
 			min-width: 0;
 		}
 	}

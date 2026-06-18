@@ -1,5 +1,5 @@
 <script>
-	import { appState } from "$lib/stores/appState.svelte.js";
+	import { appState } from "$lib/state/appState.svelte.js";
 
 	let rows = $derived(() => {
 		const raw = appState.geoJSONData?.outputs?.table?.data;
@@ -30,8 +30,9 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each rows() as row}
+					{#each rows() as row, i}
 						<tr class:named={row.direction !== "-"}>
+							<!-- <td class="dir">{row.direction}</td> -->
 							<td class="dir">{row.direction}</td>
 							<td class="numeric">{row.pct5}</td>
 							<td class="numeric">{row.pct3}</td>

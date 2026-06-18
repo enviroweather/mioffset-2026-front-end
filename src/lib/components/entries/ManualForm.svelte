@@ -4,7 +4,7 @@
 		appState,
 		entries,
 		resetFormState,
-	} from "$lib/stores/appState.svelte.js";
+	} from "$lib/state/appState.svelte.js";
 	import FormWizard from "../common/FormWizard.svelte";
 
 	// --- Form Step Config ---

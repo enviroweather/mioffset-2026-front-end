@@ -16,6 +16,14 @@
 				(formState[step.key] !== "" && formState[step.key] != null),
 		),
 	);
+	// Auto-fill when only one option is available
+	$effect(() => {
+		for (const step of steps) {
+			if (step.type === "select" && step.options?.length === 1) {
+				formState[step.key] = step.options[0].value;
+			}
+		}
+	});
 
 	function handleReset() {
 		for (let step of steps) {
