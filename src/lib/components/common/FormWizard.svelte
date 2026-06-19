@@ -1,5 +1,7 @@
 <script>
 	// --- Props ---
+	import NumberInput from "./NumberInput.svelte";
+
 	let {
 		steps,
 		formState = $bindable(),
@@ -70,16 +72,15 @@
 							{/each}
 						</select>
 					{:else if step.type === "number"}
-						<input
-							type="number"
+						<NumberInput
 							id={step.key}
 							bind:value={formState[step.key]}
 							placeholder={step.placeholder}
-							min={step.min}
-							max={step.max}
-							step={step.step}
-							aria-label={step.label}
+							ariaLabel={step.label}
 						/>
+						{#if step.helpText}
+							<small class="help-text">{step.helpText}</small>
+						{/if}
 					{/if}
 				</div>
 			</fieldset>
@@ -141,9 +142,13 @@
 		gap: 0.25rem;
 	}
 
+	.help-text {
+		color: #888;
+		font-size: 0.8rem;
+	}
+
 	/* Inputs */
-	select,
-	input {
+	select {
 		padding: 0.75rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
@@ -152,13 +157,11 @@
 		transition: all 0.3s ease;
 	}
 
-	select:hover,
-	input:hover {
+	select:hover {
 		border-color: #999;
 	}
 
-	select:focus,
-	input:focus {
+	select:focus {
 		outline: none;
 		border-color: #4caf50;
 		box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);

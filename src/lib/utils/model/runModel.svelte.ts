@@ -118,21 +118,17 @@ async function fetchWindData() {
 	}
 }
 
-function runModelSync(E: number): Promise<ModelOutput | null> {
-	if (!flattenedByDataset) return Promise.resolve(null);
+function runModelDeferred(E: number): Promise<ModelOutput | null> {
+	const data = flattenedByDataset;
+	if (!data) return Promise.resolve(null);
 
-	// Yield to the browser so the spinner can paint before the synchronous
-	// model computation blocks the main thread.
+	// setTimeout(0) yields to the browser so the spinner paints before
+	// the synchronous model computation blocks the main thread.
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			try {
 				resolve(
-					legacyFodModel(
-						flattenedByDataset!.wd,
-						flattenedByDataset!.ws,
-						flattenedByDataset!.pc,
-						E,
-					),
+					legacyFodModel(data.wd, data.ws, data.pc, E),
 				);
 			} catch {
 				resolve(null);
@@ -164,7 +160,7 @@ export async function getAndRun() {
 		await fetchWindData();
 		if (errorMsg) return;
 
-		const result = await runModelSync(E);
+		const result = await runModelDeferred(E);
 		if (!result) return;
 
 		appState.geoJSONData = buildGeoJSONData(result, Lat, Lon, E);

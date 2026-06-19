@@ -1,16 +1,17 @@
 # MI Offset - Odor Dispersion Map
 
-MI Offset is a web application that calculates how far odor will travel based on site details and wind patterns. This repo is the front-end interface. See the About page within the app for more details.
+MI Offset is a web application that calculates how far odor will travel based on site details and wind patterns. Users configure an odor source (animal housing, manure storage, or a manual emission value), pick a location on the map, and the app runs a local dispersion model to generate a footprint overlay showing setback distances at three frequency thresholds (1.5%, 3%, 5%). See the About page within the app for more details.
 
 **Tech stack:**
 
 - [SvelteKit 2](https://svelte.dev/docs/kit) + [Svelte 5](https://svelte.dev) (runes mode)
-- [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/) interactive map - tiles
-- [TomTom Search API](https://developer.tomtom.com/) - address geocoding
-- [Vercel](https://vercel.com/pricing)
-- Javascript, Vite
+- TypeScript + JavaScript
+- [Leaflet](https://leafletjs.com/) + [OpenStreetMap](https://www.openstreetmap.org/) - interactive map tiles
+- [TomTom Search API](https://developer.tomtom.com/) - address geocoding + reverse geocoding
+- [AWS S3](https://aws.amazon.com/s3/) - NARR wind data storage for the local dispersion model
+- [Vite](https://vite.dev/) + [pnpm](https://pnpm.io/)
 
-**Deployment:** Uses the native `adapter-auto` with Vercel. The app contains server-side routes, so it requires Vercel's serverless setup - in its current state it cannot be hosted on a purely static file host (like github pages).
+**Deployment:** Uses `adapter-auto` (Vercel by default). The app has server-side routes and cannot be hosted on a purely static file host (e.g. GitHub Pages). A Netlify adapter is also installed if you prefer that platform.
 
 ---
 
@@ -19,8 +20,9 @@ MI Offset is a web application that calculates how far odor will travel based on
 - **[Node.js 22+](https://nodejs.org/en/download)**
 - **[pnpm](https://pnpm.io/installation)**
 - **[TomTom Developer account](https://developer.tomtom.com/)** with an API key
-  - Register → keys → API & SDK Keys → Copy the API key
-- **[Vercel account](https://vercel.com/)** (Needed for deployment only)
+  - Register → Keys → API & SDK Keys → Copy the API key
+- **AWS account** with an S3 bucket containing NARR wind data, and an IAM user with read access
+- **[Vercel account](https://vercel.com/)** (needed for deployment only)
 
 ---
 
@@ -30,12 +32,19 @@ MI Offset is a web application that calculates how far odor will travel based on
 2. Create a `.env` file in the project root:
 
    ```sh
+   # TomTom geocoding
    TOMTOM_API_KEY="your_key_here"
    tomtomURL="api.tomtom.com"
    apiVersion=2
-   TOMTOM_API_KEY="Key Here"
-   awsURL="exampeurl-api.us-east-1.amazon.com/mioffset"
-   ACCESS_PASSPHRASE="Whatever you would like"
+
+   # AWS S3 - NARR wind data for the local dispersion model
+   FOD_AWS_REGION="us-east-1"
+   FOD_AWS_ACCESS_KEY_ID="your_access_key_id"
+   FOD_AWS_SECRET_ACCESS_KEY="your_secret_access_key"
+   S3_BUCKET_NAME="your_bucket_name"
+
+   # Passphrase gate (set ENABLED=0 to disable)
+   ACCESS_PASSPHRASE="whatever you would like"
    MI_OFFSET_PASSPHRASE_ENABLED=1
    ```
 
@@ -60,6 +69,12 @@ pnpm dev
 pnpm dev -- --open
 ```
 
+Type-check the project (Svelte + TypeScript):
+
+```sh
+pnpm check
+```
+
 ---
 
 ## Building
@@ -82,13 +97,12 @@ pnpm preview
 
 1. Push the repo to GitHub
 2. Import the repo in the [Vercel dashboard](https://vercel.com/new)
-3. In the Vercel project settings under **Environment Variables**, add all four variables from the `.env` file above
-4. Open Settings → Build And Deployment
-5. Override install command, replace with `pnpm install`
-6. Deploy - Vercel detects SvelteKit via `adapter-auto` and configures automatically
-7. Subsequent pushes to `main` redeploy automatically with the same environment variables
+3. In the Vercel project settings under **Environment Variables**, add all variables from the `.env` file above
+4. Open Settings → Build And Deployment → override the install command with `pnpm install`
+5. Deploy - Vercel detects SvelteKit via `adapter-auto` and configures automatically
+6. Subsequent pushes to `main` redeploy automatically
 
-Alternatively, you could deploy via the [Vercel CLI](https://vercel.com/docs/cli):
+Alternatively, deploy via the [Vercel CLI](https://vercel.com/docs/cli):
 
 ```sh
 vercel deploy
@@ -104,4 +118,5 @@ This project relies on services with free tier usage limits:
 | ------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | TomTom Search API   | 2,500 daily transactions                                | [developer.tomtom.com/pricing](https://developer.tomtom.com/pricing)          |
 | OpenStreetMap Tiles | No key required. Heavy usage violates the usage policy. | [OSM Tile Usage Policy](https://operations.osmfoundation.org/policies/tiles/) |
+| AWS S3              | 5 GB storage, 20,000 GET requests/month free            | [aws.amazon.com/s3/pricing](https://aws.amazon.com/s3/pricing/)               |
 | Vercel Hobby Plan   | 100 GB bandwidth/month, limited serverless invocations  | [vercel.com/pricing](https://vercel.com/pricing)                              |

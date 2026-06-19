@@ -1,5 +1,5 @@
 /**
- * TypeScript port of legacy_fod_model.py — OFFSET odor setback distance model
+ * TypeScript port of legacy_fod_model.py - OFFSET odor setback distance model
  *
  * References:
  *   Jacobson et al. (2005) OFFSET Part I.  Transactions of the ASAE 48(6).
@@ -36,24 +36,23 @@ export type ModelOutput = {
 // ─── compass direction metadata ──────────────────────────────────────────────
 
 export const DIRECTION_LABELS: string[] = [
-	'N',
-	'NNE',
-	'NE',
-	'ENE',
-	'E',
-	'ESE',
-	'SE',
-	'SSE',
-	'S',
-	'SSW',
-	'SW',
-	'WSW',
-	'W',
-	'WNW',
-	'NW',
-	'NNW'
+	"N",
+	"NNE",
+	"NE",
+	"ENE",
+	"E",
+	"ESE",
+	"SE",
+	"SSE",
+	"S",
+	"SSW",
+	"SW",
+	"WSW",
+	"W",
+	"WNW",
+	"NW",
+	"NNW",
 ];
-
 
 /**
  * Representative row in D[80][3] for each compass direction.
@@ -75,36 +74,99 @@ const DIRECTION_ROW: Record<string, number> = {
 	W: 60,
 	WNW: 65,
 	NW: 70,
-	NNW: 75
+	NNW: 75,
 };
 
 const SETBACK_TABLE_ROW_LABELS: string[] = [
-		'N','-','-','-','-', 
-		'NNE','-','-','-','-',
-		'NE','-','-','-','-', 
-		'ENE','-','-','-','-',
-		'E','-','-','-','-',
-		'ESE','-','-','-','-', 
-		'SE','-','-','-','-',
-		'SSE','-','-','-','-',
-		'S','-','-','-','-', 
-		'SSW','-','-','-','-',
-		'SW','-','-','-','-',
-		'WSW','-','-','-','-', 
-		'W','-','-','-','-',
-		'WNW','-','-','-','-',
-		'NW','-','-','-','-', 
-		'NNW','-','-','-','-'
-	];
+	"N",
+	"-",
+	"-",
+	"-",
+	"-",
+	"NNE",
+	"-",
+	"-",
+	"-",
+	"-",
+	"NE",
+	"-",
+	"-",
+	"-",
+	"-",
+	"ENE",
+	"-",
+	"-",
+	"-",
+	"-",
+	"E",
+	"-",
+	"-",
+	"-",
+	"-",
+	"ESE",
+	"-",
+	"-",
+	"-",
+	"-",
+	"SE",
+	"-",
+	"-",
+	"-",
+	"-",
+	"SSE",
+	"-",
+	"-",
+	"-",
+	"-",
+	"S",
+	"-",
+	"-",
+	"-",
+	"-",
+	"SSW",
+	"-",
+	"-",
+	"-",
+	"-",
+	"SW",
+	"-",
+	"-",
+	"-",
+	"-",
+	"WSW",
+	"-",
+	"-",
+	"-",
+	"-",
+	"W",
+	"-",
+	"-",
+	"-",
+	"-",
+	"WNW",
+	"-",
+	"-",
+	"-",
+	"-",
+	"NW",
+	"-",
+	"-",
+	"-",
+	"-",
+	"NNW",
+	"-",
+	"-",
+	"-",
+	"-",
+];
 
 // ─── setback-distance coefficients (D = a·E^b, output in feet) ───────────────
 // original comment inside the python program is incorrect
 //  # Total odor emission factor (E):
-//  # Product of source area, odor emission number, and odor control factor, 
+//  # Product of source area, odor emission number, and odor control factor,
 //  # divided by 10000, summed over all sources.
-// I don't think this is in feet 
+// I don't think this is in feet
 // AND I don't think the odor index is ÷ 10000 here, maybe in front ent
-
 
 const COEF: Array<{ a: number; b: number }> = [
 	{ a: 0, b: 0 }, // index 0 unused (1-based class numbering)
@@ -113,7 +175,7 @@ const COEF: Array<{ a: number; b: number }> = [
 	{ a: 0.0399, b: 0.5397 }, // class 3
 	{ a: 0.0242, b: 0.5844 }, // class 4
 	{ a: 0.0175, b: 0.5827 }, // class 5
-	{ a: 0.0101, b: 0.6264 } // class 6
+	{ a: 0.0101, b: 0.6264 }, // class 6
 ];
 
 // ─── internal helpers ─────────────────────────────────────────────────────────
@@ -177,7 +239,7 @@ function findWindClass(wcRow: number[], threshold: number): number {
 	for (const v of tem) {
 		if (v <= threshold && v > maxVal) maxVal = v;
 	}
-	if (maxVal === -Infinity) return 1; // all values exceed threshold — use class 1
+	if (maxVal === -Infinity) return 1; // all values exceed threshold - use class 1
 	const idx = tem.findIndex((v) => Math.abs(v - maxVal) < 1e-9);
 	return idx < 0 ? 1 : idx + 1;
 }
@@ -197,7 +259,7 @@ const ROW_RANGES: Array<Array<[number, number]>> = [
 	[[72, 77]], // d=7  SSE    → NNW
 	[
 		[77, 80],
-		[0, 2]
+		[0, 2],
 	], // d=8  S wind  → N  setback (split)
 	[[2, 7]], // d=9  SSW    → NNE
 	[[7, 12]], // d=10 SW     → NE
@@ -205,7 +267,7 @@ const ROW_RANGES: Array<Array<[number, number]>> = [
 	[[17, 22]], // d=12 W      → E
 	[[22, 27]], // d=13 WNW    → ESE
 	[[27, 32]], // d=14 NW     → SE
-	[[32, 37]] // d=15 NNW    → SSE
+	[[32, 37]], // d=15 NNW    → SSE
 ];
 
 // ─── main model function ──────────────────────────────────────────────────────
@@ -224,7 +286,7 @@ export function legacyFodModel(
 	WD: number[],
 	WS: number[],
 	PC: number[],
-	odor_index: number
+	odor_index: number,
 ): ModelOutput {
 	const n = WD.length;
 
@@ -285,7 +347,8 @@ export function legacyFodModel(
 	for (let v = 11.25; v < 360; v += 22.5) dbin.push(v);
 
 	const validCount = WDds.reduce((acc, v) => acc + (v >= 0 ? 1 : 0), 0);
-	const pct = (count: number): number => (validCount > 0 ? (count / validCount) * 100 : 0);
+	const pct = (count: number): number =>
+		validCount > 0 ? (count / validCount) * 100 : 0;
 
 	// wc[d][col]: cumulative % occurrence of wind-stability classes 1…col+1
 	// for direction sector d.
@@ -301,7 +364,7 @@ export function legacyFodModel(
 
 		for (let i = 0; i < n; i++) {
 			const v = WDds[i];
-			// Sector membership — mirrors the Python boolean-index filter
+			// Sector membership - mirrors the Python boolean-index filter
 			const inSector =
 				d === 0
 					? v >= dbin[15] || (v >= 0 && v < dbin[0]) // N sector wraps 360→0
@@ -336,9 +399,9 @@ export function legacyFodModel(
 
 	for (let d = 0; d < 16; d++) {
 		const fVals: [number, number, number] = [
-			findWindClass(wc[d], 1.5), // col 0 — 1.5%
-			findWindClass(wc[d], 3), // col 1 — 3%
-			findWindClass(wc[d], 5) // col 2 — 5%
+			findWindClass(wc[d], 1.5), // col 0 - 1.5%
+			findWindClass(wc[d], 3), // col 1 - 3%
+			findWindClass(wc[d], 5), // col 2 - 5%
 		];
 		for (const [start, end] of ROW_RANGES[d]) {
 			for (let row = start; row < end; row++) {
@@ -364,16 +427,18 @@ export function legacyFodModel(
 	// ── Step 5: direction table for human viewing, all rows
 	// Python: Dtbl=np.copy(D); Dtbl[1:79,:]=D[0:78,:]; Dtbl[0]=D[79,:]
 	// Shifts D right by 1 so N occupies rows 0-2, matching the legacy MI table format.
-	const Dtbl: number[][] = D.map(row => [...row]);
+	const Dtbl: number[][] = D.map((row) => [...row]);
 	for (let i = 1; i < 79; i++) Dtbl[i] = [...D[i - 1]];
 	Dtbl[0] = [...D[79]];
 
-	const setbackTable: SetbackTableRows[] = SETBACK_TABLE_ROW_LABELS.map((label, row) => ({
-		label,
-		d5pct: Dtbl[row][0],
-		d3pct: Dtbl[row][1],
-		d1_5pct: Dtbl[row][2]
-	}));
+	const setbackTable: SetbackTableRows[] = SETBACK_TABLE_ROW_LABELS.map(
+		(label, row) => ({
+			label,
+			d5pct: Dtbl[row][0],
+			d3pct: Dtbl[row][1],
+			d1_5pct: Dtbl[row][2],
+		}),
+	);
 
 	return { D, setbackTable };
 }
