@@ -98,7 +98,7 @@
 		console.log("lat: " + lat);
 		console.log("lng: " + lng);
 		return (
-			(lng >= -.573 && lng <= -82.413) && (lat >= 41.696 && lat <= 46.306)
+			(lng >= -88.573 && lng <= -82.413) && (lat >= 41.696 && lat <= 46.306)
 		);
 	}
 	function registerMapEvents() {
