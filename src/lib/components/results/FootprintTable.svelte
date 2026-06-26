@@ -24,9 +24,9 @@
 				<thead>
 					<tr>
 						<th>Direction</th>
-						<th>5% Frequency (mi)</th>
-						<th>3% Frequency (mi)</th>
 						<th>1.5% Frequency (mi)</th>
+						<th>3% Frequency (mi)</th>
+						<th>5% Frequency (mi)</th>
 					</tr>
 				</thead>
 				<tbody>
