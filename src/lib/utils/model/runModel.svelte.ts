@@ -80,6 +80,12 @@ function buildGeoJSONData(
 	};
 }
 
+// ── wind data cache ───────────────────────────────────────────────────────
+
+const WIND_CACHE_SIZE = 10;
+const windCache = new Map<string, WindDataRecord>();
+const windCacheOrder: string[] = [];
+
 // ── internal helpers ──────────────────────────────────────────────────────
 
 function updateGridCoords() {
@@ -104,6 +110,12 @@ async function fetchWindData() {
 		return;
 	}
 
+	const cacheKey = `${x},${y}`;
+	if (windCache.has(cacheKey)) {
+		windData = windCache.get(cacheKey)!;
+		return;
+	}
+
 	try {
 		const res = await fetch(`/api/wind?x=${x}&y=${y}`);
 		const body = await res.json();
@@ -112,6 +124,12 @@ async function fetchWindData() {
 			return;
 		}
 		windData = body as WindDataRecord;
+
+		windCache.set(cacheKey, windData);
+		windCacheOrder.push(cacheKey);
+		if (windCacheOrder.length > WIND_CACHE_SIZE) {
+			windCache.delete(windCacheOrder.shift()!);
+		}
 	} catch (err) {
 		errorMsg =
 			err instanceof Error ? err.message : "Unknown error fetching data.";

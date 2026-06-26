@@ -13,7 +13,7 @@
 	// is correct before MapView mounts. Moving this into onMount would cause MapView to
 	// render at default coordinates first, then jump to the permalink location.
 	const decodedState = decodeState(
-		new URLSearchParams(window.location.search).get("d"),
+		new URLSearchParams(window.location.search).get("data"),
 	);
 
 	if (decodedState) {
@@ -44,7 +44,7 @@
 	// Keep the address bar in sync with current entries + location.
 	$effect(() => {
 		const encoded = encodeState(entries, appState.location);
-		window.history.replaceState(null, "", `?d=${encoded}`);
+		window.history.replaceState(null, "", `?data=${encoded}`);
 	});
 </script>
 
