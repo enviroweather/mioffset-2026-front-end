@@ -46,6 +46,7 @@
 	let marker;
 	let geoJSONLayer;
 	let initialized = false;
+	let fittedOnMount = false;
 	let mapEffectBehind = false;
 
 	// --- Lifecycle ---
@@ -121,6 +122,11 @@
 	async function showGeoJSONLayer() {
 		clearGeoJSONLayer();
 		geoJSONLayer = await renderGEOJSON(map, showLegend);
+		if (focusOnMount && !fittedOnMount && geoJSONLayer) {
+			map.stop();
+			map.fitBounds(geoJSONLayer.getBounds(), { padding: [20, 20], animate: false });
+			fittedOnMount = true;
+		}
 		appState.mapLoading = false;
 	}
 

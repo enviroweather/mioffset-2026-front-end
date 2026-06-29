@@ -9,8 +9,8 @@
 			.split("\n")
 			.slice(2) // skip "Toward Distance_in_Miles" and "5%  3%  1.5%" header lines
 			.map((line) => {
-				const [direction, pct5, pct3, pct1_5] = line.trim().split(/\s+/);
-				return { direction, pct5, pct3, pct1_5 };
+				const [direction, pct1_5, pct3, pct5] = line.trim().split(/\s+/);
+				return { direction, pct1_5, pct3, pct5 };
 			})
 			.filter((r) => r.direction && r.pct5);
 	});
@@ -24,15 +24,14 @@
 				<thead>
 					<tr>
 						<th>Direction</th>
-						<th>1.5% Frequency (mi)</th>
-						<th>3% Frequency (mi)</th>
 						<th>5% Frequency (mi)</th>
+						<th>3% Frequency (mi)</th>
+						<th>1.5% Frequency (mi)</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each rows() as row, i}
 						<tr class:named={row.direction !== "-"}>
-							<!-- <td class="dir">{row.direction}</td> -->
 							<td class="dir">{row.direction}</td>
 							<td class="numeric">{row.pct5}</td>
 							<td class="numeric">{row.pct3}</td>
