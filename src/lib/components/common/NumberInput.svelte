@@ -1,24 +1,27 @@
 <script>
 	let { value = $bindable(), placeholder, id, ariaLabel } = $props();
 
-	// Owned display string - Svelte never writes here except on external reset.
 	let display = $state(value != null ? value.toLocaleString("en-US") : "");
+	let focused = $state(false);
 
 	function handleInput(e) {
 		const raw = e.currentTarget.value.replace(/,/g, "");
 		const num = parseFloat(raw);
 		value = isNaN(num) ? undefined : num;
-		// Do NOT touch `display` - let the user keep typing freely.
+	}
+
+	function handleFocus() {
+		focused = true;
 	}
 
 	function handleBlur() {
-		// Format with commas once the user leaves the field.
+		focused = false;
 		display = value != null ? value.toLocaleString("en-US") : "";
 	}
 
-	// Only sync display from outside when the field is cleared (e.g. form reset).
+	// Sync display from any external value change when the field is not focused.
 	$effect(() => {
-		if (value == null || value === "") display = "";
+		if (!focused) display = value != null ? value.toLocaleString("en-US") : "";
 	});
 </script>
 
@@ -28,6 +31,7 @@
 	{id}
 	bind:value={display}
 	oninput={handleInput}
+	onfocus={handleFocus}
 	onblur={handleBlur}
 	{placeholder}
 	aria-label={ariaLabel}

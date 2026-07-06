@@ -33,7 +33,7 @@ let errorMsg = $state("");
 
 // Each of the 80 model rows corresponds to a bearing at 4.5° increments
 // clockwise from North (row 0 = N = 0°, row 5 = NNE = 22.5°, …).
-const ROW_BEARINGS = Array.from({ length: 80 }, (_, i) => i * 4.5 + 4.5);
+const ROW_BEARINGS = Array.from({ length: 80 }, (_, i) => i * 4.5);
 
 /**
  * Converts raw model output into the GeoJSON FeatureCollection and plain-text
@@ -70,6 +70,7 @@ function buildGeoJSONData(
 			geometry: { type: "Polygon" as const, coordinates: [ring] },
 		};
 	});
+
 
 	// Table rows: label + 3 threshold distances, space-separated.
 	// FootprintTable.svelte slices off the first 2 header lines then splits

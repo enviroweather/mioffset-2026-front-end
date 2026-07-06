@@ -6,13 +6,10 @@
 	import { LATLNG_PRECISION } from "$lib/state/defaultValues.svelte.js";
 	import { usePermalink } from "$lib/utils/linkHandler.svelte.js";
 	import shpwrite from "@mapbox/shp-write";
+	import JSZip from "jszip";
+	import { geodeticDistance } from "$lib/utils/model/fodLocalModel/geo.js";
 
 	usePermalink();
-
-	function toggleMarker(lat, lng) {
-		console.log({ lat, lng });
-		debugger;
-	}
 
 	let today = new Date().toLocaleDateString("en-US", {
 		year: "numeric",
@@ -20,15 +17,54 @@
 		day: "numeric",
 	});
 
+	/** Builds a small square polygon centred on the odor source for the GIS layer. */
+	function buildSourceGeoJSON(lat, lon) {
+		const HALF = 0.05; // miles — ~265 ft each way
+		const n = geodeticDistance(lat, lon, HALF, 0);
+		const e = geodeticDistance(lat, lon, HALF, 90);
+		const s = geodeticDistance(lat, lon, HALF, 180);
+		const w = geodeticDistance(lat, lon, HALF, 270);
+		return {
+			type: "FeatureCollection",
+			features: [{
+				type: "Feature",
+				properties: { name: "Source Location" },
+				geometry: {
+					type: "Polygon",
+					coordinates: [[[e.lon, n.lat], [e.lon, s.lat], [w.lon, s.lat], [w.lon, n.lat], [e.lon, n.lat]]],
+				},
+			}],
+		};
+	}
+
 	async function downloadShapefile() {
-		const geojson = appState.geoJSONData.outputs.map.data;
-		console.log(geojson)
-		const blob = await shpwrite.zip(geojson, {
-			folder: "odor_footprint",
-			filename: "odor_footprint",
-			outputType: "blob",
-			types: { polygon: "odor_footprint" },
-		});
+		const { sourceLat, sourceLng, outputs } = appState.geoJSONData;
+
+		const [footprintBuf, sourceBuf] = await Promise.all([
+			shpwrite.zip(outputs.map.data, {
+				outputType: "arraybuffer",
+				types: { polygon: "odor_footprint" },
+			}),
+			shpwrite.zip(buildSourceGeoJSON(sourceLat, sourceLng), {
+				outputType: "arraybuffer",
+				types: { polygon: "source_location" },
+			}),
+		]);
+
+		const [fZip, sZip] = await Promise.all([
+			new JSZip().loadAsync(footprintBuf),
+			new JSZip().loadAsync(sourceBuf),
+		]);
+
+		const merged = new JSZip();
+		for (const [name, file] of Object.entries(fZip.files)) {
+			merged.file(name, await file.async("arraybuffer"));
+		}
+		for (const [name, file] of Object.entries(sZip.files)) {
+			merged.file(name, await file.async("arraybuffer"));
+		}
+
+		const blob = await merged.generateAsync({ type: "blob" });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a");
 		a.href = url;

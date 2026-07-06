@@ -413,7 +413,7 @@ export function legacyFodModel(
 	}
 
 	// ── Step 4: Setback distances D[80][3] = a·E^b ───────────────────────────
-	const D: number[][] = Array.from({ length: 80 }, () => [0, 0, 0]);
+	let D: number[][] = Array.from({ length: 80 }, () => [0, 0, 0]);
 	for (let row = 0; row < 80; row++) {
 		for (let p = 0; p < 3; p++) {
 			const cls = f[row][p];
@@ -430,7 +430,7 @@ export function legacyFodModel(
 	const Dtbl: number[][] = D.map((row) => [...row]);
 	for (let i = 1; i < 79; i++) Dtbl[i] = [...D[i - 1]];
 	Dtbl[0] = [...D[79]];
-
+	D = [...Dtbl];
 	const setbackTable: SetbackTableRows[] = SETBACK_TABLE_ROW_LABELS.map(
 		(label, row) => ({
 			label,

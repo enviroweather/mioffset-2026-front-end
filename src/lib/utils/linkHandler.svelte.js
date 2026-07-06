@@ -1,4 +1,5 @@
 import { onMount } from "svelte";
+import { browser } from "$app/environment";
 import { appState, entries } from "$lib/state/appState.svelte.js";
 import { encodeState, decodeState } from "$lib/utils/permalink.js";
 import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
@@ -10,16 +11,17 @@ import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
  *
  * Decoding happens synchronously (not in onMount) so appState.location is set
  * before MapView mounts; otherwise the map renders at default coords then jumps
- * to the permalink location.
+ * to the permalink location.  On the server (SSR) window is unavailable, so
+ * decodedState is null and all side-effects are skipped until hydration.
  *
  * @param {object} [opts]
  * @param {boolean} [opts.run=true] run the model after restoring entries
  * @returns {{ decodedState: ReturnType<typeof decodeState> }}
  */
 export function usePermalink({ run = true } = {}) {
-	const decodedState = decodeState(
-		new URLSearchParams(window.location.search).get("data"),
-	);
+	const decodedState = browser
+		? decodeState(new URLSearchParams(window.location.search).get("data"))
+		: null;
 
 	if (decodedState) {
 		appState.location.lat = decodedState.location.lat;
