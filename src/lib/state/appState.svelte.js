@@ -1,4 +1,5 @@
 import { DEFAULT_LOCATION, DEFAULT_EMISSION } from "./defaultValues.svelte.js";
+import { DEFAULT_BASEMAP } from "$lib/utils/map/basemaps.js";
 
 const DEFAULT_DRAFTS = {
 	animal: { ...DEFAULT_EMISSION },
@@ -16,6 +17,8 @@ export const appState = $state({
 		manual: { manualEmission: null },
 	},
 	geoJSONData: {},
+	// Shared across pages so the basemap picked on the map page carries into the report.
+	basemap: DEFAULT_BASEMAP,
 	activeForm: "animal",
 	mapIsUpToDate: false,
 	mapLoading: false,

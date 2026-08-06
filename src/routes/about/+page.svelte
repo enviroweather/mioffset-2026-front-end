@@ -13,6 +13,20 @@
 		</p>
 	</div>
 
+	<div class="beta-notice">
+		<strong>This is a beta version.</strong>
+		<p>
+			MI OFFSET 2026 is still under active development and review. Results may change as the
+			model site is changed and refined, and features may be incomplete or behave unexpectedly. Please do not
+			rely on this site as the sole basis for siting, permitting, or other official decisions.
+		</p>
+		<p></p>
+		<p>
+			For now please use the official site 
+			<a href="https://legacy.enviroweather.msu.edu/legacy/mioffset/index.php">here</a>
+		</p>
+	</div>
+
 	<section class="section">
 		<p>
 			Developed in cooperation with and sponsored by
@@ -42,10 +56,9 @@
 		</p>
 
 		<p>
-			MI OFFSET has been approved by MDARD for use in Michigan. Users interested in siting guidance
-			for farms outside of Michigan should refer to the regulations and/or guidelines in place in
-			those states or provinces. By using this product, you agree to the
-			<a href="viewMioffsetTerms.php">Terms of Use</a>.
+			While MI OFFSET 2026 remains in beta, official decisions should continue to be made using
+			the existing 2018 MI OFFSET application, which is
+			<a href="https://legacy.enviroweather.msu.edu/legacy/mioffset/">still available here</a>.
 		</p>
 
 		<p>
@@ -111,6 +124,28 @@
 		font-size: 1.1rem;
 		margin: 0;
 		font-style: italic;
+	}
+
+	/* Beta */
+	.beta-notice {
+		background: #ffecebdf;
+		border: 1px solid #fd928a;
+		border-left: 4px solid #b42603e5;
+		border-radius: 6px;
+		padding: 1rem;
+		margin-bottom: 2rem;
+	}
+
+	.beta-notice strong {
+		display: block;
+		color: #920e0e;
+		margin-bottom: 0.25rem;
+	}
+
+	.beta-notice p {
+		margin: 0;
+		font-size: 0.95rem;
+		color: #78350f;
 	}
 
 	/* Sections */
