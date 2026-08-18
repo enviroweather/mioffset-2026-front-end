@@ -1,11 +1,15 @@
 import { onMount } from "svelte";
-import { appState, entries } from "$lib/state/appState.svelte.js";
+import {
+	appState,
+	buildings,
+	replaceBuildings,
+} from "$lib/state/appState.svelte.js";
 import { encodeState, decodeState } from "$lib/utils/permalink.js";
 import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
 
 /**
  * Wires a page up to the ?data= permalink. Call once from a page's <script>
- * top level — it registers an $effect and onMount, which must run during
+ * top level - it registers an $effect and onMount, which must run during
  * component init.
  *
  * Decoding happens synchronously (not in onMount) so appState.location is set
@@ -13,9 +17,11 @@ import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
  * to the permalink location.
  *
  * @param {object} [opts]
- * @param {boolean} [opts.run=true] run the model after restoring entries
+ * @param {boolean} [opts.run=true] run the model after restoring buildings
  * @returns {{ decodedState: ReturnType<typeof decodeState> }}
  */
+import { BUILDING_LATLNG_PRECISION } from "$lib/state/defaultValues.svelte.js";
+
 export function usePermalink({ run = true } = {}) {
 	const decodedState = decodeState(
 		new URLSearchParams(window.location.search).get("data"),
@@ -25,32 +31,50 @@ export function usePermalink({ run = true } = {}) {
 		appState.location.lat = decodedState.location.lat;
 		appState.location.lng = decodedState.location.lng;
 		appState.location.address = decodedState.location.address;
+
+		// Restore synchronously too: MapView fits its camera to the buildings on
+		// mount, so they have to exist before it initialises.
+		if (!sameBuildings(buildings, decodedState.buildings))
+			replaceBuildings(decodedState.buildings);
 	}
 
 	onMount(async () => {
-		if (decodedState) {
-			const permalinkTotal = decodedState.entries.reduce(
-				(sum, e) => sum + (e.totalEmission ?? 0),
-				0,
-			);
-			const currentTotal = entries.reduce(
-				(sum, e) => sum + (e.totalEmission ?? 0),
-				0,
-			);
-			if (currentTotal !== permalinkTotal) {
-				entries.splice(0, entries.length);
-				for (const entry of decodedState.entries) entries.push(entry);
-			}
-			if (run) await getAndRun();
-		} else if (run && appState.geoJSONData?.outputs) {
-			getAndRun();
-		}
+		if (run && buildings.length > 0) await getAndRun();
 	});
 
 	$effect(() => {
-		const encoded = encodeState(entries, appState.location);
+		const encoded = encodeState(buildings, appState.location);
 		window.history.replaceState(null, "", `?data=${encoded}`);
 	});
 
 	return { decodedState };
+}
+
+/**
+ * Cheap identity check so navigating between pages in the same session does not
+ * discard and rebuild the buildings the user is already working on - which
+ * would drop their ids and therefore the current selection.
+ */
+function sameBuildings(current, incoming) {
+	// Coordinates are compared at the precision the link stores, since the
+	// in-memory value carries more digits than the round-trip preserves.
+	const coord = (value) => Number(value).toFixed(BUILDING_LATLNG_PRECISION);
+
+	if (current.length !== incoming.length) return false;
+	return current.every((b, i) => {
+		const other = incoming[i];
+		return (
+			b.name === other.name &&
+			coord(b.lat) === coord(other.lat) &&
+			coord(b.lng) === coord(other.lng) &&
+			b.formType === other.formType &&
+			b.species === other.species &&
+			b.animalType === other.animalType &&
+			b.housingType === other.housingType &&
+			b.storageType === other.storageType &&
+			b.technology === other.technology &&
+			String(b.area) === String(other.area) &&
+			b.manualEmission === other.manualEmission
+		);
+	});
 }

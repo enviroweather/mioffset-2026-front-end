@@ -1,5 +1,9 @@
+import animalData from "$lib/data/animalData.json";
+import storageData from "$lib/data/storageData.json";
+
 // E = (oenRate * odorControlFactor * area) / 10000
-// Equation taken from legacy code
+// Equation taken from legacy code; matches column K of the MI OFFSET 2018
+// Centroid Worksheet (=G*H*J/10000).
 // area in sq ft, odor control factor is transmission fraction (1.0 for no technology)
 export function CalculateTotalEmission(oenRate, odorControlFactor, area) {
 	// Undefined Check
@@ -15,4 +19,70 @@ export function CalculateTotalEmission(oenRate, odorControlFactor, area) {
 	// Number(area) coerces the string input value to a number;
 	// the checks above guarantee it is non-null and non-empty here.
 	return (oenRate * odorControlFactor * Number(area)) / 10000;
+}
+
+/**
+ * Odor Emission Number for a building, looked up from the species/housing or
+ * storage tables. Returns null when the dropdowns aren't filled in far enough
+ * to identify a rate.
+ * @param {object} building
+ */
+export function lookupOenRate(building) {
+	const { formType, species, animalType, housingType, storageType } = building;
+
+	if (formType === "animal") {
+		if (!species || !animalType || !housingType) return null;
+		return (
+			animalData.SPECIES[species]?.animalTypes[animalType]?.housingType[
+				housingType
+			]?.oen_rate ?? null
+		);
+	}
+	if (formType === "storage") {
+		if (!storageType) return null;
+		return storageData.STORAGE[storageType]?.oen_rate ?? null;
+	}
+	return null;
+}
+
+/**
+ * Odor Control Factor for a technology key. The worksheet falls back to 1.0
+ * (no reduction) when no technology is selected, so we do the same.
+ * @param {string} technology
+ */
+export function lookupOdorControlFactor(technology) {
+	if (!technology) return 1.0;
+	return animalData.TECH[technology]?.odorControlFactor ?? 1.0;
+}
+
+/**
+ * Derives the three calculated columns for a building from its raw inputs.
+ * Single source of truth shared by the buildings state, the permalink decoder,
+ * and the report page, so a building's OEF is never computed two ways.
+ *
+ * @param {object} building
+ * @returns {{oenRate: number|null, odorControlFactor: number|null, totalEmission: number|null}}
+ */
+export function deriveEmission(building) {
+	if (building.formType === "manual") {
+		const em = building.manualEmission;
+		return {
+			oenRate: null,
+			odorControlFactor: null,
+			totalEmission: em == null || em === "" ? null : Number(em),
+		};
+	}
+
+	const oenRate = lookupOenRate(building);
+	const odorControlFactor = lookupOdorControlFactor(building.technology);
+
+	return {
+		oenRate,
+		odorControlFactor,
+		totalEmission: CalculateTotalEmission(
+			oenRate,
+			odorControlFactor,
+			building.area,
+		),
+	};
 }

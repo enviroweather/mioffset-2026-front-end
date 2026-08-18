@@ -1,18 +1,13 @@
 <script>
 	import MapView from "$lib/components/location/MapView.svelte";
-	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
+	import BuildingsTable from "$lib/components/entries/BuildingsTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
-	import { appState } from "$lib/state/appState.svelte.js";
-	import { LATLNG_PRECISION } from "$lib/state/defaultValues.svelte.js";
+	import { appState, buildings, site } from "$lib/state/appState.svelte.js";
+	import { BUILDING_LATLNG_PRECISION } from "$lib/state/defaultValues.svelte.js";
 	import { usePermalink } from "$lib/utils/linkHandler.svelte.js";
 	import shpwrite from "@mapbox/shp-write";
 
 	usePermalink();
-
-	function toggleMarker(lat, lng) {
-		console.log({ lat, lng });
-		debugger;
-	}
 
 	let today = new Date().toLocaleDateString("en-US", {
 		year: "numeric",
@@ -20,9 +15,10 @@
 		day: "numeric",
 	});
 
+	let centroid = $derived(site.centroid);
+
 	async function downloadShapefile() {
 		const geojson = appState.geoJSONData.outputs.map.data;
-		console.log(geojson)
 		const blob = await shpwrite.zip(geojson, {
 			folder: "odor_footprint",
 			filename: "odor_footprint",
@@ -63,10 +59,22 @@
 				<span>{today}</span>
 			</div>
 			<div class="meta-row">
-				<span class="meta-label">Location:</span>
+				<span class="meta-label">Structures:</span>
+				<span>{buildings.length}</span>
+			</div>
+			<div class="meta-row">
+				<span class="meta-label">Total OEF:</span>
+				<span>{site.totalOEF.toFixed(2)}</span>
+			</div>
+			<div class="meta-row">
+				<span class="meta-label">Source centroid:</span>
 				<span>
-					{Number(appState.location.lat).toFixed(LATLNG_PRECISION)}°N,
-					{Number(appState.location.lng).toFixed(LATLNG_PRECISION)}°W
+					{#if centroid}
+						{centroid.lat.toFixed(BUILDING_LATLNG_PRECISION)},
+						{centroid.lng.toFixed(BUILDING_LATLNG_PRECISION)}
+					{:else}
+						-
+					{/if}
 				</span>
 			</div>
 			<div class="meta-row">
@@ -83,9 +91,9 @@
 	</header>
 
 	<section class="report-wrapper">
-		<!-- Entries Table -->
+		<!-- Buildings Table -->
 		<section class="report-section entries-section-wrapper">
-			<EntriesTable interactive={false} />
+			<BuildingsTable interactive={false} />
 		</section>
 
 		<!-- Map -->
@@ -93,7 +101,6 @@
 			<h2 class="section-heading">Location Map</h2>
 			<div class="map-wrapper">
 				<MapView
-					onLocationSelect={toggleMarker}
 					enableNav={false}
 					focusOnMount={true}
 					interactive={false}
@@ -270,7 +277,7 @@
 	}
 
 	/* Entries table: allow headers to wrap so 10 columns fit in 7.5in */
-	.print-page :global(.entries-section th) {
+	.print-page :global(.buildings-section th) {
 		white-space: normal;
 		font-size: 0.8rem;
 	}
@@ -300,7 +307,7 @@
 		flex-shrink: 0;
 	}
 
-	.print-page :global(.entries-section td) {
+	.print-page :global(.buildings-section td) {
 		font-size: 0.8rem;
 	}
 	.print-page :global(.remove-cell) {
@@ -343,7 +350,7 @@
 		}
 
 		/* Flatten card shadows */
-		:global(.entries-section),
+		:global(.buildings-section),
 		:global(.footprint-table-wrapper) {
 			box-shadow: none !important;
 			border: 1px solid #ddd;

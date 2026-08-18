@@ -1,8 +1,8 @@
 <script>
 	// --- Imports ---
 	import MapView from "$lib/components/location/MapView.svelte";
-	import EmissionForm from "$lib/components/entries/EmissionForm.svelte";
-	import EntriesTable from "$lib/components/entries/EntriesTable.svelte";
+	import BuildingPanel from "$lib/components/entries/BuildingPanel.svelte";
+	import BuildingsTable from "$lib/components/entries/BuildingsTable.svelte";
 	import FootprintTable from "$lib/components/results/FootprintTable.svelte";
 	import { appState } from "$lib/state/appState.svelte.js";
 	import { usePermalink } from "$lib/utils/linkHandler.svelte.js";
@@ -12,7 +12,7 @@
 
 <div class="page-container">
 	<section class="section emission-wrapper">
-		<EmissionForm />
+		<BuildingPanel />
 	</section>
 
 	<section class="section map-wrapper">
@@ -20,7 +20,7 @@
 	</section>
 
 	<div class="entries-wrapper">
-		<EntriesTable />
+		<BuildingsTable />
 		{#if appState.mapIsUpToDate}
 			<FootprintTable />
 		{/if}
@@ -35,7 +35,7 @@
 	/* Grid Layout */
 	.page-container {
 		display: grid;
-		grid-template-columns: 0.5fr 2fr;
+		grid-template-columns: minmax(500px, 0.6fr) 2fr;
 		grid-template-areas:
 			"emission    map"
 			"entries entries";

@@ -1,49 +1,23 @@
 <script>
-	// --- Imports ---
-	import {
-		appState,
-		entries,
-		resetFormState,
-	} from "$lib/state/appState.svelte.js";
 	import FormWizard from "../common/FormWizard.svelte";
+
+	// Edits the building in place - no draft, no submit.
+	let { building } = $props();
 
 	// --- Form Step Config ---
 	const manualSteps = [
 		{
 			key: "manualEmission",
 			label: "Odor Emission Factor:",
-			legend: "Enter OEF",
 			type: "number",
 			min: 0,
 			step: 1,
 			placeholder: "10",
-			helpText: "Total Odor Emission Factor (OEF) for This Site",
+			helpText:
+				"Odor Emission Factor for this structure. It is used directly, and also weights the structure's pull on the site centroid.",
 			required: true,
 		},
 	];
-
-	// --- Submit Handler ---
-	function handleOdorSubmit(formData) {
-		entries.push({
-			formType: "manual",
-			totalEmission: formData.manualEmission,
-			location: {
-				lat: appState.location.lat,
-				lng: appState.location.lng,
-				address: appState.location.address,
-			},
-			snapshot: {
-				location: { ...appState.location },
-				formDraft: { ...appState.formDrafts.manual },
-				activeForm: appState.activeForm,
-			},
-		});
-		resetFormState();
-	}
 </script>
 
-<FormWizard
-	steps={manualSteps}
-	bind:formState={appState.formDrafts.manual}
-	onSubmit={handleOdorSubmit}
-/>
+<FormWizard steps={manualSteps} bind:formState={building} />

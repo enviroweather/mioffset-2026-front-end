@@ -1,14 +1,10 @@
 <script>
 	// --- Imports ---
-	import { tick } from "svelte";
 	import ManualCoords from "$lib/components/location/ManualCoords.svelte";
 	import Address from "$lib/components/location/AddressSearch.svelte";
 	import LocationUnknown from "./LocationUnknown.svelte";
-	import { appState } from "$lib/state/appState.svelte.js";
-	import {
-		DEFAULT_LAT,
-		DEFAULT_LNG,
-	} from "$lib/state/defaultValues.svelte.js";
+	import { appState, site } from "$lib/state/appState.svelte.js";
+	import { DEFAULT_LAT, DEFAULT_LNG } from "$lib/state/defaultValues.svelte.js";
 	import CollapsibleButton from "../common/CollapsibleButton.svelte";
 
 	// --- State ---
@@ -34,9 +30,9 @@
 				appState.location.fly = true;
 				appState.location.lat = parseFloat(results[0].position.lat);
 				appState.location.lng = parseFloat(results[0].position.lon);
-				appState.location.address = results[0].address.freeformAddress ?? appState.location.address;
+				appState.location.address =
+					results[0].address.freeformAddress ?? appState.location.address;
 				appState.manualAddress = true;
-				appState.location.markerHidden = false;
 			} else {
 				noResults = true;
 			}
@@ -48,21 +44,20 @@
 		}
 	}
 
-	async function handleReset(e) {
+	/**
+	 * Clears the address and returns the camera to the work: the odor source if
+	 * any buildings are placed, otherwise the Michigan-wide default view.
+	 * Buildings themselves are untouched - this only moves the map.
+	 */
+	function handleReset(e) {
 		e.preventDefault();
 		noResults = false;
 		appState.location.address = "";
-		if (appState.geoJSONData?.outputs) {
-			appState.location.lat = appState.geoJSONData.sourceLat;
-			appState.location.lng = appState.geoJSONData.sourceLng;
-			appState.location.markerHidden = false;
-			await tick();
-			appState.mapIsUpToDate = true;
-		} else {
-			appState.location.fly = true;
-			appState.location.lat = DEFAULT_LAT;
-			appState.location.lng = DEFAULT_LNG;
-		}
+
+		const centroid = site.centroid;
+		appState.location.lat = centroid?.lat ?? DEFAULT_LAT;
+		appState.location.lng = centroid?.lng ?? DEFAULT_LNG;
+		appState.location.fly = true;
 	}
 
 	// subscribe to address changes to clear the no-results state
