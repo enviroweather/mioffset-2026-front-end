@@ -26,6 +26,12 @@
 	import LocationSelection from "./LocationSelection.svelte";
 	import BuildingPalette from "./BuildingPalette.svelte";
 	import { renderGEOJSON } from "$lib/utils/map/mapRenderLayers.js";
+	import {
+		BASEMAPS,
+		DEFAULT_BASEMAP,
+		createBasemapLayer,
+		basemapKeyFromLabel,
+	} from "$lib/utils/map/basemaps.js";
 	import LoadingIcon from "../common/LoadingIcon.svelte";
 	import { getAndRun } from "$lib/utils/model/runModel.svelte.ts";
 
@@ -57,6 +63,8 @@
 	let markers = new Map(); // building id -> L.Marker
 	let centroidMarker = null;
 	let geoJSONLayer;
+	let baseLayers = {}; // label -> L.TileLayer, in the shape L.control.layers expects
+	let activeBaseLayer = null;
 	let fittedOnMount = false;
 	let autoRunPrimed = false;
 
@@ -92,10 +100,7 @@
 			maxBoundsViscosity: 1.0, // 1.0 = fully rigid boundary, no rubber-band when panning to the edge
 		});
 
-		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-			attribution:
-				'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-		}).addTo(map);
+		initBasemaps();
 		map.fitBounds(michiganBounds);
 		appState.location.zoom = map.getZoom();
 
@@ -105,6 +110,45 @@
 			L.DomEvent.disableClickPropagation(overlay);
 			L.DomEvent.disableScrollPropagation(overlay);
 		}
+	}
+
+	// --- Basemaps ---
+
+	/**
+	 * Builds one tile layer per entry in BASEMAPS and adds the one appState selected.
+	 * The layers control is only offered on the interactive map; the report map inherits
+	 * whatever was chosen there via appState.basemap.
+	 */
+	function initBasemaps() {
+		baseLayers = Object.fromEntries(
+			Object.entries(BASEMAPS).map(([key, { label }]) => [
+				label,
+				createBasemapLayer(L, key),
+			]),
+		);
+
+		activeBaseLayer =
+			baseLayers[BASEMAPS[appState.basemap]?.label] ??
+			baseLayers[BASEMAPS[DEFAULT_BASEMAP].label];
+		activeBaseLayer.addTo(map);
+
+		if (!interactive) return;
+
+		L.control.layers(baseLayers, null, { position: "topleft" }).addTo(map);
+		map.on("baselayerchange", (e) => {
+			// Leaflet already swapped the layer; just record the choice so it persists
+			// across pages. The $effect below no-ops because the layer is on the map.
+			activeBaseLayer = e.layer;
+			appState.basemap = basemapKeyFromLabel(e.name);
+		});
+	}
+
+	function setBasemap(key) {
+		const layer = baseLayers[BASEMAPS[key]?.label];
+		if (!layer || map.hasLayer(layer)) return;
+		if (activeBaseLayer) map.removeLayer(activeBaseLayer);
+		layer.addTo(map);
+		activeBaseLayer = layer;
 	}
 
 	function registerMapEvents() {
@@ -254,6 +298,14 @@
 		const observer = new ResizeObserver(() => map.invalidateSize());
 		observer.observe(mapContainer);
 		return () => observer.disconnect();
+	});
+
+	// Follow basemap changes made elsewhere (e.g. picked on the map page, then the
+	// report page mounts its own map with the same selection)
+	$effect(() => {
+		const key = appState.basemap;
+		if (!map) return;
+		untrack(() => setBasemap(key));
 	});
 
 	// Clear manualAddress flag when address is emptied so reverse geocode resumes
@@ -526,12 +578,13 @@
 			filter 0.15s ease,
 			transform 0.15s ease;
 		cursor: grab;
+		opacity: 80%;
 	}
 
 	.map :global(.building-marker.is-selected) {
 		filter: drop-shadow(0 0 5px var(--color-kelly-green))
-			drop-shadow(0 0 1px var(--color-spartan-green));
-		transform: scale(1.06);
+			drop-shadow(0 0 5px var(--color-spartan-green));
+			opacity: 100%;
 	}
 
 	.map :global(.centroid-marker) {

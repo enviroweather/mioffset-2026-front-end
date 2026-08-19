@@ -6,7 +6,7 @@
 		appState,
 		buildings,
 		site,
-		selectBuilding,
+		focusBuilding,
 		removeBuilding,
 	} from "$lib/state/appState.svelte.js";
 	import { deriveEmission } from "$lib/utils/model/OdorEmissionFactor.js";
@@ -47,7 +47,7 @@
 
 	function handleRowClick(id) {
 		if (!interactive) return;
-		selectBuilding(id);
+		focusBuilding(id);
 	}
 
 	function handleRemove(e, id) {
@@ -144,9 +144,7 @@
 				{#if centroid}
 					<tr class="centroid-row">
 						<td colspan={5}>
-							Odor source &mdash; {centroid.weighted
-								? "emission-weighted centroid"
-								: "centre of placed buildings (no emissions entered yet)"}
+							Odor source - {"emission-weighted centroid"}
 						</td>
 						<td class="numeric"
 							>{centroid.lat.toFixed(BUILDING_LATLNG_PRECISION)}</td
@@ -288,7 +286,7 @@
 
 	.remove-btn {
 		background: none;
-		border: none;
+		border: 10px #e74c3c hidden;
 		color: #aaa;
 		font-size: 1.1rem;
 		line-height: 1;
@@ -303,6 +301,7 @@
 	.remove-btn:hover {
 		color: #e74c3c;
 		background: #fdf0ee;
+		border: 1px #e74c3c solid;
 	}
 
 	/* Numeric Cells */

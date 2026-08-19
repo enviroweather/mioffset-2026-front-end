@@ -14,17 +14,17 @@ export const mapIcons = {
 	},
 	Cattle: {
 		iconUrl: "cattle.png",
-		iconSize: [77, 50],
+		iconSize: [77/1.5, 50/1.5],
 		iconAnchor: [38, 25],
 	},
 	Swine: {
 		iconUrl: "swine.png",
-		iconSize: [77, 50],
+		iconSize: [77/1.5, 50/1.5],
 		iconAnchor: [38, 25],
 	},
 	Poultry: {
 		iconUrl: "poultry.png",
-		iconSize: [77, 70],
+		iconSize: [77/1.5, 70/1.5],
 		iconAnchor: [38, 35],
 	},
 	Storage: {

@@ -4,6 +4,7 @@ import {
 	TYPE_SPECIFIC_FIELDS,
 } from "./defaultValues.svelte.js";
 import { weightedCentroid, totalOEF } from "$lib/utils/model/centroid.js";
+import { DEFAULT_BASEMAP } from "$lib/utils/map/basemaps.js";
 
 // --- State ---
 
@@ -26,6 +27,8 @@ export const appState = $state({
 	geoJSONData: {},
 	mapIsUpToDate: false,
 	mapLoading: false,
+	// Shared across pages so the basemap picked on the map page carries into the report.
+	basemap: DEFAULT_BASEMAP,
 });
 
 // Monotonic so deleting "Building 2" never leaves two buildings sharing a name.
@@ -86,6 +89,23 @@ export function removeBuilding(id) {
 
 export function selectBuilding(id) {
 	appState.selectedId = id;
+}
+
+/**
+ * Selects a building and flies the map camera to it. Used by menu-driven
+ * selection (buildings table, quick list) where the building may be off
+ * screen - clicking a marker on the map already has it in view, so that
+ * path uses selectBuilding() directly and leaves the camera alone.
+ */
+export function focusBuilding(id) {
+	selectBuilding(id);
+
+	const building = buildings.find((b) => b.id === id);
+	if (!building) return;
+
+	appState.location.lat = building.lat;
+	appState.location.lng = building.lng;
+	appState.location.fly = true;
 }
 
 /**

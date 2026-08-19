@@ -9,6 +9,8 @@
 		setBuildingType,
 		clearBuildingFields,
 		removeBuilding,
+		selectBuilding,
+		focusBuilding,
 	} from "$lib/state/appState.svelte.js";
 	import { deriveEmission } from "$lib/utils/model/OdorEmissionFactor.js";
 	import { BUILDING_LATLNG_PRECISION } from "$lib/state/defaultValues.svelte.js";
@@ -24,6 +26,66 @@
 
 	function format(value, digits = 2) {
 		return value == null ? "-" : Number(value).toFixed(digits);
+	}
+
+	// --- Manual lat/lng editing ---
+	// Mirrors ManualCoords.svelte's pattern: draft while typing, commit on
+	// blur/Enter so a half-typed "-8" doesn't move the marker mid-entry.
+	let latDraft = $state("");
+	let lngDraft = $state("");
+	let editingLat = $state(false);
+	let editingLng = $state(false);
+
+	let latDisplay = $derived(
+		editingLat ? latDraft : selected.lat.toFixed(BUILDING_LATLNG_PRECISION),
+	);
+	let lngDisplay = $derived(
+		editingLng ? lngDraft : selected.lng.toFixed(BUILDING_LATLNG_PRECISION),
+	);
+
+	function beginEditLat() {
+		latDraft = String(selected.lat);
+		editingLat = true;
+	}
+	function beginEditLng() {
+		lngDraft = String(selected.lng);
+		editingLng = true;
+	}
+
+	// Re-centers the camera after a manual edit, since a typed coordinate can
+	// easily land the marker outside the current view.
+	function focusCamera() {
+		appState.location.lat = selected.lat;
+		appState.location.lng = selected.lng;
+		appState.location.fly = true;
+	}
+
+	function commitLat() {
+		if (!editingLat) return;
+		editingLat = false;
+		const lat = Number(latDraft);
+		if (!Number.isFinite(lat) || lat < -90 || lat > 90) return;
+		selected.lat = lat;
+		focusCamera();
+	}
+	function commitLng() {
+		if (!editingLng) return;
+		editingLng = false;
+		const lng = Number(lngDraft);
+		if (!Number.isFinite(lng) || lng < -180 || lng > 180) return;
+		selected.lng = lng;
+		focusCamera();
+	}
+
+	function handleCoordKeydown(e) {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			e.currentTarget.blur();
+		} else if (e.key === "Escape") {
+			editingLat = false;
+			editingLng = false;
+			e.currentTarget.blur();
+		}
 	}
 </script>
 
@@ -42,7 +104,7 @@
 						<li>
 							<button
 								class="quick-item"
-								onclick={() => (appState.selectedId = building.id)}
+								onclick={() => focusBuilding(building.id)}
 							>
 								<span class="quick-name"
 									>{building.name || "Unnamed building"}</span
@@ -75,21 +137,43 @@
 				placeholder="e.g. Egg Laying Hen Housing"
 			/>
 
-			<!-- Position is set by dragging the marker; shown here as read-only data -->
+			<!-- Position can be dragged on the map, or typed in directly here -->
 			<div class="coords" aria-label="Building position">
 				<span class="coord">
-					<span class="coord-label">Lat</span>
-					<span class="coord-value"
-						>{selected.lat.toFixed(BUILDING_LATLNG_PRECISION)}</span
-					>
+					<label class="coord-label" for="building-lat">Lat</label>
+					<input
+						id="building-lat"
+						class="coord-input"
+						type="number"
+						inputmode="decimal"
+						step="any"
+						min={-90}
+						max={90}
+						value={latDisplay}
+						oninput={(e) => (latDraft = e.currentTarget.value)}
+						onfocus={beginEditLat}
+						onblur={commitLat}
+						onkeydown={handleCoordKeydown}
+					/>
 				</span>
 				<span class="coord">
-					<span class="coord-label">Lng</span>
-					<span class="coord-value"
-						>{selected.lng.toFixed(BUILDING_LATLNG_PRECISION)}</span
-					>
+					<label class="coord-label" for="building-lng">Lng</label>
+					<input
+						id="building-lng"
+						class="coord-input"
+						type="number"
+						inputmode="decimal"
+						step="any"
+						min={-180}
+						max={180}
+						value={lngDisplay}
+						oninput={(e) => (lngDraft = e.currentTarget.value)}
+						onfocus={beginEditLng}
+						onblur={commitLng}
+						onkeydown={handleCoordKeydown}
+					/>
 				</span>
-				<span class="coord-hint">drag the marker to move</span>
+				<span class="coord-hint">or drag the marker</span>
 			</div>
 		</div>
 
@@ -149,9 +233,8 @@
 				class="btn btn-secondary"
 				onclick={() => clearBuildingFields(selected.id)}>Clear Fields</button
 			>
-			<button
-				class="btn btn-primary"
-				onclick={() => (appState.selectedId = null)}>Done</button
+			<button class="btn btn-primary" onclick={() => selectBuilding(null)}
+				>Done</button
 			>
 		</div>
 
@@ -284,10 +367,38 @@
 		margin-right: 0.25rem;
 	}
 
-	.coord-value {
+	.coord-input {
+		font-family: inherit;
 		font-variant-numeric: tabular-nums;
 		color: #2c3e50;
 		font-weight: 600;
+		font-size: 0.8rem;
+		width: 5.5rem;
+		box-sizing: border-box;
+		padding: 0.1rem 0.3rem;
+		border: 1px solid transparent;
+		border-radius: 3px;
+		background: transparent;
+		-moz-appearance: textfield;
+		appearance: textfield;
+	}
+
+	.coord-input:hover {
+		border-color: #ccc;
+	}
+
+	.coord-input:focus {
+		outline: none;
+		border-color: #4caf50;
+		background: white;
+		box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+	}
+
+	/* Spinner override, matches ManualCoords.svelte */
+	.coord-input::-webkit-outer-spin-button,
+	.coord-input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
 	}
 
 	.coord-hint {
