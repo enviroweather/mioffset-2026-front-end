@@ -1,15 +1,30 @@
 <script>
 	// --- Imports ---
-	import { onMount, onDestroy, untrack, tick } from "svelte";
-	import { appState, entries } from "$lib/state/appState.svelte.js";
-	import { mapIcons, resolveMarkerIcon } from "$lib/state/mapIcons.svelte.js";
-	import { reverseGeocode } from "$lib/utils/map/reverseGeocode.js";
+	import { onMount, onDestroy, untrack } from "svelte";
+	import {
+		appState,
+		buildings,
+		site,
+		addBuilding,
+		selectBuilding,
+	} from "$lib/state/appState.svelte.js";
+	import {
+		mapIcons,
+		buildingIconKey,
+		resolveBuildingIcon,
+		createCentroidIcon,
+	} from "$lib/state/mapIcons.svelte.js";
 	import {
 		LANDMARK_ZOOM,
+		PLACEMENT_ZOOM,
 		MAX_ZOOM,
 		MIN_ZOOM,
+		BUILDING_DRAG_TYPE,
+		BUILDING_LATLNG_PRECISION,
 	} from "$lib/state/defaultValues.svelte.js";
+	import { reverseGeocode } from "$lib/utils/map/reverseGeocode.js";
 	import LocationSelection from "./LocationSelection.svelte";
+	import BuildingPalette from "./BuildingPalette.svelte";
 	import { renderGEOJSON } from "$lib/utils/map/mapRenderLayers.js";
 	import {
 		BASEMAPS,
@@ -22,24 +37,18 @@
 
 	// --- Props & State ---
 	let {
-		onLocationSelect = () => {},
 		enableNav = true,
 		focusOnMount = false,
 		interactive = true,
 		showLegend = false,
 	} = $props();
 
-	let currentSpecies = $derived.by(() => {
-		if (appState.activeForm === "animal" && appState.formDrafts.animal.species)
-			return appState.formDrafts.animal.species;
-		if (
-			appState.activeForm === "storage" &&
-			appState.formDrafts.storage.storageType
-		)
-			return "Storage";
-		if (entries[0]?.type === "storage") return "Storage";
-		return entries[0]?.animal?.species || "default";
-	});
+	// Live editing means a single keystroke in the area field would otherwise
+	// kick off a full wind-fetch + model run. Coalesce bursts of edits instead.
+	const AUTO_RUN_DEBOUNCE_MS = 500;
+	// Longer: this one costs an external geocoding call, and the address is only
+	// cosmetic, so it can afford to lag behind the model.
+	const GEOCODE_DEBOUNCE_MS = 1500;
 
 	// $state.raw rather than $state: Leaflet objects are large and can break the library
 	// raw still signals effects when the top-level variables are reassigned.
@@ -47,15 +56,17 @@
 	let mapContainer = $state(null);
 	let map = $state.raw(null);
 	let locOverlay = $state(null);
-	// Plain booleans, deliberately NOT $state - mutating them must not re-trigger the effects
-	// that read them.
-	let marker;
+	let paletteOverlay = $state(null);
+
+	// Plain values, deliberately NOT $state - mutating them must not re-trigger the
+	// effects that read them.
+	let markers = new Map(); // building id -> L.Marker
+	let centroidMarker = null;
 	let geoJSONLayer;
 	let baseLayers = {}; // label -> L.TileLayer, in the shape L.control.layers expects
 	let activeBaseLayer = null;
-	let initialized = false;
 	let fittedOnMount = false;
-	let mapEffectBehind = false;
+	let autoRunPrimed = false;
 
 	// --- Lifecycle ---
 	function preloadImages() {
@@ -71,6 +82,7 @@
 		preloadImages();
 		initMap();
 		registerMapEvents();
+		if (buildings.length > 0) fitToBuildings();
 	});
 
 	onDestroy(() => map?.remove());
@@ -90,14 +102,16 @@
 
 		initBasemaps();
 		map.fitBounds(michiganBounds);
-		appState.location.zoom = map.getZoom(); // sync so first click zooms in
+		appState.location.zoom = map.getZoom();
 
-		// Prevent the location overlay (address search) from panning/zooming the map underneath it
-		if (locOverlay) {
-			L.DomEvent.disableClickPropagation(locOverlay);
-			L.DomEvent.disableScrollPropagation(locOverlay);
+		// Keep the overlays from panning/zooming the map underneath them
+		for (const overlay of [locOverlay, paletteOverlay]) {
+			if (!overlay) continue;
+			L.DomEvent.disableClickPropagation(overlay);
+			L.DomEvent.disableScrollPropagation(overlay);
 		}
 	}
+
 	// --- Basemaps ---
 
 	/**
@@ -138,28 +152,80 @@
 	}
 
 	function registerMapEvents() {
-		if (!interactive) return;
-
-		map.on("click", (e) => {
-			const { lat, lng } = e.latlng;
-			appState.location.fly = true;
-			appState.location.lat = lat;
-			appState.location.lng = lng;
-			appState.location.markerHidden = false;
-
-			clearGeoJSONLayer(geoJSONLayer);
-			onLocationSelect({ lat, lng });
-
-			if (!appState.manualAddress) {
-				reverseGeocode(lat, lng).then((address) => {
-					if (address !== null && !appState.manualAddress)
-						appState.location.address = address;
-				});
-			}
-		});
 		map.on("zoom", () => {
 			appState.location.zoom = map.getZoom();
 		});
+
+		// Mirror the camera into appState so the coordinate readout tracks the
+		// view. Safe against feedback: the camera effect below only acts when the
+		// `fly` flag is set, which panning never sets.
+		map.on("moveend", () => {
+			const center = map.getCenter();
+			appState.location.lat = center.lat;
+			appState.location.lng = center.lng;
+		});
+
+		if (!interactive) return;
+
+		map.on("click", (e) => {
+			if (appState.placing) {
+				placeBuilding(e.latlng.lat, e.latlng.lng);
+				appState.placing = false;
+			} else {
+				// Edits save live, so dropping the selection costs nothing.
+				selectBuilding(null);
+			}
+		});
+	}
+
+	// --- Placement ---
+
+	/**
+	 * Drops a new building and frames it. The first structure on an empty map
+	 * gets a zoom-in, because the Michigan-wide default view is far too coarse
+	 * to position a barn at the precision the worksheet expects.
+	 */
+	function placeBuilding(lat, lng) {
+		const isFirst = buildings.length === 0;
+		addBuilding(lat, lng);
+
+		if (isFirst && map.getZoom() < PLACEMENT_ZOOM) {
+			map.flyTo([lat, lng], PLACEMENT_ZOOM, { duration: 1.2 });
+		}
+	}
+
+	function fitToBuildings() {
+		if (!map || buildings.length === 0) return;
+		const bounds = L.latLngBounds(buildings.map((b) => [b.lat, b.lng]));
+		map.fitBounds(bounds, {
+			padding: [60, 60],
+			maxZoom: PLACEMENT_ZOOM,
+			animate: false,
+		});
+	}
+
+	function handleDragOver(e) {
+		if (!interactive) return;
+		if (!e.dataTransfer.types.includes(BUILDING_DRAG_TYPE)) return;
+		// Both preventDefault calls are required for the drop event to fire.
+		e.preventDefault();
+		e.dataTransfer.dropEffect = "copy";
+	}
+
+	function handleDrop(e) {
+		if (!interactive || !map) return;
+		if (!e.dataTransfer.types.includes(BUILDING_DRAG_TYPE)) return;
+		e.preventDefault();
+
+		// DragEvent extends MouseEvent, so Leaflet can resolve it against the
+		// container without any manual offset arithmetic.
+		const { lat, lng } = map.mouseEventToLatLng(e);
+		placeBuilding(lat, lng);
+		appState.placing = false;
+	}
+
+	function handleKeydown(e) {
+		if (e.key === "Escape" && appState.placing) appState.placing = false;
 	}
 
 	// --- GEOJSON Layer ---
@@ -168,7 +234,10 @@
 		geoJSONLayer = await renderGEOJSON(map, showLegend);
 		if (focusOnMount && !fittedOnMount && geoJSONLayer) {
 			map.stop();
-			map.fitBounds(geoJSONLayer.getBounds(), { padding: [20, 20], animate: false });
+			map.fitBounds(geoJSONLayer.getBounds(), {
+				padding: [20, 20],
+				animate: false,
+			});
 			fittedOnMount = true;
 		}
 		appState.mapLoading = false;
@@ -181,31 +250,44 @@
 		geoJSONLayer = null;
 	}
 
-	// --- Marker ---
+	// --- Markers ---
+	function createMarker(building) {
+		const marker = L.marker([building.lat, building.lng], {
+			icon: resolveBuildingIcon(
+				L,
+				building,
+				building.id === appState.selectedId,
+			),
+			draggable: interactive,
+			autoPan: true,
+		}).addTo(map);
 
-	function placeOrUpdateMarker(lat, lng, icon) {
-		if (marker) {
-			marker.setLatLng({ lat, lng });
-			marker.setIcon(icon);
-		} else {
-			marker = L.marker({ lat, lng }, { icon }).addTo(map);
-		}
+		marker.on("click", (e) => {
+			L.DomEvent.stopPropagation(e); // don't let the map's click deselect it again
+			selectBuilding(building.id);
+		});
+
+		// dragend only, for two reasons: updating on every `drag` frame would
+		// restart the debounced model run on each mousemove, and selecting
+		// mid-drag would swap this marker's icon - which replaces the DOM element
+		// Leaflet is currently dragging and drops the gesture.
+		marker.on("dragend", () => {
+			const { lat, lng } = marker.getLatLng();
+			const target = buildings.find((b) => b.id === building.id);
+			if (!target) return;
+			target.lat = lat;
+			target.lng = lng;
+			selectBuilding(building.id);
+		});
+
+		return marker;
 	}
 
-	function navigateToLocation(lat, lng, fly) {
-		// untrack: reads zoom without creating an effect dependency
-		const zoom = untrack(() => appState.location.zoom);
-		const zoomedOut = zoom <= MIN_ZOOM;
-		map.stop();
-		if (fly) {
-			zoomedOut
-				? map.flyTo([lat, lng], LANDMARK_ZOOM, { duration: 1.5 })
-				: map.panTo([lat, lng]);
-		} else {
-			map.setView([lat, lng], zoomedOut ? LANDMARK_ZOOM : zoom, {
-				animate: false,
-			});
-		}
+	function markerTooltip(building) {
+		const name = building.name || "Unnamed building";
+		return `${name}<br><span class="tooltip-coords">${building.lat.toFixed(
+			BUILDING_LATLNG_PRECISION,
+		)}, ${building.lng.toFixed(BUILDING_LATLNG_PRECISION)}</span>`;
 	}
 
 	// --- Effects ---
@@ -231,80 +313,189 @@
 		if (!appState.location.address) appState.manualAddress = false;
 	});
 
-	// Show/hide GeoJSON layer based on whether results are up to date
+	// Name the site from its own source point.
+	// with buildings, the centroid is the thing worth labelling, and it is what
+	// the report header prints. Skipped once the user has typed or searched an
+	// address of their own.
+	$effect(() => {
+		if (!interactive || appState.manualAddress) return;
+		const centroid = site.centroid;
+		if (!centroid) return;
+
+		const timer = setTimeout(() => {
+			reverseGeocode(centroid.lat, centroid.lng).then((address) => {
+				if (address !== null && !appState.manualAddress)
+					appState.location.address = address;
+			});
+		}, GEOCODE_DEBOUNCE_MS);
+		return () => clearTimeout(timer);
+	});
+
+	// Show the footprint once results are up to date. While they are merely
+	// stale the previous footprint deliberately stays on screen - with live
+	// editing, tearing it down on each keystroke would make the map flicker.
+	// It is only removed once there is genuinely nothing left to draw.
 	$effect(() => {
 		if (!map) return;
 		if (appState.mapIsUpToDate) {
 			showGeoJSONLayer();
+		} else if (!site.centroid || site.totalOEF <= 0) {
+			clearGeoJSONLayer();
 		}
 	});
 
-	// Mark results stale and auto-run model whenever entries, total OEF, or location change.
-	$effect(() => {
-		// `void expr` is the Svelte 5 idiom for "track this as a dependency without using the value."
-		void entries.length;
-		void entries.reduce((sum, e) => sum + (e.totalEmission ?? 0), 0);
-		void appState.location.lat;
-		void appState.location.lng;
-
-		// Skip the initial run: on first mount these dependencies haven't changed, so there's nothing
-		// to stale. Without the skip a footprint already loaded would be
-		// immediately invalidated the moment the component mounts.
-		if (!mapEffectBehind) {
-			mapEffectBehind = true;
-			return;
-		}
-		appState.mapIsUpToDate = false;
-		untrack(() => {
-			if (appState.location.fly && map) {
-				// setTimeout(0) defers past map.stop() in navigateToLocation, which fires
-				// moveend synchronously and would trigger the listener too early.
-				setTimeout(() => map.once("moveend", () => getAndRun()), 0);
-			} else {
-				getAndRun();
-			}
-		});
-	});
-
-	// Sync marker position, icon, and camera with appState
+	// Reconcile building markers with state: add, remove, move, re-icon, re-label.
 	$effect(() => {
 		if (!L || !map) return;
+
+		const selectedId = appState.selectedId;
+		const seen = new Set();
+
+		for (const building of buildings) {
+			seen.add(building.id);
+			let marker = markers.get(building.id);
+
+			if (!marker) {
+				marker = createMarker(building);
+				markers.set(building.id, marker);
+			} else {
+				const current = marker.getLatLng();
+				if (current.lat !== building.lat || current.lng !== building.lng)
+					marker.setLatLng([building.lat, building.lng]);
+			}
+
+			// setIcon replaces the marker's DOM element, so only call it when the
+			// icon actually changes - otherwise every unrelated edit would rebuild
+			// every marker and restart its CSS transition.
+			const signature = `${buildingIconKey(building)}|${building.id === selectedId}`;
+			if (marker._iconSignature !== signature) {
+				marker._iconSignature = signature;
+				marker.setIcon(
+					resolveBuildingIcon(L, building, building.id === selectedId),
+				);
+			}
+
+			marker.bindTooltip(markerTooltip(building), { direction: "bottom" });
+		}
+
+		for (const [id, marker] of markers) {
+			if (seen.has(id)) continue;
+			map.removeLayer(marker);
+			markers.delete(id);
+		}
+	});
+
+	// The odor source: an emission-weighted centroid of every placed building.
+	$effect(() => {
+		if (!L || !map) return;
+		const centroid = site.centroid;
+
+		if (!centroid) {
+			if (centroidMarker) {
+				map.removeLayer(centroidMarker);
+				centroidMarker = null;
+			}
+			return;
+		}
+
+		if (!centroidMarker) {
+			centroidMarker = L.marker([centroid.lat, centroid.lng], {
+				icon: createCentroidIcon(L),
+				interactive: true,
+				keyboard: false,
+				zIndexOffset: 500,
+			}).addTo(map);
+		} else {
+			centroidMarker.setLatLng([centroid.lat, centroid.lng]);
+		}
+
+		centroidMarker.bindTooltip(
+			`Odor source &mdash; ${
+				centroid.weighted
+					? "emission-weighted centroid"
+					: "centre of placed buildings"
+			}<br><span class="tooltip-coords">${centroid.lat.toFixed(
+				BUILDING_LATLNG_PRECISION,
+			)}, ${centroid.lng.toFixed(BUILDING_LATLNG_PRECISION)}</span>`,
+			{ direction: "bottom" },
+		);
+	});
+
+	// Mark results stale and re-run the model whenever the source point or the
+	// site's total emission changes. The returned cleanup runs before the next
+	// pass, which is what debounces a burst of keystrokes into one run.
+	$effect(() => {
+		const centroid = site.centroid;
+		void centroid?.lat;
+		void centroid?.lng;
+		void site.totalOEF;
+
+		// Skip the initial pass: on first mount nothing has changed, and without
+		// the skip a footprint restored from a permalink would be invalidated the
+		// moment this component mounts.
+		if (!autoRunPrimed) {
+			autoRunPrimed = true;
+			return;
+		}
+
+		appState.mapIsUpToDate = false;
+		const timer = setTimeout(
+			() => untrack(() => getAndRun()),
+			AUTO_RUN_DEBOUNCE_MS,
+		);
+		return () => clearTimeout(timer);
+	});
+
+	// Camera moves, driven by the address search / reset controls only.
+	$effect(() => {
+		if (!map) return;
 		const { lat, lng } = appState.location;
 
 		// fly is read and cleared via untrack so this effect doesn't depend on it.
-		// If fly were read normally, clearing fly = false here would re-trigger this
-		// same effect in a loop.
+		// If fly were read normally, clearing it here would re-trigger this same
+		// effect in a loop.
 		const fly = untrack(() => appState.location.fly);
+		if (!fly) return;
 		untrack(() => {
 			appState.location.fly = false;
 		});
-		placeOrUpdateMarker(
-			lat,
-			lng,
-			resolveMarkerIcon(L, currentSpecies, appState.mapIsUpToDate),
-		);
 
-		// skip navigation on first placement unless focusOnMount is set
-		if (!initialized) {
-			initialized = true;
-			if (focusOnMount) navigateToLocation(lat, lng, false);
-			return;
-		}
-		navigateToLocation(lat, lng, fly);
+		map.stop();
+		map.flyTo(
+			[lat, lng],
+			Math.max(
+				untrack(() => appState.location.zoom),
+				LANDMARK_ZOOM,
+			),
+			{ duration: 1.5 },
+		);
 	});
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 <!-- Map Container -->
 <div class="map-wrapper">
+	<!-- svelte-ignore a11y_no_static_element_interactions -- drop target for the building palette; keyboard users place via the palette's click-to-arm mode -->
 	<div
 		bind:this={mapContainer}
 		class="map"
 		class:blurred={appState.location.searching}
+		class:placing={appState.placing}
+		ondragover={handleDragOver}
+		ondrop={handleDrop}
 	>
 		<!-- Location Overlay -->
 		{#if enableNav}
-			<div class="overlay" bind:this={locOverlay}>
+			<div class="overlay overlay-top" bind:this={locOverlay}>
 				<LocationSelection />
+			</div>
+		{/if}
+
+		<!-- Building Palette -->
+		{#if interactive}
+			<div class="overlay overlay-bottom" bind:this={paletteOverlay}>
+				<BuildingPalette onPlaceRequest={() => selectBuilding(null)} />
 			</div>
 		{/if}
 	</div>
@@ -339,6 +530,16 @@
 		pointer-events: none;
 	}
 
+	/* Armed placement mode - the whole canvas becomes a target */
+	.map.placing :global(.leaflet-container) {
+		cursor: crosshair;
+	}
+
+	.map.placing {
+		outline: 2px dashed var(--color-kelly-green);
+		outline-offset: -2px;
+	}
+
 	.loading-overlay {
 		position: absolute;
 		top: 50%;
@@ -346,19 +547,53 @@
 		transform: translate(-50%, -50%);
 		z-index: 1001;
 	}
-	/* Location Overlay */
+
+	/* Overlays */
 	.overlay {
 		position: absolute;
+		z-index: 1000; /* must be above Leaflet's panes */
+		transition: all 0.3s ease;
+	}
+
+	.overlay-top {
 		top: 1rem;
 		right: 1rem;
-		z-index: 1000; /* must be above Leaflet's panes */
 		background: white;
 		border: 1px solid var(--color-kelly-green);
-		transition: all 0.3s ease;
 		padding: 0.5rem;
 		border-radius: 8px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 		max-width: 320px;
 		width: max-content;
+	}
+
+	.overlay-bottom {
+		bottom: 1.5rem;
+		left: 1rem;
+	}
+
+	/* Leaflet markers live outside the component tree, so these must be global. */
+	.map :global(.building-marker) {
+		transition:
+			filter 0.15s ease,
+			transform 0.15s ease;
+		cursor: grab;
+		opacity: 80%;
+	}
+
+	.map :global(.building-marker.is-selected) {
+		filter: drop-shadow(0 0 5px var(--color-kelly-green))
+			drop-shadow(0 0 5px var(--color-spartan-green));
+			opacity: 100%;
+	}
+
+	.map :global(.centroid-marker) {
+		filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.9));
+	}
+
+	.map :global(.tooltip-coords) {
+		font-variant-numeric: tabular-nums;
+		color: #666;
+		font-size: 0.8em;
 	}
 </style>

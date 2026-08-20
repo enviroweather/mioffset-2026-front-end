@@ -39,7 +39,7 @@
 
 <style>
 	input {
-		padding: 0.75rem;
+		padding: 0.55rem 0.65rem;
 		border: 1px solid #ccc;
 		border-radius: 4px;
 		font-size: 1rem;

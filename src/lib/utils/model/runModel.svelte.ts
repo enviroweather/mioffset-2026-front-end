@@ -14,11 +14,7 @@ import {
 	type ModelOutput,
 } from "$lib/utils/model/fodLocalModel/fodModel";
 
-import { appState, entries } from "$lib/state/appState.svelte.js";
-
-// ── location (reactive from appState) ─────────────────────────────────────
-let Lat = $derived(appState.location.lat);
-let Lon = $derived(appState.location.lng);
+import { appState, site } from "$lib/state/appState.svelte.js";
 
 // ── wind data ─────────────────────────────────────────────────────────────
 let gridX = $state<number | null>(null);
@@ -101,12 +97,12 @@ const windCacheOrder: string[] = [];
 // ── internal helpers ──────────────────────────────────────────────────────
 
 /**
- * Finds the reanalysis grid cell (gridX, gridY) closest to the current lat/lng and
+ * Finds the reanalysis grid cell (gridX, gridY) closest to the source point and
  * stores it in module state.  Must be called before fetchWindData() so the
  * correct grid coordinates are used when building the S3 request URL.
  */
-function updateGridCoords() {
-	const result = closestGridPoint(Lat, Lon);
+function updateGridCoords(lat: number, lon: number) {
+	const result = closestGridPoint(lat, lon);
 	gridX = result[0];
 	gridY = result[1];
 }
@@ -179,9 +175,7 @@ function runModelDeferred(E: number): Promise<ModelOutput | null> {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			try {
-				resolve(
-					legacyFodModel(data.wd, data.ws, data.pc, E),
-				);
+				resolve(legacyFodModel(data.wd, data.ws, data.pc, E));
 			} catch {
 				resolve(null);
 			}
@@ -194,34 +188,42 @@ function runModelDeferred(E: number): Promise<ModelOutput | null> {
 /**
  * Main entry point for running the odor footprint model.
  *
- * Orchestrates the full pipeline: resolve the grid cell → fetch wind data →
- * run the FOD model → write GeoJSON output to appState.  Sets mapLoading
- * during the run and mapIsUpToDate when complete so reactive consumers
- * (MapView, FootprintTable) update automatically.
+ * Orchestrates the full pipeline: resolve the source point → resolve the grid
+ * cell → fetch wind data → run the FOD model → write GeoJSON output to
+ * appState.  Sets mapLoading during the run and mapIsUpToDate when complete so
+ * reactive consumers (MapView, FootprintTable) update automatically.
  *
- * Returns immediately if the map is already up to date or if total emission
- * is zero (nothing to model).
+ * The footprint is centred on the emission-weighted centroid of the placed
+ * buildings and driven by their summed Odor Emission Factor - the two values
+ * the MI OFFSET 2018 worksheet had the user carry over by hand.
+ *
+ * Returns immediately if the map is already up to date, if no buildings are
+ * placed, or if total emission is zero (nothing to model).
  */
 export async function getAndRun() {
 	if (appState.mapIsUpToDate) return;
 	appState.mapLoading = true;
 
 	try {
-		const E = (entries as any[]).reduce(
-			(sum: number, e: any) => sum + (e.totalEmission ?? 0),
-			0,
-		);
+		const centroid = site.centroid;
+		if (!centroid) return;
 
+		const E = site.totalOEF;
 		if (E <= 0) return;
 
-		updateGridCoords();
+		updateGridCoords(centroid.lat, centroid.lng);
 		await fetchWindData();
 		if (errorMsg) return;
 
 		const result = await runModelDeferred(E);
 		if (!result) return;
 
-		appState.geoJSONData = buildGeoJSONData(result, Lat, Lon, E);
+		appState.geoJSONData = buildGeoJSONData(
+			result,
+			centroid.lat,
+			centroid.lng,
+			E,
+		);
 		// tick() lets geoJSONData propagate before mapIsUpToDate = true triggers
 		// the MapView effect that calls showGeoJSONLayer().
 		await tick();

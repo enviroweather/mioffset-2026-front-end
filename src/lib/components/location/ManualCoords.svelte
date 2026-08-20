@@ -3,87 +3,101 @@
 	import { appState } from "$lib/state/appState.svelte.js";
 	import { LATLNG_PRECISION } from "$lib/state/defaultValues.svelte.js";
 
-	function parseCoordInput(value) {
-		return value === "" ? null : Number(value);
-	}
-	// --- State ---
-	let latFocused = $state(false);
-	let lngFocused = $state(false);
+	// These inputs move the map camera. They are not a building's position -
+	// buildings are positioned by dragging their markers.
+	let latDraft = $state("");
+	let lngDraft = $state("");
+	let editing = $state(false);
 
-	// --- Display Derived ---
-	// show full precision when focused so user can edit exact value; truncate when blurred for readability
+	// While the user isn't typing, mirror wherever the camera currently is.
 	let latDisplay = $derived(
-		latFocused
-			? (appState.location.lat ?? "")
-			: appState.location.lat != null
-				? Number(appState.location.lat).toFixed(LATLNG_PRECISION)
-				: "",
+		editing
+			? latDraft
+			: Number(appState.location.lat).toFixed(LATLNG_PRECISION),
 	);
 	let lngDisplay = $derived(
-		lngFocused
-			? (appState.location.lng ?? "")
-			: appState.location.lng != null
-				? Number(appState.location.lng).toFixed(LATLNG_PRECISION)
-				: "",
+		editing
+			? lngDraft
+			: Number(appState.location.lng).toFixed(LATLNG_PRECISION),
 	);
+
+	function beginEdit() {
+		latDraft = String(appState.location.lat ?? "");
+		lngDraft = String(appState.location.lng ?? "");
+		editing = true;
+	}
+
+	/**
+	 * Commit on blur or Enter rather than per keystroke - otherwise a half-typed
+	 * "-8" would fly the camera off to longitude -8 mid-entry.
+	 */
+	function commit() {
+		if (!editing) return;
+		editing = false;
+
+		const lat = Number(latDraft);
+		const lng = Number(lngDraft);
+		if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+		if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return;
+
+		appState.location.lat = lat;
+		appState.location.lng = lng;
+		appState.location.fly = true;
+	}
+
+	function handleKeydown(e) {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			e.currentTarget.blur();
+		} else if (e.key === "Escape") {
+			editing = false;
+			e.currentTarget.blur();
+		}
+	}
 </script>
 
 <section class="form-wrapper">
-	<form onsubmit={(e) => e.preventDefault()}>
-		<div class="coord-row">
-			<div class="form-group">
-				<label for="latitude">Latitude</label>
-				<input
-					type="number"
-					id="latitude"
-					value={latDisplay}
-					oninput={(e) => {
-						const v = e.currentTarget.value;
-						appState.location.lat = parseCoordInput(v);
-						appState.location.markerHidden = false;
-					}}
-					onfocus={() => (latFocused = true)}
-					onblur={() => (latFocused = false)}
-					min={-90}
-					max={90}
-					step="any"
-					placeholder="e.g. 42.729"
-				/>
-			</div>
-
-			<div class="form-group">
-				<label for="longitude">Longitude</label>
-				<input
-					type="number"
-					id="longitude"
-					value={lngDisplay}
-					oninput={(e) => {
-						const v = e.currentTarget.value;
-						appState.location.lng = parseCoordInput(v);
-						appState.location.markerHidden = false;
-					}}
-					onfocus={() => (lngFocused = true)}
-					onblur={() => (lngFocused = false)}
-					min={-180}
-					max={180}
-					step="any"
-					placeholder="e.g. -84.472"
-				/>
-			</div>
+	<div class="coord-row">
+		<div class="form-group">
+			<label for="latitude">View latitude</label>
+			<input
+				type="number"
+				id="latitude"
+				value={latDisplay}
+				oninput={(e) => (latDraft = e.currentTarget.value)}
+				onfocus={beginEdit}
+				onblur={commit}
+				onkeydown={handleKeydown}
+				min={-90}
+				max={90}
+				step="any"
+				placeholder="e.g. 42.729"
+			/>
 		</div>
-	</form>
+
+		<div class="form-group">
+			<label for="longitude">View longitude</label>
+			<input
+				type="number"
+				id="longitude"
+				value={lngDisplay}
+				oninput={(e) => (lngDraft = e.currentTarget.value)}
+				onfocus={beginEdit}
+				onblur={commit}
+				onkeydown={handleKeydown}
+				min={-180}
+				max={180}
+				step="any"
+				placeholder="e.g. -84.472"
+			/>
+		</div>
+	</div>
 </section>
 
 <style>
 	/* Layout */
 	.form-wrapper {
 		width: 100%;
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
 	}
 
 	.coord-row {

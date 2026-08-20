@@ -1,6 +1,9 @@
-import animalData from "$lib/data/animalData.json";
-import storageData from "$lib/data/storageData.json";
-import { CalculateTotalEmission } from "./model/OdorEmissionFactor.js";
+import {
+	BUILDING_LATLNG_PRECISION,
+	DEFAULT_BUILDING,
+} from "$lib/state/defaultValues.svelte.js";
+
+const FORMAT_VERSION = 2;
 
 function b64Encode(str) {
 	return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
@@ -11,105 +14,109 @@ function b64Decode(str) {
 	return atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
 }
 
+function round(value) {
+	return Number(Number(value).toFixed(BUILDING_LATLNG_PRECISION));
+}
+
 /**
- * Encode current entries + location into a single base64url string for the ?d= URL param.
- * All entries share the same flat shape; fields absent for a given form type are omitted.
- * Used short variable names to help link length
+ * Encode the site's buildings into a single base64url string for the ?data= URL
+ * param. Only raw inputs are stored - Odor Emission Number, Odor Control Factor
+ * and Odor Emission Factor are all re-derived on decode, so a link can never
+ * carry a stale calculation. Short keys keep the URL manageable.
  */
-export function encodeState(entries, location) {
+export function encodeState(buildings, location) {
 	const data = {
-		loc: [location.lat, location.lng, location.address],
-		e: entries.map((entry) => {
-			const e = { ft: entry.formType };
-			if (entry.species != null) e.sp = entry.species;
-			if (entry.animalType != null) e.at = entry.animalType;
-			if (entry.housingType != null) e.ht = entry.housingType;
-			if (entry.storageType != null) e.st = entry.storageType;
-			if (entry.technology != null) e.tech = entry.technology;
-			if (entry.area != null) e.area = entry.area;
-			if (entry.totalEmission != null) e.em = entry.totalEmission;
-			return e;
+		v: FORMAT_VERSION,
+		c: [round(location.lat), round(location.lng), location.address ?? ""],
+		b: buildings.map((building) => {
+			const b = {
+				n: building.name,
+				la: round(building.lat),
+				lo: round(building.lng),
+				ft: building.formType,
+			};
+			if (building.species) b.sp = building.species;
+			if (building.animalType) b.at = building.animalType;
+			if (building.housingType) b.ht = building.housingType;
+			if (building.storageType) b.st = building.storageType;
+			if (building.technology) b.tech = building.technology;
+			if (building.area !== "" && building.area != null) b.ar = building.area;
+			if (building.manualEmission != null) b.em = building.manualEmission;
+			return b;
 		}),
 	};
 	return b64Encode(JSON.stringify(data));
 }
 
+function toBuilding(raw, index) {
+	return {
+		id: crypto.randomUUID(),
+		...DEFAULT_BUILDING,
+		name: raw.n ?? `Building ${index + 1}`,
+		lat: raw.la,
+		lng: raw.lo,
+		formType: raw.ft ?? "animal",
+		species: raw.sp ?? "",
+		animalType: raw.at ?? "",
+		housingType: raw.ht ?? "",
+		storageType: raw.st ?? "",
+		technology: raw.tech ?? "None",
+		area: raw.ar ?? "",
+		manualEmission: raw.em ?? null,
+	};
+}
+
 /**
- * Decode a ?d= param back into { location, entries }.
- * Re-derives oenRate, odorControlFactor, and totalEmission from the saved raw inputs.
- * Returns null if the string is invalid.
+ * Version 1 links predate per-building placement: they carried one site location
+ * and a list of emission entries sharing it. Each entry becomes a building
+ * stacked at that location, which keeps the total OEF and the resulting
+ * footprint identical - the centroid of co-located points is that point.
+ */
+function upgradeV1(parsed) {
+	const [lat, lng, address = ""] = parsed.loc ?? [];
+	if (lat == null || lng == null) return null;
+
+	return {
+		location: { lat, lng, address },
+		buildings: (parsed.e ?? []).map((e, i) =>
+			toBuilding(
+				{
+					n: `Building ${i + 1}`,
+					la: lat,
+					lo: lng,
+					ft: e.ft,
+					sp: e.sp,
+					at: e.at,
+					ht: e.ht,
+					st: e.st,
+					tech: e.tech,
+					ar: e.area,
+					em: e.em,
+				},
+				i,
+			),
+		),
+	};
+}
+
+/**
+ * Decode a ?data= param back into { location, buildings }.
+ * Returns null if the string is missing or invalid.
  */
 export function decodeState(encoded) {
+	if (!encoded) return null;
 	try {
 		const parsed = JSON.parse(b64Decode(encoded));
-		const location = { lat: parsed.loc[0], lng: parsed.loc[1], address: parsed.loc[2] };
 
-		const entries = (parsed.e || []).map((e) => {
-			const {
-				ft: formType,
-				sp: species,
-				at: animalType,
-				ht: housingType,
-				st: storageType,
-				tech: technology,
-				area,
-				em,
-			} = e;
+		if (parsed.v !== FORMAT_VERSION) return upgradeV1(parsed);
 
-			let oenRate = null;
-			let odorControlFactor = null;
-
-			if (formType === "animal") {
-				oenRate =
-					species && animalType && housingType
-						? (animalData.SPECIES[species]?.animalTypes[animalType]
-								?.housingType[housingType]?.oen_rate ?? null)
-						: null;
-				odorControlFactor = technology
-					? (animalData.TECH[technology]?.odorControlFactor ?? null)
-					: null;
-			} else if (formType === "storage") {
-				oenRate = storageType
-					? (storageData.STORAGE[storageType]?.oen_rate ?? null)
-					: null;
-				odorControlFactor = technology
-					? (animalData.TECH[technology]?.odorControlFactor ?? null)
-					: null;
-			}
-
-			const totalEmission =
-				formType === "manual"
-					? em
-					: CalculateTotalEmission(oenRate, odorControlFactor, area);
-
-			const formDraft =
-				formType === "animal"
-					? { species, animalType, housingType, technology, area }
-					: formType === "storage"
-						? { storageType, technology, area }
-						: { manualEmission: em };
-
-			return {
-				formType,
-				species,
-				animalType,
-				housingType,
-				storageType,
-				technology,
-				area,
-				oenRate,
-				odorControlFactor,
-				totalEmission,
-				location: { lat: location.lat, lng: location.lng, address: location.address },
-				snapshot: {
-					location: { ...location, address: location.address },
-					formDraft,
-					activeForm: formType,
-				},
-			};
-		});
-
-		return { location, entries };
+		const [lat, lng, address = ""] = parsed.c ?? [];
+		return {
+			location: { lat, lng, address },
+			buildings: (parsed.b ?? [])
+				.filter((raw) => Number.isFinite(raw.la) && Number.isFinite(raw.lo))
+				.map(toBuilding),
+		};
 	} catch {
 		return null;
 	}
