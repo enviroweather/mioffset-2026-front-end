@@ -188,7 +188,6 @@
 	function placeBuilding(lat, lng) {
 		const isFirst = buildings.length === 0;
 		addBuilding(lat, lng);
-
 		if (isFirst && map.getZoom() < PLACEMENT_ZOOM) {
 			map.flyTo([lat, lng], PLACEMENT_ZOOM, { duration: 1.2 });
 		}
@@ -209,6 +208,7 @@
 		if (!e.dataTransfer.types.includes(BUILDING_DRAG_TYPE)) return;
 		// Both preventDefault calls are required for the drop event to fire.
 		e.preventDefault();
+		appState.mapIsUpToDate = false;
 		e.dataTransfer.dropEffect = "copy";
 	}
 
@@ -277,6 +277,7 @@
 			if (!target) return;
 			target.lat = lat;
 			target.lng = lng;
+			clearGeoJSONLayer();
 			selectBuilding(building.id);
 		});
 
