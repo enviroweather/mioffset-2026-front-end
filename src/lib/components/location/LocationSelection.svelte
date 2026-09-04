@@ -7,6 +7,11 @@
 	import { DEFAULT_LAT, DEFAULT_LNG } from "$lib/state/defaultValues.svelte.js";
 	import CollapsibleButton from "../common/CollapsibleButton.svelte";
 
+	// --- Props ---
+	// The map overlay is cramped, so it collapses. The side panel hosts these
+	// same controls with room to spare and shows them outright.
+	let { collapsible = true } = $props();
+
 	// --- State ---
 	let noResults = $state(false);
 
@@ -67,37 +72,45 @@
 	});
 </script>
 
-<div class="collapse-wrapper">
-	<CollapsibleButton>
-		<!-- Address Search Row -->
-		{#if noResults}
-			<LocationUnknown />
-		{/if}
-		<div class="address-wrapper">
-			<Address {handleSubmit} />
-			<div class="form-actions">
-				<label class="spacer" for="spacing">&nbsp;</label>
-				<button type="submit" class="btn btn-primary" onclick={handleSubmit}
-					>Search</button
+{#snippet controls()}
+	<!-- Address Search Row -->
+	{#if noResults}
+		<LocationUnknown />
+	{/if}
+	<div class="address-wrapper">
+		<Address {handleSubmit} />
+		<div class="form-actions">
+			<label class="spacer" for="spacing">&nbsp;</label>
+			<button type="submit" class="btn btn-primary" onclick={handleSubmit}
+				>Search</button
+			>
+		</div>
+	</div>
+	<!-- Manual Coords & Reset -->
+	<div class="local-footer-wrapper">
+		<div class="latlng-wrapper">
+			<ManualCoords />
+		</div>
+		<div class="form-actions">
+			<label class="spacer" for="spacing">&nbsp;</label>
+			<div class="button-row">
+				<button type="reset" class="btn btn-secondary" onclick={handleReset}
+					>Reset</button
 				>
 			</div>
 		</div>
-		<!-- Manual Coords & Reset -->
-		<div class="local-footer-wrapper">
-			<div class="latlng-wrapper">
-				<ManualCoords />
-			</div>
-			<div class="form-actions">
-				<label class="spacer" for="spacing">&nbsp;</label>
-				<div class="button-row">
-					<button type="reset" class="btn btn-secondary" onclick={handleReset}
-						>Reset</button
-					>
-				</div>
-			</div>
-		</div>
-	</CollapsibleButton>
-</div>
+	</div>
+{/snippet}
+
+{#if collapsible}
+	<div class="collapse-wrapper">
+		<CollapsibleButton>
+			{@render controls()}
+		</CollapsibleButton>
+	</div>
+{:else}
+	{@render controls()}
+{/if}
 
 <style>
 	/* Layout */

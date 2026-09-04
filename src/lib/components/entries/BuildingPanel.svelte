@@ -2,6 +2,7 @@
 	import AnimalForm from "./AnimalForm.svelte";
 	import StorageForm from "./StorageForm.svelte";
 	import ManualForm from "./ManualForm.svelte";
+	import LocationSelection from "../location/LocationSelection.svelte";
 	import {
 		appState,
 		buildings,
@@ -93,12 +94,23 @@
 	{#if !selected}
 		<!-- Empty state -->
 		<div class="empty">
-			<h2>No building selected</h2>
-			<p>
-				Drag <strong>Add building</strong> from the bottom-left of the map onto the
-				spot where a structure sits, then click its marker to enter its details here.
-			</p>
-			{#if buildings.length > 0}
+			{#if buildings.length === 0}
+				<!-- Nothing placed yet, so the only task is finding the property. The
+				     map's location overlay stands down while these controls are here. -->
+				<h2>Find your site</h2>
+				<p>
+					Search for the property address, then drag <strong>Add building</strong>
+					from the bottom-left of the map onto the spot where a structure sits.
+				</p>
+				<div class="locate">
+					<LocationSelection collapsible={false} />
+				</div>
+			{:else}
+				<h2>No building selected</h2>
+				<p>
+					Click a marker on the map to enter its details here, or pick one from
+					the list below.
+				</p>
 				<ul class="quick-list">
 					{#each buildings as building (building.id)}
 						<li>
@@ -268,6 +280,10 @@
 		color: #666;
 		font-size: 0.9rem;
 		line-height: 1.45;
+	}
+
+	.locate {
+		margin-bottom: 0.75rem;
 	}
 
 	.empty-note {

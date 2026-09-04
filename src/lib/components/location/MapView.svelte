@@ -37,7 +37,7 @@
 
 	// --- Props & State ---
 	let {
-		enableNav = true,
+		enableNav = false,
 		focusOnMount = false,
 		interactive = true,
 		showLegend = false,
@@ -57,6 +57,7 @@
 	let map = $state.raw(null);
 	let locOverlay = $state(null);
 	let paletteOverlay = $state(null);
+	let recenterOverlay = $state(null);
 
 	// Plain values, deliberately NOT $state - mutating them must not re-trigger the
 	// effects that read them.
@@ -103,13 +104,6 @@
 		initBasemaps();
 		map.fitBounds(michiganBounds);
 		appState.location.zoom = map.getZoom();
-
-		// Keep the overlays from panning/zooming the map underneath them
-		for (const overlay of [locOverlay, paletteOverlay]) {
-			if (!overlay) continue;
-			L.DomEvent.disableClickPropagation(overlay);
-			L.DomEvent.disableScrollPropagation(overlay);
-		}
 	}
 
 	// --- Basemaps ---
@@ -188,19 +182,30 @@
 	function placeBuilding(lat, lng) {
 		const isFirst = buildings.length === 0;
 		addBuilding(lat, lng);
+
 		if (isFirst && map.getZoom() < PLACEMENT_ZOOM) {
 			map.flyTo([lat, lng], PLACEMENT_ZOOM, { duration: 1.2 });
 		}
 	}
 
-	function fitToBuildings() {
+	function fitToBuildings({ animate = false } = {}) {
 		if (!map || buildings.length === 0) return;
 		const bounds = L.latLngBounds(buildings.map((b) => [b.lat, b.lng]));
+		map.stop();
 		map.fitBounds(bounds, {
 			padding: [60, 60],
 			maxZoom: PLACEMENT_ZOOM,
-			animate: false,
+			animate,
 		});
+	}
+
+	/**
+	 * Frames every placed building again after the user has panned away. The
+	 * camera effect below is bypassed deliberately: it only ever centres on a
+	 * point, which would clip a site whose buildings are spread out.
+	 */
+	function handleRecenter() {
+		fitToBuildings({ animate: true });
 	}
 
 	function handleDragOver(e) {
@@ -208,7 +213,6 @@
 		if (!e.dataTransfer.types.includes(BUILDING_DRAG_TYPE)) return;
 		// Both preventDefault calls are required for the drop event to fire.
 		e.preventDefault();
-		appState.mapIsUpToDate = false;
 		e.dataTransfer.dropEffect = "copy";
 	}
 
@@ -228,7 +232,7 @@
 		if (e.key === "Escape" && appState.placing) appState.placing = false;
 	}
 
-	// --- GEOJSON Layer ---
+	// --- GEOJSON Layer (Odor Footprint) ---
 	async function showGeoJSONLayer() {
 		clearGeoJSONLayer();
 		geoJSONLayer = await renderGEOJSON(map, showLegend);
@@ -277,7 +281,6 @@
 			if (!target) return;
 			target.lat = lat;
 			target.lng = lng;
-			clearGeoJSONLayer();
 			selectBuilding(building.id);
 		});
 
@@ -292,6 +295,18 @@
 	}
 
 	// --- Effects ---
+
+	// Keep the overlays from panning/zooming the map underneath them. This is an
+	// effect rather than part of initMap because the location overlay mounts only
+	// once the first building is placed, well after the map is built.
+	$effect(() => {
+		if (!L || !map) return;
+		for (const overlay of [locOverlay, paletteOverlay, recenterOverlay]) {
+			if (!overlay) continue;
+			L.DomEvent.disableClickPropagation(overlay);
+			L.DomEvent.disableScrollPropagation(overlay);
+		}
+	});
 
 	// Keep map div sized correctly upon container resize
 	$effect(() => {
@@ -486,8 +501,10 @@
 		ondragover={handleDragOver}
 		ondrop={handleDrop}
 	>
-		<!-- Location Overlay -->
-		{#if enableNav}
+		<!-- Location Overlay. Until the first building is placed these controls
+		     live in the side panel instead, where the empty state has room for
+		     them and finding the property is the only task on offer. -->
+		{#if enableNav && buildings.length > 0}
 			<div class="overlay overlay-top" bind:this={locOverlay}>
 				<LocationSelection />
 			</div>
@@ -497,6 +514,38 @@
 		{#if interactive}
 			<div class="overlay overlay-bottom" bind:this={paletteOverlay}>
 				<BuildingPalette onPlaceRequest={() => selectBuilding(null)} />
+			</div>
+
+			<!-- Recenter -->
+			<div class="overlay overlay-bottom-right" bind:this={recenterOverlay}>
+				<button
+					type="button"
+					class="recenter"
+					onclick={handleRecenter}
+					disabled={buildings.length === 0}
+					title={buildings.length === 0
+						? "Place a building to enable recentering"
+						: "Recenter the map on the site"}
+				>
+					<!-- Tabler Icons "focus-centered" (MIT) - https://tabler.io/icons -->
+					<svg
+						class="recenter-icon"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						aria-hidden="true"
+					>
+						<path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+						<path d="M4 8v-2a2 2 0 0 1 2 -2h2" />
+						<path d="M4 16v2a2 2 0 0 0 2 2h2" />
+						<path d="M16 4h2a2 2 0 0 1 2 2v2" />
+						<path d="M16 20h2a2 2 0 0 0 2 -2v-2" />
+					</svg>
+					<span>Recenter</span>
+				</button>
 			</div>
 		{/if}
 	</div>
@@ -571,6 +620,52 @@
 	.overlay-bottom {
 		bottom: 1.5rem;
 		left: 1rem;
+	}
+
+	/* Lifted clear of Leaflet's attribution strip in the same corner */
+	.overlay-bottom-right {
+		bottom: 1.5rem;
+		right: 1rem;
+	}
+
+	.recenter {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.45rem 0.6rem;
+		background: white;
+		border: 1px solid var(--color-kelly-green);
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		color: #2c3e50;
+		font-family: inherit;
+		font-size: 0.9rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition:
+			background 0.15s,
+			transform 0.15s;
+	}
+
+	.recenter:hover:not(:disabled) {
+		background: #eaf6ea;
+		transform: translateY(-1px);
+	}
+
+	.recenter:active:not(:disabled) {
+		transform: none;
+	}
+
+	.recenter:disabled {
+		border-color: #ccc;
+		color: #999;
+		cursor: not-allowed;
+	}
+
+	.recenter-icon {
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
 	}
 
 	/* Leaflet markers live outside the component tree, so these must be global. */
