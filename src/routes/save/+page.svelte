@@ -1,3 +1,15 @@
+<!--
+	Save - the printable odor footprint report.
+
+	A report-shaped view of the same site: title block with the date, the map,
+	the buildings table (read-only) and the full setback distance table. The
+	PDF is produced by window.print() against the print stylesheet rather than
+	a PDF library, which is why the layout is built for paper and the toolbar
+	is marked screen-only.
+
+	Also assembles the GIS download: a small square polygon around the odor
+	source plus the footprint, zipped as a shapefile.
+-->
 <script>
 	import MapView from "$lib/components/location/MapView.svelte";
 	import BuildingsTable from "$lib/components/entries/BuildingsTable.svelte";
@@ -21,21 +33,31 @@
 
 	/** Builds a small square polygon centred on the odor source for the GIS layer. */
 	function buildSourceGeoJSON(lat, lon) {
-		const HALF = 0.05; // miles — ~265 ft each way
+		const HALF = 0.05; // miles - ~265 ft each way
 		const n = geodeticDistance(lat, lon, HALF, 0);
 		const e = geodeticDistance(lat, lon, HALF, 90);
 		const s = geodeticDistance(lat, lon, HALF, 180);
 		const w = geodeticDistance(lat, lon, HALF, 270);
 		return {
 			type: "FeatureCollection",
-			features: [{
-				type: "Feature",
-				properties: { name: "Source Location" },
-				geometry: {
-					type: "Polygon",
-					coordinates: [[[e.lon, n.lat], [e.lon, s.lat], [w.lon, s.lat], [w.lon, n.lat], [e.lon, n.lat]]],
+			features: [
+				{
+					type: "Feature",
+					properties: { name: "Source Location" },
+					geometry: {
+						type: "Polygon",
+						coordinates: [
+							[
+								[e.lon, n.lat],
+								[e.lon, s.lat],
+								[w.lon, s.lat],
+								[w.lon, n.lat],
+								[e.lon, n.lat],
+							],
+						],
+					},
 				},
-			}],
+			],
 		};
 	}
 
@@ -83,7 +105,8 @@
 			class="shapefile-btn"
 			onclick={downloadShapefile}
 			disabled={!appState.mapIsUpToDate || !appState.geoJSONData?.outputs}
-		>Download Shapefile</button>
+			>Download Shapefile</button
+		>
 		<button class="print-btn" onclick={() => window.print()}
 			>Print / Save as PDF</button
 		>
