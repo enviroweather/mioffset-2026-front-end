@@ -7,7 +7,9 @@ Developed in cooperation with and sponsored by
 and
 [Michigan Department of Agriculture and Rural Development (MDARD)](http://www.michigan.gov/mdard/).
 
-MI OFFSET is a planning tool for assessing potential odor impacts from livestock facilities.
+Demo Test
+
+Michigan OFFSET is a planning tool for assessing potential odor impacts from livestock facilities.
 Output from this tool, called an odor footprint, is a radial plot which represents approximate
 distances that one must be away from the odor source to detect a noticeable or stronger odor up
 to 1.5%, 3% and 5% of the time for each of the 16 compass directions. MI OFFSET 2026 is a revised
