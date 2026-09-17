@@ -7,7 +7,6 @@ Developed in cooperation with and sponsored by
 and
 [Michigan Department of Agriculture and Rural Development (MDARD)](http://www.michigan.gov/mdard/).
 
-Demo Test
 
 Michigan OFFSET is a planning tool for assessing potential odor impacts from livestock facilities.
 Output from this tool, called an odor footprint, is a radial plot which represents approximate
