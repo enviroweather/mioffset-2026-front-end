@@ -135,7 +135,7 @@
 									>{building.name || "Unnamed building"}</span
 								>
 								<span class="quick-oef"
-									>{format(deriveEmission(building).totalEmission)}</span
+									>{format(deriveEmission(building).totalEmission, 2)}</span
 								>
 							</button>
 						</li>

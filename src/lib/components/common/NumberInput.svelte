@@ -9,7 +9,14 @@
 <script>
 	let { value = $bindable(), placeholder, id, ariaLabel } = $props();
 
-	let display = $state(value != null ? value.toLocaleString("en-US") : "");
+	// Thousands separators, capped at 2 decimal places.
+	function formatDisplay(v) {
+		return v != null
+			? v.toLocaleString("en-US", { maximumFractionDigits: 2 })
+			: "";
+	}
+
+	let display = $state(formatDisplay(value));
 	let focused = $state(false);
 
 	function handleInput(e) {
@@ -18,18 +25,21 @@
 		value = isNaN(num) ? undefined : num;
 	}
 
+	// Show the full, unrounded value while editing so typing never re-parses
+	// the rounded display and silently drops digits.
 	function handleFocus() {
 		focused = true;
+		display = value != null ? String(value) : "";
 	}
 
 	function handleBlur() {
 		focused = false;
-		display = value != null ? value.toLocaleString("en-US") : "";
+		display = formatDisplay(value);
 	}
 
 	// Sync display from any external value change when the field is not focused.
 	$effect(() => {
-		if (!focused) display = value != null ? value.toLocaleString("en-US") : "";
+		if (!focused) display = formatDisplay(value);
 	});
 </script>
 
